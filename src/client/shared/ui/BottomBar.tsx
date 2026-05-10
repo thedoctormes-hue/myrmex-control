@@ -3,8 +3,8 @@ import { NavLink } from 'react-router-dom';
 const nav = [
   { to: '/', label: 'Дашборд', icon: '📊' },
   { to: '/projects', label: 'Проекты', icon: '📁' },
-  { to: '/library', label: 'Библиотека', icon: '📚' },
-  { to: '/files', label: 'Файлы', icon: '📂' },
+  { to: '/analytics', label: 'Аналитика', icon: '📈' },
+  { to: '/audit', label: 'Аудит', icon: '📋' },
   { to: '/graph', label: 'Граф', icon: '🕸️' },
 ];
 

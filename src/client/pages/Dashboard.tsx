@@ -2,6 +2,7 @@ import type { MyrmexState } from '@shared/types';
 import { ServerWidget } from '../features/dashboard/ServerWidget';
 import { BalanceWidget } from '../features/dashboard/BalanceWidget';
 import { SignalsFeed } from '../features/dashboard/SignalsFeed';
+import { HealthScoreWidget } from '../features/dashboard/HealthScore';
 
 interface Props {
   state: MyrmexState | null;
@@ -43,6 +44,7 @@ export function Dashboard({ state, onRefresh }: Props) {
 
       {/* Widgets */}
       <div className="grid md:grid-cols-2 gap-4">
+        <HealthScoreWidget />
         <ServerWidget servers={state.servers} />
         <BalanceWidget />
         <SignalsFeed changelog={state.changelog} />

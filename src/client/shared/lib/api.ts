@@ -128,3 +128,62 @@ export const setup = (password: string) =>
     method: 'POST',
     body: JSON.stringify({ password }),
   });
+
+// --- Health Score ---
+
+export interface HealthScore {
+  overall: number;
+  servers: { online: number; total: number; score: number };
+  tasks: { total: number; done: number; inProgress: number; score: number };
+  agents: { active: number; total: number; score: number };
+  timestamp: string;
+}
+
+export const getHealthScore = () => request<HealthScore>('/health');
+
+// --- Audit Log ---
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  source: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  diff: Record<string, unknown>;
+}
+
+export interface AuditLogResult {
+  entries: AuditLogEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export const getAuditLog = (params?: Record<string, string>) => {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return request<AuditLogResult>(`/audit${qs}`);
+};
+
+export const getAuditEntityTypes = () => request<string[]>('/audit/entity-types');
+export const getAuditSources = () => request<string[]>('/audit/sources');
+
+// --- Analytics ---
+
+export interface AnalyticsResult {
+  tasks: {
+    byStatus: Record<string, number>;
+    byPriority: Record<string, number>;
+    byProject: { name: string; count: number }[];
+    completedLast7Days: number;
+    createdLast7Days: number;
+    avgCompletionHours: number | null;
+  };
+  projects: { total: number; active: number; paused: number; archived: number };
+  agents: { byStatus: Record<string, number>; byProject: { name: string; count: number }[] };
+  servers: { byStatus: Record<string, number>; total: number };
+  activity: { last24h: number; last7d: number; last30d: number };
+  timestamp: string;
+}
+
+export const getAnalytics = () => request<AnalyticsResult>('/analytics');

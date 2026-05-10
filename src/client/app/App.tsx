@@ -13,6 +13,8 @@ import { Files } from '../pages/Files';
 import { Graph } from '../pages/Graph';
 import { Login } from '../pages/Login';
 import { Setup } from '../pages/Setup';
+import { AuditLog } from '../pages/AuditLog';
+import { Analytics } from '../pages/Analytics';
 
 export default function App() {
   const { state, loading, error, refresh } = useMyrmex();
@@ -119,6 +121,8 @@ export default function App() {
           <Route path="/library" element={<Library state={state} onRefresh={refresh} />} />
           <Route path="/files" element={<Files />} />
           <Route path="/graph" element={<Graph state={state} />} />
+          <Route path="/audit" element={<AuditLog />} />
+          <Route path="/analytics" element={<Analytics />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

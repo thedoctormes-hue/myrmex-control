@@ -14,6 +14,8 @@ const nav = [
   { to: '/library', label: 'Библиотека', icon: '📚' },
   { to: '/files', label: 'Файлы', icon: '📂' },
   { to: '/graph', label: 'Граф', icon: '🕸️' },
+  { to: '/analytics', label: 'Аналитика', icon: '📈' },
+  { to: '/audit', label: 'Аудит', icon: '📋' },
 ];
 
 export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {

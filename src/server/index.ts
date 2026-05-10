@@ -16,6 +16,9 @@ import { router as libraryRouter } from './api/library.js';
 import { router as filesRouter } from './api/files.js';
 import { router as serversRouter } from './api/servers.js';
 import { router as stateRouter } from './api/state.js';
+import { router as healthRouter } from './api/health.js';
+import { router as auditRouter } from './api/audit.js';
+import { router as analyticsRouter } from './api/analytics.js';
 import { startWatchdog, stopWatchdog } from './watchdog.js';
 // import { startBackupScheduler, stopBackupScheduler } from './backup.js';
 
@@ -48,6 +51,9 @@ app.use('/api/projects', requireAuth, projectsRouter);
 app.use('/api/library', requireAuth, libraryRouter);
 app.use('/api/files', requireAuth, filesRouter);
 app.use('/api/servers', requireAuth, serversRouter);
+app.use('/api/health', requireAuth, healthRouter);
+app.use('/api/audit', requireAuth, auditRouter);
+app.use('/api/analytics', requireAuth, analyticsRouter);
 
 // Production: статические файлы клиента
 const clientDist = join(__dirname, '../client');
