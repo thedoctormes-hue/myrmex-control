@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { MyrmexFile } from '@shared/types';
-import { getFiles } from '../lib/api';
+import { getFiles } from '../shared/lib/api';
 
 export function Files() {
   const [tab, setTab] = useState<'inbox' | 'outbox'>('inbox');

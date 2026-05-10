@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { setup } from '../lib/api';
+import { setup } from '../shared/lib/api';
 
 interface Props {
   onSetup: () => void;

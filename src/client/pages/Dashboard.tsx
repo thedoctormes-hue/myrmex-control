@@ -1,7 +1,7 @@
 import type { MyrmexState } from '@shared/types';
-import { ServerWidget } from '../components/dashboard/ServerWidget';
-import { BalanceWidget } from '../components/dashboard/BalanceWidget';
-import { SignalsFeed } from '../components/dashboard/SignalsFeed';
+import { ServerWidget } from '../features/dashboard/ServerWidget';
+import { BalanceWidget } from '../features/dashboard/BalanceWidget';
+import { SignalsFeed } from '../features/dashboard/SignalsFeed';
 
 interface Props {
   state: MyrmexState | null;

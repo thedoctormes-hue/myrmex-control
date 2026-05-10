@@ -2,7 +2,7 @@
 // ToastContainer — рендерит все активные уведомления
 // ============================================================
 
-import { useToast } from '../../hooks/useToast';
+import { useToast } from '../hooks/useToast';
 import { CheckCircle2, AlertTriangle, Info, X, AlertCircle } from 'lucide-react';
 
 const ICONS = {

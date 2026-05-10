@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { MyrmexState, Skill } from '@shared/types';
-import { createSkill, deleteSkill } from '../lib/api';
-import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { createSkill, deleteSkill } from '../shared/lib/api';
+import { ErrorBanner } from '../shared/ui/ErrorBanner';
 
 interface Props {
   state: MyrmexState | null;

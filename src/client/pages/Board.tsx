@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { MyrmexState, Task, TaskStatus } from '@shared/types';
-import { createTask, moveTask, deleteTask } from '../lib/api';
+import { createTask, moveTask, deleteTask } from '../shared/lib/api';
 
 interface Props {
   state: MyrmexState | null;

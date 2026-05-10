@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useMyrmex } from './hooks/useMyrmex';
-import { useTheme } from './hooks/useTheme';
-import { authStatus, logout as logoutApi, setUnauthorizedHandler } from './lib/api';
-import { Sidebar } from './components/layout/Sidebar';
-import { BottomBar } from './components/layout/BottomBar';
-import { Dashboard } from './pages/Dashboard';
-import { Projects } from './pages/Projects';
-import { Board } from './pages/Board';
-import { Library } from './pages/Library';
-import { Files } from './pages/Files';
-import { Graph } from './pages/Graph';
-import { Login } from './pages/Login';
-import { Setup } from './pages/Setup';
+import { useMyrmex } from '../shared/hooks/useMyrmex';
+import { useTheme } from '../shared/hooks/useTheme';
+import { authStatus, logout as logoutApi, setUnauthorizedHandler } from '../shared/lib/api';
+import { Sidebar } from '../shared/ui/Sidebar';
+import { BottomBar } from '../shared/ui/BottomBar';
+import { Dashboard } from '../pages/Dashboard';
+import { Projects } from '../pages/Projects';
+import { Board } from '../pages/Board';
+import { Library } from '../pages/Library';
+import { Files } from '../pages/Files';
+import { Graph } from '../pages/Graph';
+import { Login } from '../pages/Login';
+import { Setup } from '../pages/Setup';
 
 export default function App() {
   const { state, loading, error, refresh } = useMyrmex();

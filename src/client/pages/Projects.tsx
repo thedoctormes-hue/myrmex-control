@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { MyrmexState, Project } from '@shared/types';
-import { createProject, deleteProject } from '../lib/api';
-import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { createProject, deleteProject } from '../shared/lib/api';
+import { ErrorBanner } from '../shared/ui/ErrorBanner';
 
 interface Props {
   state: MyrmexState | null;
