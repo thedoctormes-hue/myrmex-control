@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+server-dist/
+
+# Environment & secrets
+.env
+.env.bak
+
+# Logs
+logs/
+*.log
+
+# Backups
+backups/
+
+# Demo instance — keep demo-data.json, ignore runtime files
+demo/*
+!demo/demo-data.json
+
+# Production data (use myrmex.example.json as seed)
+myrmex.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo

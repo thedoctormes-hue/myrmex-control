@@ -1,0 +1,270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Myrmex Lab Data",
+  "description": "Единый источник правды лаборатории ЗавЛаб",
+  "type": "object",
+  "required": ["_meta", "workspace", "projects", "tasks", "agents", "incidents", "skills", "hooks", "changelog", "auditLog", "settings"],
+
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["version", "schemaVersion", "lastUpdated"],
+      "properties": {
+        "version": { "type": "string", "description": "Версия данных (дата)" },
+        "schemaVersion": { "type": "string", "description": "Семвер схемы" },
+        "lastUpdated": { "type": "string", "format": "date-time" },
+        "lastUpdatedBy": { "type": "string" },
+        "changeCount": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "workspace": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "owner": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "categories": {
+      "type": "array",
+      "description": "Справочник категорий проектов",
+      "items": {
+        "type": "object",
+        "required": ["id", "name"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "icon": { "type": "string" },
+          "color": { "type": "string" }
+        }
+      }
+    },
+
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/project" }
+    },
+
+    "tasks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/task" }
+    },
+
+    "agents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/agent" }
+    },
+
+    "incidents": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/incident" }
+    },
+
+    "skills": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/skill" }
+    },
+
+    "hooks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/hook" }
+    },
+
+    "servers": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/server" }
+    },
+
+    "changelog": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/changelogEntry" }
+    },
+
+    "auditLog": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/auditEntry" }
+    },
+
+    "settings": {
+      "type": "object",
+      "properties": {
+        "theme": { "type": "string", "enum": ["dark", "light"] },
+        "language": { "type": "string", "enum": ["ru", "en"] },
+        "refreshIntervalSec": { "type": "integer", "minimum": 5 },
+        "notificationsEnabled": { "type": "boolean" },
+        "custom": { "type": "object" }
+      }
+    }
+  },
+
+  "definitions": {
+
+    "project": {
+      "type": "object",
+      "required": ["id", "title", "status", "category", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "paused", "completed", "archived"] },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "owner": { "type": "string", "description": "ID агента-владельца" },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "color": { "type": "string" },
+        "icon": { "type": "string" },
+        "path": { "type": "string" },
+        "url": { "type": "string" },
+        "port": { "type": "integer" },
+        "service": { "type": "string" },
+        "channel": { "type": "string" },
+        "integratesWith": { "type": "array", "items": { "type": "string" } },
+        "goals": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "task": {
+      "type": "object",
+      "required": ["id", "title", "status", "priority", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "projectId": { "type": "string" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "status": { "type": "string", "enum": ["backlog", "todo", "in_progress", "review", "done", "blocked"] },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "assigneeId": { "type": "string" },
+        "parentId": { "type": "string" },
+        "dependencies": { "type": "array", "items": { "type": "string" } },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "agent": {
+      "type": "object",
+      "required": ["id", "name", "role", "status", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "inactive", "onboarding"] },
+        "skills": { "type": "array", "items": { "type": "string" }, "description": "ID скиллов" },
+        "currentTasks": { "type": "array", "items": { "type": "string" }, "description": "ID текущих задач" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" },
+        "joinedAt": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object" }
+      }
+    },
+
+    "incident": {
+      "type": "object",
+      "required": ["id", "title", "severity", "status", "reportedAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "severity": { "type": "string", "enum": ["critical", "high", "medium", "low"] },
+        "status": { "type": "string", "enum": ["open", "investigating", "mitigated", "resolved", "closed"] },
+        "reportedAt": { "type": "string", "format": "date-time" },
+        "reportedBy": { "type": "string", "description": "ID агента" },
+        "affectedProjects": { "type": "array", "items": { "type": "string" } },
+        "affectedServices": { "type": "array", "items": { "type": "string" } },
+        "rootCause": { "type": "string" },
+        "resolution": { "type": "string" },
+        "lessonsLearned": { "type": "array", "items": { "type": "string" } },
+        "resolvedAt": { "type": "string", "format": "date-time" },
+        "resolvedBy": { "type": "string" }
+      }
+    },
+
+    "skill": {
+      "type": "object",
+      "required": ["id", "name", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "content": { "type": "string" },
+        "filePath": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "category": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "hook": {
+      "type": "object",
+      "required": ["id", "name", "trigger", "createdAt"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "trigger": { "type": "string", "description": "Когда срабатывает" },
+        "content": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "enabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "server": {
+      "type": "object",
+      "required": ["id", "name", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "host": { "type": "string" },
+        "port": { "type": "integer" },
+        "status": { "type": "string", "enum": ["online", "offline", "maintenance"] },
+        "services": { "type": "array", "items": { "type": "string" } },
+        "lastChecked": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object" }
+      }
+    },
+
+    "changelogEntry": {
+      "type": "object",
+      "required": ["id", "timestamp", "source", "action", "entityType", "entityId"],
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "source": { "type": "string", "enum": ["ui", "api", "system", "migration", "demo-sim"] },
+        "action": { "type": "string", "enum": ["create", "update", "delete", "move"] },
+        "entityType": { "type": "string" },
+        "entityId": { "type": "string" },
+        "diff": { "type": "object" }
+      }
+    },
+
+    "auditEntry": {
+      "type": "object",
+      "required": ["id", "timestamp", "entityType", "entityId", "action", "by"],
+      "properties": {
+        "id": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "entityType": { "type": "string" },
+        "entityId": { "type": "string" },
+        "action": { "type": "string" },
+        "by": { "type": "string", "description": "ID агента или система" },
+        "details": { "type": "string" },
+        "before": { "type": "object" },
+        "after": { "type": "object" }
+      }
+    }
+  }
+}

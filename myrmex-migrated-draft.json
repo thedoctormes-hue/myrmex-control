@@ -1,0 +1,915 @@
+{
+  "_meta": {
+    "version": "2026.05.10",
+    "schemaVersion": "1.0.0",
+    "lastUpdated": "2026-05-09T22:11:48.504760+00:00",
+    "lastUpdatedBy": "migration-script",
+    "changeCount": 26
+  },
+  "workspace": {
+    "name": "ЗавЛаб — Лаборатория Безумного Доктора",
+    "description": "Единый источник правды лаборатории",
+    "owner": "eugene",
+    "createdAt": "2026-05-09T22:11:48.504766+00:00"
+  },
+  "categories": [
+    {
+      "id": "cli",
+      "name": "CLI System",
+      "description": "Командная строка, системные утилиты",
+      "icon": "⌨️",
+      "color": "#6366f1"
+    },
+    {
+      "id": "content",
+      "name": "Content System",
+      "description": "Контент-машины, блог, публикации",
+      "icon": "📝",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "telegram-bot",
+      "name": "Telegram Bot",
+      "description": "Telegram боты и каналы",
+      "icon": "🤖",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "api",
+      "name": "API",
+      "description": "API сервисы и бэкенд",
+      "icon": "🔌",
+      "color": "#10b981"
+    },
+    {
+      "id": "devtools",
+      "name": "DevTools",
+      "description": "Инструменты разработки",
+      "icon": "🔧",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "infrastructure",
+      "name": "Infrastructure",
+      "description": "Инфраструктура, мониторинг",
+      "icon": "🏗️",
+      "color": "#ef4444"
+    },
+    {
+      "id": "landing",
+      "name": "Landing Page",
+      "description": "Лендинги и сайты",
+      "icon": "🌐",
+      "color": "#06b6d4"
+    },
+    {
+      "id": "blog",
+      "name": "Blog",
+      "description": "Блоги и статьи",
+      "icon": "📰",
+      "color": "#ec4899"
+    },
+    {
+      "id": "dashboard",
+      "name": "Dashboard",
+      "description": "Дашборды и панели управления",
+      "icon": "📊",
+      "color": "#14b8a6"
+    },
+    {
+      "id": "saas",
+      "name": "SaaS",
+      "description": "SaaS платформы",
+      "icon": "☁️",
+      "color": "#f97316"
+    },
+    {
+      "id": "generator",
+      "name": "Generator",
+      "description": "Генераторы и фабрики",
+      "icon": "⚙️",
+      "color": "#64748b"
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "description": "Прочее",
+      "icon": "📦",
+      "color": "#9ca3af"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_30719b5d",
+      "title": "kotolizator",
+      "description": "",
+      "status": "active",
+      "category": "cli",
+      "tags": [
+        "cli-system"
+      ],
+      "priority": 0,
+      "path": "/root/LabDoctorM/",
+      "url": "",
+      "port": null,
+      "service": "kotolizator.service",
+      "channel": "@kotolizator",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499476+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499511+00:00"
+    },
+    {
+      "id": "proj_19593823",
+      "title": "hype-protocol",
+      "description": "Контент-машина DoctorM&Ai. CHAOS_CAPTURE протокол.",
+      "status": "active",
+      "category": "content",
+      "tags": [
+        "content-system"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/hype-protocol/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499529+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499533+00:00"
+    },
+    {
+      "id": "proj_f03f8998",
+      "title": "msk-gastro-digest-bot",
+      "description": "",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/telegram-bots/msk-gastro-digest-bot/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499580+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499584+00:00"
+    },
+    {
+      "id": "proj_860ac8f1",
+      "title": "vpn-daemon",
+      "description": "",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/telegram-bots/vpn-daemon/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499596+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499599+00:00"
+    },
+    {
+      "id": "proj_73a5c830",
+      "title": "mail-daemon",
+      "description": "",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/telegram-bots/mail-daemon/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499610+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499613+00:00"
+    },
+    {
+      "id": "proj_cf0bd0f8",
+      "title": "stenographer",
+      "description": "",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/telegram-bots/stenographer/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499624+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499627+00:00"
+    },
+    {
+      "id": "proj_ffb7f083",
+      "title": "llm-evangelist",
+      "description": "Дайджест LLM-моделей с OpenRouter. Ежедневный пост в 09:00 MSK.",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/telegram-bots/llm-evangelist/",
+      "url": "",
+      "port": null,
+      "service": "llmevangelist.service",
+      "channel": "@LLMevangelist",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499638+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499641+00:00"
+    },
+    {
+      "id": "proj_3fe3b74d",
+      "title": "protocol-bot",
+      "description": "",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/telegram-bots/protocol/",
+      "url": "",
+      "port": null,
+      "service": "protocol-bot.service",
+      "channel": "@Protocolstandbot",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499652+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499656+00:00"
+    },
+    {
+      "id": "proj_1d478e20",
+      "title": "zakupki-drop-bot",
+      "description": "Парсинг госзакупок для дропшипинга",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": [
+        "telegram-bot"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/telegram-bots/zakupki-drop-bot/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499667+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499670+00:00"
+    },
+    {
+      "id": "proj_93978693",
+      "title": "fedlab-parser",
+      "description": "Умный поиск мероприятий лабораторной медицины",
+      "status": "active",
+      "category": "api",
+      "tags": [
+        "api"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/fedlab_parser/",
+      "url": "",
+      "port": 9999,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499705+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499708+00:00"
+    },
+    {
+      "id": "proj_2a3c6919",
+      "title": "zprr-tracker",
+      "description": "AI трекер речевого развития детей (ЗПРР)",
+      "status": "active",
+      "category": "api",
+      "tags": [
+        "api"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/zprr-tracker/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499720+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499723+00:00"
+    },
+    {
+      "id": "proj_fcef60b4",
+      "title": "github-premium",
+      "description": "Корпоративный стиль GitHub: шаблоны, CI/CD, безопасность",
+      "status": "active",
+      "category": "devtools",
+      "tags": [
+        "devtools"
+      ],
+      "priority": 3,
+      "path": "/root/LabDoctorM/projects/github-premium/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499734+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499738+00:00"
+    },
+    {
+      "id": "proj_8808969a",
+      "title": "remote-access-toolkit",
+      "description": "Диагностика Linux ноутбуков через SSH туннели",
+      "status": "active",
+      "category": "infrastructure",
+      "tags": [
+        "infrastructure"
+      ],
+      "priority": 3,
+      "path": "/root/LabDoctorM/projects/remote-access/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499752+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499756+00:00"
+    },
+    {
+      "id": "proj_d299e12b",
+      "title": "shtab-ai-gb52",
+      "description": "",
+      "status": "active",
+      "category": "landing",
+      "tags": [
+        "landing-page"
+      ],
+      "priority": 1,
+      "path": "/var/www/shtab-ai.ru/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499766+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499769+00:00"
+    },
+    {
+      "id": "proj_036ca728",
+      "title": "articles-shtab-ai",
+      "description": "Автоблог DoctorM&Ai на articles.shtab-ai.ru. Генерация → публикация через SSH/SCP на Warsaw.",
+      "status": "active",
+      "category": "blog",
+      "tags": [
+        "blog",
+        "✅ Работает"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/hype-protocol/",
+      "url": "https://articles.shtab-ai.ru",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499778+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499780+00:00"
+    },
+    {
+      "id": "proj_5ecc8a45",
+      "title": "syncthing-dashboard",
+      "description": "Dashboard синхронизации файлов",
+      "status": "active",
+      "category": "dashboard",
+      "tags": [
+        "dashboard"
+      ],
+      "priority": 3,
+      "path": "/root/LabDoctorM/projects/web-apps/syncthing-dashboard/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [
+        "os-lab-api",
+        "metrics"
+      ],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499791+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499794+00:00"
+    },
+    {
+      "id": "proj_861c4398",
+      "title": "os-lab-api",
+      "description": "API мониторинга серверов (Warsaw/Florida/RF)",
+      "status": "active",
+      "category": "api",
+      "tags": [
+        "api"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/web-apps/os-lab-api/",
+      "url": "",
+      "port": 8002,
+      "service": "",
+      "channel": "",
+      "integratesWith": [
+        "syncthing-dashboard",
+        "metrics"
+      ],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499807+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499810+00:00"
+    },
+    {
+      "id": "proj_a79e9286",
+      "title": "protocol",
+      "description": "",
+      "status": "active",
+      "category": "infrastructure",
+      "tags": [
+        "infrastructure"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/infrastructure/monitoring/protocol/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499820+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499823+00:00"
+    },
+    {
+      "id": "proj_2e6fe60b",
+      "title": "metrics",
+      "description": "Сбор и анализ метрик серверов (weekly/yearly)",
+      "status": "active",
+      "category": "infrastructure",
+      "tags": [
+        "infrastructure"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/infrastructure/monitoring/metrics/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [
+        "os-lab-api",
+        "protocol"
+      ],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499833+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499836+00:00"
+    },
+    {
+      "id": "proj_7f402f42",
+      "title": "openclawbox",
+      "description": "SaaS платформа доступа к AI-моделям",
+      "status": "active",
+      "category": "saas",
+      "tags": [
+        "saas"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/OpenClawBox/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499846+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499849+00:00"
+    },
+    {
+      "id": "proj_fec95c88",
+      "title": "myrmex-forge",
+      "description": "Фабрика каналов: генерация, деплой, клонирование Telegram-каналов",
+      "status": "active",
+      "category": "generator",
+      "tags": [
+        "telegram-bot-generator"
+      ],
+      "priority": 2,
+      "path": "/root/LabDoctorM/projects/myrmex-forge/",
+      "url": "",
+      "port": null,
+      "service": "",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499858+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499861+00:00"
+    },
+    {
+      "id": "proj_4ed76ab3",
+      "title": "myrmex-command",
+      "description": "Пульт управления муравейником: канбан из evolution_backlog.json, мониторинг, файлообменник",
+      "status": "active",
+      "category": "dashboard",
+      "tags": [
+        "dashboard"
+      ],
+      "priority": 1,
+      "path": "/root/LabDoctorM/projects/web-apps/myrmex-command/",
+      "url": "https://dashboard.shtab-ai.ru",
+      "port": 8167,
+      "service": "myrmex-command.service",
+      "channel": "",
+      "integratesWith": [],
+      "goals": [],
+      "createdAt": "2026-05-09T22:11:48.499871+00:00",
+      "updatedAt": "2026-05-09T22:11:48.499874+00:00"
+    }
+  ],
+  "tasks": [],
+  "agents": [],
+  "incidents": [
+    {
+      "id": "inc_48461008",
+      "title": "2026-05-06: Утечка токенов в git history",
+      "description": "Токены Telegram ботов и OpenRouter API были зафиксированы в git history в файле `AUDIT_2026.md` в контексте legacy-проекта `/root/bots` (теперь удалён). **Токены НЕ активны, под контролем.**",
+      "severity": "critical",
+      "status": "investigating",
+      "reportedAt": "2026-05-06T00:00:00+00:00",
+      "reportedBy": "КотОлизатОр",
+      "affectedProjects": [],
+      "affectedServices": [],
+      "rootCause": "",
+      "resolution": "1. ✅ Токены больше не активны (legacy проект)",
+      "lessonsLearned": []
+    },
+    {
+      "id": "inc_24324662",
+      "title": "2026-05-08: Некорректное удаление функционала из kanban_server.py",
+      "description": "При рефакторинге kanban_server.py (удаление decompose endpoint) были случайно удалены важные секции мониторинга и утилит, не связанные с декомпозицией.",
+      "severity": "high",
+      "status": "resolved",
+      "reportedAt": "2026-05-08T00:00:00+00:00",
+      "reportedBy": "OWL (Qwen Code)",
+      "affectedProjects": [],
+      "affectedServices": [],
+      "rootCause": "При удалении decompose endpoint был захвачен слишком большой блок кода (402-690 строк), включающий несвязанные секции.",
+      "resolution": "1. ✅ Все секции восстановлены из памяти",
+      "lessonsLearned": [
+        "При удалении кода нужно проверять границы секций. Каждая секция — отдельный блок. Не удалять всё подряд.",
+        "**Статус:** Исправлено",
+        "**Ответственный:** OWL (Qwen Code)"
+      ]
+    },
+    {
+      "id": "inc_c44e2bc8",
+      "title": "2026-05-09: Уничтожение dashboard проекта",
+      "description": "Dashboard был заменён на упрощённую версию без сохранения оригинального функционала.",
+      "severity": "critical",
+      "status": "open",
+      "reportedAt": "2026-05-09T00:00:00+00:00",
+      "reportedBy": "Qwen Code (OWL)",
+      "affectedProjects": [],
+      "affectedServices": [],
+      "rootCause": "- Непонимание структуры проекта",
+      "resolution": "",
+      "lessonsLearned": []
+    }
+  ],
+  "skills": [],
+  "hooks": [],
+  "servers": [],
+  "changelog": [
+    {
+      "id": "de27fc78-5fd1-4954-895e-be1f351ff238",
+      "timestamp": "2026-05-09T18:25:43.253Z",
+      "source": "api",
+      "action": "delete",
+      "entityType": "skill",
+      "entityId": "13c1b7b9-85d5-4755-99b7-853e90e00d5a",
+      "diff": {
+        "name": "тест"
+      }
+    },
+    {
+      "id": "3085e878-11e5-4974-8ddc-9147896cd1a1",
+      "timestamp": "2026-05-09T18:25:43.184Z",
+      "source": "api",
+      "action": "update",
+      "entityType": "project",
+      "entityId": "e880f65b-6cc6-407c-9bb7-376e83c5a056",
+      "diff": {
+        "name": "Renamed Project"
+      }
+    },
+    {
+      "id": "6705bea5-12f7-4c2a-b5b8-9f60a1b6ebd4",
+      "timestamp": "2026-05-09T18:25:43.168Z",
+      "source": "api",
+      "action": "update",
+      "entityType": "task",
+      "entityId": "994c5588-f930-4e3f-b4b2-c7bfa4ace4ac",
+      "diff": {
+        "title": "Updated via probe"
+      }
+    },
+    {
+      "id": "32d65ee9-f10d-41bd-9348-bbaaac898c75",
+      "timestamp": "2026-05-09T18:25:43.076Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "skill",
+      "entityId": "dc1ec68a-41e1-4d3b-ad61-3ee0a8f2545a",
+      "diff": {
+        "name": "probe-skill"
+      }
+    },
+    {
+      "id": "7e242e21-f7fc-4976-98c2-669558c72c2f",
+      "timestamp": "2026-05-09T18:25:43.061Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "7a6c58c9-6a59-48dd-a272-23f81fccd567",
+      "diff": {
+        "title": "Probe task"
+      }
+    },
+    {
+      "id": "fe9d5b6b-639a-49a6-9128-4d76f0af5c39",
+      "timestamp": "2026-05-09T18:25:43.042Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "a2ed4e38-a98f-45a7-8c7b-794933406ca8",
+      "diff": {
+        "name": "Probe Project"
+      }
+    },
+    {
+      "id": "e2221746-494d-4512-9945-eed0c103863b",
+      "timestamp": "2026-05-09T18:13:21.751Z",
+      "source": "api",
+      "action": "update",
+      "entityType": "task",
+      "entityId": "994c5588-f930-4e3f-b4b2-c7bfa4ace4ac",
+      "diff": {
+        "title": "Updated via API probe"
+      }
+    },
+    {
+      "id": "0dd968f2-d9f7-4c85-bdfb-6d62fdb3c757",
+      "timestamp": "2026-05-09T18:09:10.491Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "skill",
+      "entityId": "647f87d0-b7d1-4b9c-ba4c-5999cbbbe31d",
+      "diff": {
+        "name": "probe-skill"
+      }
+    },
+    {
+      "id": "4feb35bf-a617-46fd-96e0-f622e0481a1a",
+      "timestamp": "2026-05-09T18:09:10.478Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "18491d66-536a-4e85-aea1-3674681d43c4",
+      "diff": {
+        "title": "Probe task"
+      }
+    },
+    {
+      "id": "9782e098-d106-4dd9-b227-62d8d4a7c53c",
+      "timestamp": "2026-05-09T18:09:10.467Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "4f685ff2-0223-405a-8929-41ed51086524",
+      "diff": {
+        "name": "Probe Project"
+      }
+    },
+    {
+      "id": "af09d236-4b52-4117-9576-f49130693615",
+      "timestamp": "2026-05-09T18:09:10.454Z",
+      "source": "probe",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "5ab5524f-ab2b-43d7-a2f2-3c4416bb08af",
+      "diff": {
+        "name": "Probe Project"
+      }
+    },
+    {
+      "id": "eb354300-1bbb-4f4f-bb1c-1d0c605dd01c",
+      "timestamp": "2026-05-09T13:18:32.387Z",
+      "source": "ui",
+      "action": "create",
+      "entityType": "skill",
+      "entityId": "13c1b7b9-85d5-4755-99b7-853e90e00d5a",
+      "diff": {
+        "name": "тест"
+      }
+    },
+    {
+      "id": "3ae6523e-bd44-4ec0-989f-91e6ffa475c6",
+      "timestamp": "2026-05-09T11:10:27.749Z",
+      "source": "api",
+      "action": "move",
+      "entityType": "task",
+      "entityId": "39634dd1-4308-45e0-ae55-9670318c7426",
+      "diff": {
+        "from": "backlog",
+        "to": "todo"
+      }
+    },
+    {
+      "id": "feb55cf0-15b8-4a0b-a5a2-64ecdf444a81",
+      "timestamp": "2026-05-09T11:10:19.251Z",
+      "source": "ui",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "39634dd1-4308-45e0-ae55-9670318c7426",
+      "diff": {
+        "title": "Вызвать демона"
+      }
+    },
+    {
+      "id": "428b2df6-aeef-48f8-bcb8-3ee762154f71",
+      "timestamp": "2026-05-09T11:09:46.627Z",
+      "source": "ui",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "cd1e7d86-d5af-42ab-8fc6-5a15490299e6",
+      "diff": {
+        "name": "😈демон"
+      }
+    },
+    {
+      "id": "04b081a0-8ab2-41e4-acd3-7a508ea16ca2",
+      "timestamp": "2026-05-09T10:22:05.085Z",
+      "source": "ui",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "00b015b9-8dc3-47c9-9cb9-cdd5da0fc432",
+      "diff": {
+        "title": "Тест"
+      }
+    },
+    {
+      "id": "e14a582c-49ef-4469-8f95-e02fa758e3ed",
+      "timestamp": "2026-05-09T10:16:12.760Z",
+      "source": "ui",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "34df278f-9953-480b-83bd-2d188a4d511f",
+      "diff": {
+        "name": "Тестовый"
+      }
+    },
+    {
+      "id": "58f4c6bc-7a72-41d8-9c91-4b35aa80c45b",
+      "timestamp": "2026-05-09T09:42:56.545Z",
+      "source": "deploy",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "92b50457-b7a9-40e0-9a79-b4061e7f26c1",
+      "diff": {
+        "name": "Deploy Test"
+      }
+    },
+    {
+      "id": "7b0cfb41-2b08-4886-ad21-343d317e1267",
+      "timestamp": "2026-05-09T09:34:27.375Z",
+      "source": "api",
+      "action": "delete",
+      "entityType": "project",
+      "entityId": "9fd8a248-fe66-4ef4-a2bf-a573ae65a84e",
+      "diff": {
+        "name": "T"
+      }
+    },
+    {
+      "id": "04426f20-4066-46f2-9559-3ac461af8224",
+      "timestamp": "2026-05-09T09:34:27.364Z",
+      "source": "api",
+      "action": "delete",
+      "entityType": "task",
+      "entityId": "a29440db-89af-4bcb-a279-beec96dd6cfb",
+      "diff": {
+        "title": "T"
+      }
+    },
+    {
+      "id": "6f84cc11-8d3f-4b0f-adc8-6e30ba18dc9f",
+      "timestamp": "2026-05-09T09:34:27.351Z",
+      "source": "t",
+      "action": "move",
+      "entityType": "task",
+      "entityId": "a29440db-89af-4bcb-a279-beec96dd6cfb",
+      "diff": {
+        "from": "done",
+        "to": "in_progress"
+      }
+    },
+    {
+      "id": "e69f344f-6ada-45ce-a823-dff0e8bc4db7",
+      "timestamp": "2026-05-09T09:34:27.337Z",
+      "source": "t",
+      "action": "update",
+      "entityType": "task",
+      "entityId": "a29440db-89af-4bcb-a279-beec96dd6cfb",
+      "diff": {
+        "status": "done",
+        "source": "t"
+      }
+    },
+    {
+      "id": "b75c138d-0d6e-49e1-b55a-c6d3b84bdb88",
+      "timestamp": "2026-05-09T09:34:27.289Z",
+      "source": "t",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "a29440db-89af-4bcb-a279-beec96dd6cfb",
+      "diff": {
+        "title": "T"
+      }
+    },
+    {
+      "id": "1857a958-acd6-40f8-b857-a3ea53d57730",
+      "timestamp": "2026-05-09T09:34:27.237Z",
+      "source": "t",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "9fd8a248-fe66-4ef4-a2bf-a573ae65a84e",
+      "diff": {
+        "name": "T"
+      }
+    },
+    {
+      "id": "e078cb45-f50e-4b6f-a7c3-2ecc66ada152",
+      "timestamp": "2026-05-09T09:30:31.325Z",
+      "source": "test",
+      "action": "create",
+      "entityType": "task",
+      "entityId": "994c5588-f930-4e3f-b4b2-c7bfa4ace4ac",
+      "diff": {
+        "title": "Test Task"
+      }
+    },
+    {
+      "id": "7b04eb7f-8f56-4023-a8c0-0d683c8fcf54",
+      "timestamp": "2026-05-09T09:30:31.236Z",
+      "source": "test",
+      "action": "create",
+      "entityType": "project",
+      "entityId": "e880f65b-6cc6-407c-9bb7-376e83c5a056",
+      "diff": {
+        "name": "Test Project"
+      }
+    }
+  ],
+  "auditLog": [
+    {
+      "id": "audit_02f640aa",
+      "timestamp": "2026-05-09T22:11:48.504740+00:00",
+      "entityType": "system",
+      "entityId": "migration",
+      "action": "data_migration",
+      "by": "migration-script",
+      "details": "Migrated 22 projects, 3 incidents from legacy sources"
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "language": "ru",
+    "refreshIntervalSec": 30,
+    "notificationsEnabled": true,
+    "custom": {}
+  }
+}

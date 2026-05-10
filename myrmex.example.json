@@ -1,0 +1,29 @@
+{
+  "_meta": {
+    "version": "0.1.0",
+    "last_updated": "2026-01-01T00:00:00.000Z",
+    "last_updated_by": "seed",
+    "change_count": 0
+  },
+  "workspace": {
+    "name": "Myrmex Control",
+    "description": "AI Agent Hive Management",
+    "owner": "admin",
+    "created_at": "2026-01-01T00:00:00.000Z"
+  },
+  "projects": [],
+  "agents": [],
+  "tasks": [],
+  "library": [],
+  "files": [],
+  "servers": [],
+  "settings": {
+    "theme": "dark",
+    "language": "en",
+    "refresh_interval_sec": 30,
+    "notifications_enabled": true,
+    "custom": {}
+  },
+  "mcp_servers": [],
+  "changelog": []
+}

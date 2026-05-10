@@ -1,0 +1,407 @@
+{
+  "_meta": {
+    "version": "2026.05.10",
+    "schemaVersion": "1.0.0",
+    "lastUpdated": "2026-05-10T00:00:00.000Z",
+    "lastUpdatedBy": "demo-init",
+    "changeCount": 0
+  },
+  "workspace": {
+    "name": "Demo Lab",
+    "description": "Демонстрационный муравейник — данные сбрасываются каждый час",
+    "owner": "demo",
+    "createdAt": "2026-05-10T00:00:00.000Z"
+  },
+  "categories": [
+    {"id": "cli", "name": "CLI System", "icon": "⌨️", "color": "#6366f1"},
+    {"id": "content", "name": "Content System", "icon": "📝", "color": "#8b5cf6"},
+    {"id": "telegram-bot", "name": "Telegram Bot", "icon": "🤖", "color": "#3b82f6"},
+    {"id": "api", "name": "API", "icon": "🔌", "color": "#10b981"},
+    {"id": "devtools", "name": "DevTools", "icon": "🔧", "color": "#f59e0b"},
+    {"id": "infrastructure", "name": "Infrastructure", "icon": "🏗️", "color": "#ef4444"},
+    {"id": "landing", "name": "Landing Page", "icon": "🌐", "color": "#06b6d4"},
+    {"id": "blog", "name": "Blog", "icon": "📰", "color": "#ec4899"},
+    {"id": "dashboard", "name": "Dashboard", "icon": "📊", "color": "#14b8a6"},
+    {"id": "saas", "name": "SaaS", "icon": "☁️", "color": "#f97316"},
+    {"id": "generator", "name": "Generator", "icon": "⚙️", "color": "#64748b"},
+    {"id": "other", "name": "Other", "icon": "📦", "color": "#9ca3af"}
+  ],
+  "projects": [
+    {
+      "id": "proj_demo_001",
+      "title": "Neural Memory Palace",
+      "description": "Распределённая система памяти для AI-агентов с поддержкой долгосрочного контекста",
+      "status": "active",
+      "category": "api",
+      "tags": ["memory", "context", "ai-core"],
+      "owner": "agent_demo_001",
+      "priority": 0,
+      "color": "#6366f1",
+      "icon": "🧠",
+      "goals": ["Поддержка 1M+ токенов контекста", "Автоматическая консолидация памяти"],
+      "createdAt": "2026-04-01T10:00:00.000Z",
+      "updatedAt": "2026-05-09T15:30:00.000Z"
+    },
+    {
+      "id": "proj_demo_002",
+      "title": "Telegram Hive Bot",
+      "description": "Мультиагентный Telegram-бот для управления лабораторией",
+      "status": "active",
+      "category": "telegram-bot",
+      "tags": ["telegram", "bot", "multi-agent"],
+      "owner": "agent_demo_002",
+      "priority": 1,
+      "color": "#3b82f6",
+      "icon": "🤖",
+      "channel": "@DemoHiveBot",
+      "goals": ["Автомодерация", "Уведомления о инцидентах", "Статус серверов"],
+      "createdAt": "2026-03-15T08:00:00.000Z",
+      "updatedAt": "2026-05-08T12:00:00.000Z"
+    },
+    {
+      "id": "proj_demo_003",
+      "title": "Metrics Collector",
+      "description": "Сбор и визуализация метрик серверов в реальном времени",
+      "status": "active",
+      "category": "infrastructure",
+      "tags": ["monitoring", "metrics", "grafana"],
+      "owner": "agent_demo_003",
+      "priority": 1,
+      "color": "#ef4444",
+      "icon": "📊",
+      "port": 9090,
+      "goals": ["Мониторинг 5+ серверов", "Алерты при аномалиях"],
+      "createdAt": "2026-04-20T14:00:00.000Z",
+      "updatedAt": "2026-05-09T10:00:00.000Z"
+    },
+    {
+      "id": "proj_demo_004",
+      "title": "Content Forge",
+      "description": "Автоматическая генерация и публикация контента",
+      "status": "paused",
+      "category": "content",
+      "tags": ["content", "automation", "blog"],
+      "owner": "agent_demo_001",
+      "priority": 2,
+      "color": "#8b5cf6",
+      "icon": "📝",
+      "goals": ["50 статей/месяц", "SEO-оптимизация"],
+      "createdAt": "2026-02-10T09:00:00.000Z",
+      "updatedAt": "2026-05-01T16:00:00.000Z"
+    },
+    {
+      "id": "proj_demo_005",
+      "title": "VPN Shield",
+      "description": "Распределённая VPN-инфраструктура с обходом DPI",
+      "status": "active",
+      "category": "infrastructure",
+      "tags": ["vpn", "security", "dpi-bypass"],
+      "owner": "agent_demo_003",
+      "priority": 0,
+      "color": "#10b981",
+      "icon": "🛡️",
+      "goals": ["3 точки присутствия", "Автообход блокировок"],
+      "createdAt": "2026-01-05T11:00:00.000Z",
+      "updatedAt": "2026-05-09T18:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task_demo_001",
+      "projectId": "proj_demo_001",
+      "title": "Реализовать консолидацию памяти",
+      "description": "Автоматическое сжатие старых воспоминаний при достижении лимита",
+      "status": "in_progress",
+      "priority": "high",
+      "assigneeId": "agent_demo_001",
+      "tags": ["memory", "core"],
+      "createdAt": "2026-05-08T10:00:00.000Z",
+      "updatedAt": "2026-05-09T15:00:00.000Z"
+    },
+    {
+      "id": "task_demo_002",
+      "projectId": "proj_demo_001",
+      "title": "Добавить семантический поиск",
+      "description": "Поиск по воспоминаниям через embedding-вектора",
+      "status": "todo",
+      "priority": "medium",
+      "assigneeId": "agent_demo_001",
+      "tags": ["search", "embeddings"],
+      "createdAt": "2026-05-09T08:00:00.000Z",
+      "updatedAt": "2026-05-09T08:00:00.000Z"
+    },
+    {
+      "id": "task_demo_003",
+      "projectId": "proj_demo_002",
+      "title": "Команда /status для серверов",
+      "description": "Показывает статус всех серверов одним сообщением",
+      "status": "done",
+      "priority": "high",
+      "assigneeId": "agent_demo_002",
+      "tags": ["telegram", "status"],
+      "createdAt": "2026-05-07T12:00:00.000Z",
+      "updatedAt": "2026-05-08T14:00:00.000Z",
+      "completedAt": "2026-05-08T14:00:00.000Z"
+    },
+    {
+      "id": "task_demo_004",
+      "projectId": "proj_demo_003",
+      "title": "Настроить алерты на CPU > 90%",
+      "description": "Push-уведомление при высокой нагрузке",
+      "status": "review",
+      "priority": "medium",
+      "assigneeId": "agent_demo_003",
+      "tags": ["monitoring", "alerts"],
+      "createdAt": "2026-05-08T09:00:00.000Z",
+      "updatedAt": "2026-05-09T11:00:00.000Z"
+    },
+    {
+      "id": "task_demo_005",
+      "projectId": "proj_demo_005",
+      "title": "Добавить сервер в Сингапуре",
+      "description": "Развернуть VLESS + REALITY на новом узле",
+      "status": "backlog",
+      "priority": "low",
+      "assigneeId": null,
+      "tags": ["vpn", "singapore"],
+      "createdAt": "2026-05-09T16:00:00.000Z",
+      "updatedAt": "2026-05-09T16:00:00.000Z"
+    },
+    {
+      "id": "task_demo_006",
+      "projectId": "proj_demo_002",
+      "title": "Интеграция с Myrmex API",
+      "description": "Бот должен читать задачи из Myrmex и публиковать статус",
+      "status": "todo",
+      "priority": "high",
+      "assigneeId": "agent_demo_002",
+      "tags": ["integration", "api"],
+      "createdAt": "2026-05-09T12:00:00.000Z",
+      "updatedAt": "2026-05-09T12:00:00.000Z"
+    }
+  ],
+  "agents": [
+    {
+      "id": "agent_demo_001",
+      "name": "Architect",
+      "role": "Principal AI Architect",
+      "status": "active",
+      "skills": ["skill_demo_001", "skill_demo_002"],
+      "currentTasks": ["task_demo_001", "task_demo_002"],
+      "bio": "Проектирует архитектуру систем памяти и контекста",
+      "joinedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "agent_demo_002",
+      "name": "BotMaster",
+      "role": "Telegram Bot Engineer",
+      "status": "active",
+      "skills": ["skill_demo_003"],
+      "currentTasks": ["task_demo_006"],
+      "bio": "Разрабатывает и поддерживает Telegram-ботов лаборатории",
+      "joinedAt": "2026-02-15T00:00:00.000Z"
+    },
+    {
+      "id": "agent_demo_003",
+      "name": "OpsGuard",
+      "role": "Infrastructure & Security",
+      "status": "active",
+      "skills": ["skill_demo_004", "skill_demo_005"],
+      "currentTasks": ["task_demo_004"],
+      "bio": "Мониторинг серверов, VPN, безопасность",
+      "joinedAt": "2026-01-10T00:00:00.000Z"
+    },
+    {
+      "id": "agent_demo_004",
+      "name": "Scribe",
+      "role": "Content Generator",
+      "status": "inactive",
+      "skills": ["skill_demo_006"],
+      "currentTasks": [],
+      "bio": "Генерирует контент для блога и социальных сетей",
+      "joinedAt": "2026-03-01T00:00:00.000Z"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "inc_demo_001",
+      "title": "Memory leak в модуле контекста",
+      "description": "При обработке длинных диалогов потребление RAM растёт линейно",
+      "severity": "high",
+      "status": "resolved",
+      "reportedAt": "2026-05-08T14:00:00.000Z",
+      "reportedBy": "agent_demo_001",
+      "affectedProjects": ["proj_demo_001"],
+      "affectedServices": ["context-engine"],
+      "rootCause": "Неосвобождаемые буферы attention-слоёв при длительных сессиях",
+      "resolution": "Добавлен garbage collection для attention cache каждые 1000 токенов",
+      "lessonsLearned": ["Мониторить RAM при нагрузочном тестировании", "Добавить лимиты на размер кэша"],
+      "resolvedAt": "2026-05-09T10:00:00.000Z",
+      "resolvedBy": "agent_demo_001"
+    },
+    {
+      "id": "inc_demo_002",
+      "title": "Telegram API rate limit",
+      "description": "Бот получил 429 Too Many Requests при массовой рассылке",
+      "severity": "medium",
+      "status": "mitigated",
+      "reportedAt": "2026-05-09T08:00:00.000Z",
+      "reportedBy": "agent_demo_002",
+      "affectedProjects": ["proj_demo_002"],
+      "affectedServices": ["telegram-api"],
+      "rootCause": "Отсутствие rate limiter при отправке уведомлений",
+      "resolution": "Добавлен exponential backoff + очередь сообщений",
+      "lessonsLearned": ["Всегда добавлять rate limiter для внешних API"],
+      "resolvedAt": "2026-05-09T12:00:00.000Z",
+      "resolvedBy": "agent_demo_002"
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill_demo_001",
+      "name": "Context Engineering",
+      "description": "Проектирование систем управления контекстом для LLM",
+      "content": "# Context Engineering\n\n## Принципы\n1. Разделяй контекст на слои\n2. Используй консолидацию\n3. Мониторь потребление токенов",
+      "tags": ["ai", "context", "architecture"],
+      "category": "ai-core",
+      "createdAt": "2026-04-01T10:00:00.000Z",
+      "updatedAt": "2026-05-01T10:00:00.000Z"
+    },
+    {
+      "id": "skill_demo_002",
+      "name": "Memory Architecture",
+      "description": "Архитектура долгосрочной памяти для AI-агентов",
+      "content": "# Memory Architecture\n\n## Типы памяти\n- Рабочая (RAM)\n- Краткосрочная (SSD)\n- Долгосрочная (Cold Storage)",
+      "tags": ["memory", "architecture"],
+      "category": "ai-core",
+      "createdAt": "2026-04-15T10:00:00.000Z",
+      "updatedAt": "2026-05-05T10:00:00.000Z"
+    },
+    {
+      "id": "skill_demo_003",
+      "name": "Telegram Bot Patterns",
+      "description": "Паттерны разработки Telegram-ботов на aiogram",
+      "content": "# Telegram Bot Patterns\n\n## FSM\n## Middleware\n## Rate Limiting",
+      "tags": ["telegram", "bot", "aiogram"],
+      "category": "telegram",
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-05-08T10:00:00.000Z"
+    },
+    {
+      "id": "skill_demo_004",
+      "name": "Server Monitoring",
+      "description": "Настройка мониторинга серверов с нуля",
+      "content": "# Server Monitoring\n\n## Стек\n- Prometheus + Grafana\n- Node Exporter\n- Custom health checks",
+      "tags": ["monitoring", "infrastructure"],
+      "category": "infrastructure",
+      "createdAt": "2026-02-01T10:00:00.000Z",
+      "updatedAt": "2026-04-20T10:00:00.000Z"
+    },
+    {
+      "id": "skill_demo_005",
+      "name": "VPN & DPI Bypass",
+      "description": "Настройка VPN с обходом DPI",
+      "content": "# VPN & DPI Bypass\n\n## Протоколы\n- VLESS + REALITY\n- XTLS\n- Shadowsocks",
+      "tags": ["vpn", "security", "dpi"],
+      "category": "infrastructure",
+      "createdAt": "2026-01-15T10:00:00.000Z",
+      "updatedAt": "2026-05-09T10:00:00.000Z"
+    },
+    {
+      "id": "skill_demo_006",
+      "name": "Content Generation",
+      "description": "Генерация контента с помощью LLM",
+      "content": "# Content Generation\n\n## Workflow\n1. Research\n2. Outline\n3. Draft\n4. Review\n5. Publish",
+      "tags": ["content", "llm", "automation"],
+      "category": "content",
+      "createdAt": "2026-03-10T10:00:00.000Z",
+      "updatedAt": "2026-04-15T10:00:00.000Z"
+    }
+  ],
+  "hooks": [
+    {
+      "id": "hook_demo_001",
+      "name": "Pre-deploy Check",
+      "description": "Проверка перед деплоем",
+      "trigger": "before_deploy",
+      "content": "run_tests && check_lint && verify_env",
+      "tags": ["deploy", "ci-cd"],
+      "enabled": true,
+      "createdAt": "2026-03-01T10:00:00.000Z",
+      "updatedAt": "2026-03-01T10:00:00.000Z"
+    },
+    {
+      "id": "hook_demo_002",
+      "name": "Incident Auto-Create",
+      "description": "Автоматическое создание инцидента при падении сервиса",
+      "trigger": "service_down",
+      "content": "create_incident --severity=high --auto-assign=ops",
+      "tags": ["incident", "automation"],
+      "enabled": true,
+      "createdAt": "2026-04-01T10:00:00.000Z",
+      "updatedAt": "2026-04-01T10:00:00.000Z"
+    },
+    {
+      "id": "hook_demo_003",
+      "name": "Daily Report",
+      "description": "Ежедневный отчёт в Telegram",
+      "trigger": "schedule:0 9 * * *",
+      "content": "generate_report --period=daily --channel=@reports",
+      "tags": ["report", "telegram", "schedule"],
+      "enabled": false,
+      "createdAt": "2026-04-15T10:00:00.000Z",
+      "updatedAt": "2026-05-01T10:00:00.000Z"
+    }
+  ],
+  "servers": [
+    {
+      "id": "srv_demo_001",
+      "name": "warsaw",
+      "host": "warsaw.example.com",
+      "port": 443,
+      "status": "online",
+      "services": ["nginx", "myrmex-control", "api"],
+      "lastChecked": "2026-05-09T20:00:00.000Z"
+    },
+    {
+      "id": "srv_demo_002",
+      "name": "florida",
+      "host": "florida.example.com",
+      "port": 443,
+      "status": "online",
+      "services": ["vpn", "syncthing"],
+      "lastChecked": "2026-05-09T20:00:00.000Z"
+    },
+    {
+      "id": "srv_demo_003",
+      "name": "singapore",
+      "host": "singapore.example.com",
+      "port": 443,
+      "status": "maintenance",
+      "services": ["vpn"],
+      "lastChecked": "2026-05-09T18:00:00.000Z"
+    }
+  ],
+  "changelog": [],
+  "auditLog": [
+    {
+      "id": "audit_demo_001",
+      "timestamp": "2026-05-10T00:00:00.000Z",
+      "entityType": "system",
+      "entityId": "demo-init",
+      "action": "demo_data_created",
+      "by": "demo-init-script",
+      "details": "Demo data initialized with sample projects, tasks, agents, incidents"
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "language": "en",
+    "refreshIntervalSec": 30,
+    "notificationsEnabled": true,
+    "custom": {
+      "demoMode": true,
+      "demoResetIntervalHours": 1
+    }
+  }
+}
