@@ -32,6 +32,23 @@
 
 <!-- ![Myrmex Control Dashboard](docs/screenshot.png) -->
 
+## 📋 Table of Contents
+
+- [Description](#-description)
+- [Why This Exists](#-why-this-exists)
+- [Features](#-features)
+- [Trade-offs](#️-trade-offs)
+- [Roadmap](#️-roadmap)
+- [Tech Stack](#-tech-stack)
+- [Quick Start](#-quick-start)
+- [Project Structure](#-project-structure)
+- [API Endpoints](#-api-endpoints)
+- [Documentation](#-documentation)
+- [Deployment](#-deployment)
+- [Design System](#-design-system)
+- [License](#-license)
+- [Author](#-author)
+
 ## 📖 Description
 
 **Myrmex Control** is a full-stack management dashboard for AI agents — a "hive control center" that gives you a single pane of glass over your entire agent infrastructure. Built with a deep navy color palette and amber accents, it combines a React 19 frontend with an Express 4 backend, using JSON files as a lightweight database.
@@ -41,6 +58,60 @@ The name *Myrmex* (μύρμηξ) is Greek for "ant" — a nod to the project's p
 Two instances are deployed:
 - **[myrmexcontrol.shtab-ai.ru](https://myrmexcontrol.shtab-ai.ru)** — production instance with full authentication
 - **[demo.shtab-ai.ru](https://demo.shtab-ai.ru)** — demo mode, no login required
+
+## 🤔 Why This Exists
+
+Managing multiple AI agents — each with their own tasks, configs, and state — quickly becomes chaotic. Existing solutions are either overkill (Kubernetes dashboards) or too simplistic (spreadsheets).
+
+Myrmex Control fills the gap: a **single-file database** dashboard that's powerful enough to be useful, simple enough to deploy in one command, and clean enough to serve as a portfolio piece.
+
+**The philosophy:**
+- **Zero external dependencies** — no PostgreSQL, no Redis, no Docker required
+- **Single source of truth** — one `myrmex.json` file holds everything
+- **Readable by humans** — open the DB in any text editor
+- **Deployable anywhere** — Node.js + one `npm start`
+
+## ⚖️ Trade-offs
+
+Every design decision has a cost. Here's what we gave up and why:
+
+| Decision | What we lose | Why it's worth it |
+|---|---|---|
+| JSON file as DB | SQL queries, concurrent writes, indexing | Zero-config, human-readable, sufficient for single-user |
+| Cookie sessions | Horizontal scaling, survive restarts | Simplicity, no JWT library, instant invalidation |
+| In-memory rate limiting | Works behind proxy, multi-instance | Zero dependencies, fast, enough for personal dashboard |
+| No SSR/SSG | SEO (not needed for a dashboard) | Simpler architecture, no framework lock-in |
+| Minimal input validation | Runtime type safety | Trade-off for v0.1 — Zod can be added in v0.2 |
+| CSS `'unsafe-inline'` in CSP | XSS protection gap | Required for Tailwind — acceptable for authenticated dashboard |
+
+## 🗺️ Roadmap
+
+### v0.1 — Foundation ✅
+- [x] Full-stack React + Express architecture
+- [x] JSON file-based database with atomic writes
+- [x] Cookie-based authentication + demo mode
+- [x] Kanban board, Projects, Library, Files, Servers
+- [x] Rate limiting, security headers, error logging
+- [x] 141 tests, 94%+ coverage
+- [x] CI/CD pipeline with quality gates
+- [x] Architecture documentation + ADR
+
+### v0.2 — Intelligence 🚧
+- [ ] WebSocket real-time updates (replace polling)
+- [ ] Health Score dashboard widget
+- [ ] Analytics page (agent productivity, task velocity)
+- [ ] Audit Log viewer (changelog browser)
+- [ ] D3.js interactive dependency graph
+- [ ] OpenRouter balance integration
+
+### v1.0 — Production 📋
+- [ ] JWT refresh token rotation
+- [ ] TOTP two-factor authentication
+- [ ] RBAC (role-based access control)
+- [ ] PWA with offline support
+- [ ] Telegram Web App integration
+- [ ] Docker Compose deployment
+- [ ] Automated demo instance deployment
 
 ## ✨ Features
 
@@ -58,8 +129,7 @@ Two instances are deployed:
 | 🔔 **Toast Notifications** | Real-time feedback for user actions |
 | 🛡️ **Rate Limiting** | 100 requests/minute per IP |
 | 🔒 **Security Headers** | HSTS, CSP, and other hardening headers |
-| 💾 **Auto-Backup** | Hourly backups of state, keeping last 10 snapshots |
-| 🐕 **Watchdog** | Background server monitoring (5-min checks) and balance alerts |
+| 🐕 **Watchdog** | Background server monitoring (5-min TCP checks) |
 
 ## 🛠 Tech Stack
 
@@ -159,8 +229,6 @@ myrmex-control/
 │   │   │   ├── servers.ts       # Server monitoring
 │   │   │   └── state.ts         # Global state read/write
 │   │   ├── auth.ts              # Password setup, login, sessions
-│   │   ├── backup.ts            # Hourly auto-backup scheduler
-│   │   ├── demo-sim.ts          # Demo mode data simulator
 │   │   ├── middleware.ts        # Rate limiter + error logger
 │   │   ├── myrmex.ts            # JSON DB read/write + audit log
 │   │   ├── watchdog.ts          # Background server monitoring
