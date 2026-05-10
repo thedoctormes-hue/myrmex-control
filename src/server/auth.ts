@@ -193,7 +193,19 @@ export function requireRole(...roles: UserRole[]) {
 // --- Routes ---
 
 // Setup (first user — becomes admin)
+// Requires SETUP_TOKEN env var to prevent unauthorized registration
 export async function setup(req: Request, res: Response) {
+  // If SETUP_TOKEN is configured, require it (check FIRST, before user count)
+  const setupToken = process.env.SETUP_TOKEN;
+  if (setupToken) {
+    const provided = req.body.setup_token || req.headers['x-setup-token'];
+    if (provided !== setupToken) {
+      console.log('[Auth] Setup failed: invalid or missing SETUP_TOKEN');
+      res.status(403).json({ error: 'Invalid setup token' });
+      return;
+    }
+  }
+
   const state = readState();
   if (state.users.length > 0) {
     res.status(403).json({ error: 'Users already exist. Use login.' });
