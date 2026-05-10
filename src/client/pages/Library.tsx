@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { MyrmexState, Skill } from '@shared/types';
 import { createSkill, deleteSkill } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
+import { t, useLang } from '../shared/lib/i18n';
 
 interface Props {
   state: MyrmexState | null;
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function Library({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<Skill['type']>('skill');
@@ -24,8 +26,8 @@ export function Library({ state, onRefresh }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError('Название обязательно'); return; }
-    if (!content.trim()) { setError('Содержимое обязательно'); return; }
+    if (!name.trim()) { setError(lang === 'ru' ? 'Название обязательно' : 'Name is required'); return; }
+    if (!content.trim()) { setError(lang === 'ru' ? 'Содержимое обязательно' : 'Content is required'); return; }
     try {
       setSaving(true);
       setError(null);
@@ -41,45 +43,54 @@ export function Library({ state, onRefresh }: Props) {
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания');
+      setError(err instanceof Error ? err.message : (lang === 'ru' ? 'Ошибка создания' : 'Create error'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Удалить?')) return;
+    const msg = lang === 'ru' ? 'Удалить?' : 'Delete?';
+    if (!confirm(msg)) return;
     try {
       await deleteSkill(id);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : (lang === 'ru' ? 'Ошибка удаления' : 'Delete error'));
     }
   };
 
-  const typeLabels: Record<string, string> = {
-    all: 'Все', skill: 'Скиллы', mask: 'Маски', hook: 'Хуки', template: 'Шаблоны',
+  const typeLabels: Record<string, Record<Lang, string>> = {
+    all:    { en: 'All',       ru: 'Все' },
+    skill:  { en: 'Skills',    ru: 'Скиллы' },
+    mask:   { en: 'Masks',     ru: 'Маски' },
+    hook:   { en: 'Hooks',     ru: 'Хуки' },
+    template: { en: 'Templates', ru: 'Шаблоны' },
   };
+
+  const lt = (key: string) => typeLabels[key]?.[lang] ?? key;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Библиотека</h1>
-          <p className="text-sm text-muted-foreground">{allSkills.length} элементов</p>
+          <h1 className="text-2xl font-bold">{t('lib.title')}</h1>
+          <p className="text-sm text-muted-foreground">
+            {allSkills.length} {lang === 'ru' ? 'элементов' : 'items'}
+          </p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
-          {showForm ? '✕' : '+ Добавить'}
+          {showForm ? '✕' : `+ ${t('lib.add')}`}
         </button>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       <div className="flex gap-2 flex-wrap">
-        {Object.entries(typeLabels).map(([key, label]) => (
+        {Object.keys(typeLabels).map(key => (
           <button
             key={key}
             onClick={() => setFilter(key)}
@@ -89,7 +100,7 @@ export function Library({ state, onRefresh }: Props) {
                 : 'bg-secondary text-secondary-foreground hover:bg-accent'
             }`}
           >
-            {label}
+            {lt(key)}
           </button>
         ))}
       </div>
@@ -100,7 +111,7 @@ export function Library({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Название *"
+              placeholder={t('lib.name')}
               className="flex-1 px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -111,22 +122,22 @@ export function Library({ state, onRefresh }: Props) {
               onChange={e => setType(e.target.value as Skill['type'])}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm"
             >
-              <option value="skill">Скилл</option>
-              <option value="mask">Маска</option>
-              <option value="hook">Хук</option>
-              <option value="template">Шаблон</option>
+              <option value="skill">{t('lib.type.skill')}</option>
+              <option value="mask">{t('lib.type.mask')}</option>
+              <option value="hook">{t('lib.type.hook')}</option>
+              <option value="template">{t('lib.type.template')}</option>
             </select>
           </div>
           <input
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Описание (опционально)"
+            placeholder={t('lib.description')}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder="Содержимое *"
+            placeholder={t('lib.content')}
             rows={6}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
             required
@@ -134,7 +145,7 @@ export function Library({ state, onRefresh }: Props) {
           <input
             value={tags}
             onChange={e => setTags(e.target.value)}
-            placeholder="Теги (через запятую)"
+            placeholder={t('lib.tags')}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
@@ -142,7 +153,7 @@ export function Library({ state, onRefresh }: Props) {
             disabled={saving || !name.trim() || !content.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50"
           >
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? (lang === 'ru' ? 'Сохранение...' : 'Saving...') : t('common.save')}
           </button>
         </form>
       )}
@@ -183,7 +194,7 @@ export function Library({ state, onRefresh }: Props) {
       {skills.length === 0 && (
         <div className="text-center py-12 text-muted-foreground">
           <div className="text-4xl mb-2">📚</div>
-          <p>Библиотека пуста</p>
+          <p>{t('lib.empty')}</p>
         </div>
       )}
     </div>

@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { login } from '../shared/lib/api';
+import { t, useLang } from '../shared/lib/i18n';
 
 interface Props {
   onLogin: (token: string) => void;
 }
 
 export function Login({ onLogin }: Props) {
+  const [lang] = useLang();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [totpCode, setTotpCode] = useState('');
@@ -13,11 +15,13 @@ export function Login({ onLogin }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const err = (ru: string, en: string) => lang === 'ru' ? ru : en;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username.trim()) { setError('Введите имя пользователя'); return; }
-    if (!password.trim()) { setError('Введите пароль'); return; }
-    if (totpRequired && !totpCode.trim()) { setError('Введите код 2FA'); return; }
+    if (!username.trim()) { setError(err('Введите имя пользователя', 'Enter username')); return; }
+    if (!password.trim()) { setError(err('Введите пароль', 'Enter password')); return; }
+    if (totpRequired && !totpCode.trim()) { setError(err('Введите код 2FA', 'Enter 2FA code')); return; }
 
     try {
       setLoading(true);
@@ -26,11 +30,11 @@ export function Login({ onLogin }: Props) {
       if (res.access_token) {
         onLogin(res.access_token);
       }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'Ошибка входа';
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : err('Ошибка входа', 'Login error');
       if (msg.includes('TOTP code required')) {
         setTotpRequired(true);
-        setError('Введите код из приложения аутентификации');
+        setError(err('Введите код из приложения аутентификации', 'Enter code from authenticator app'));
       } else {
         setError(msg);
         setPassword('');
@@ -47,34 +51,34 @@ export function Login({ onLogin }: Props) {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🐜</div>
           <h1 className="text-2xl font-bold">Myrmex Control</h1>
-          <p className="text-sm text-muted-foreground mt-1">Муравейник агентов</p>
+          <p className="text-sm text-muted-foreground mt-1">{t('auth.loginTitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium mb-1.5">Пользователь</label>
+            <label htmlFor="username" className="block text-sm font-medium mb-1.5">{t('auth.username')}</label>
             <input id="username" type="text" value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="Имя пользователя"
+              placeholder={t('auth.username')}
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus required />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1.5">Пароль</label>
+            <label htmlFor="password" className="block text-sm font-medium mb-1.5">{t('auth.password')}</label>
             <input id="password" type="password" value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Введите пароль"
+              placeholder={t('auth.password')}
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               required />
           </div>
 
           {totpRequired && (
             <div>
-              <label htmlFor="totp" className="block text-sm font-medium mb-1.5">Код 2FA</label>
+              <label htmlFor="totp" className="block text-sm font-medium mb-1.5">{t('auth.totp')}</label>
               <input id="totp" type="text" value={totpCode}
                 onChange={e => setTotpCode(e.target.value)}
-                placeholder="6 цифр из приложения"
+                placeholder={lang === 'ru' ? '6 цифр из приложения' : '6 digits from app'}
                 className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring text-center text-lg tracking-widest"
                 maxLength={6} pattern="[0-9]{6}" inputMode="numeric" />
             </div>
@@ -88,7 +92,11 @@ export function Login({ onLogin }: Props) {
 
           <button type="submit" disabled={loading || !username.trim() || !password.trim()}
             className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition">
-            {loading ? 'Вход...' : totpRequired ? 'Подтвердить' : 'Войти'}
+            {loading
+              ? (lang === 'ru' ? 'Вход...' : 'Signing in...')
+              : totpRequired
+                ? (lang === 'ru' ? 'Подтвердить' : 'Verify')
+                : t('auth.login')}
           </button>
         </form>
       </div>

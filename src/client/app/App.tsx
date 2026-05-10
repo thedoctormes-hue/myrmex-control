@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useMyrmex } from '../shared/hooks/useMyrmex';
 import { useTheme } from '../shared/hooks/useTheme';
+import { useSwipeNav } from '../shared/hooks/useSwipeNav';
 import { authStatus, logout as logoutApi, setUnauthorizedHandler, setToken, getToken } from '../shared/lib/api';
+import { initTWA, isTWA, getTWAColorScheme, getTWAUser, haptic } from '../shared/lib/twa';
 import { Sidebar } from '../shared/ui/Sidebar';
 import { BottomBar } from '../shared/ui/BottomBar';
 import { Dashboard } from '../pages/Dashboard';
@@ -32,6 +34,29 @@ export default function App() {
     needsSetup: false,
     demo: false,
   });
+
+  // Swipe navigation between main sections
+  const mainRoutes = ['/', '/projects', '/analytics', '/audit', '/graph'];
+  useSwipeNav(mainRoutes);
+
+  // Initialize Telegram Web App
+  useEffect(() => {
+    initTWA();
+
+    // If TWA provides a color scheme, apply it
+    const twaScheme = getTWAColorScheme();
+    if (twaScheme) {
+      const root = document.documentElement;
+      if (twaScheme === 'light') root.classList.remove('dark');
+      else root.classList.add('dark');
+    }
+
+    // Log TWA user for debugging
+    const twaUser = getTWAUser();
+    if (twaUser) {
+      console.log(`[TWA] Running inside Telegram as @${twaUser.username ?? twaUser.id}`);
+    }
+  }, []);
 
   // On 401 — reset auth
   useEffect(() => {

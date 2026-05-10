@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <rect width="192" height="192" rx="32" fill="#0f172a"/>
+  <g transform="translate(48, 48)">
+    <!-- Ant body -->
+    <ellipse cx="48" cy="60" rx="28" ry="20" fill="#f59e0b"/>
+    <ellipse cx="48" cy="35" rx="20" ry="18" fill="#f59e0b"/>
+    <circle cx="48" cy="14" r="12" fill="#f59e0b"/>
+    <!-- Eyes -->
+    <circle cx="42" cy="12" r="3" fill="#0f172a"/>
+    <circle cx="54" cy="12" r="3" fill="#0f172a"/>
+    <!-- Antennae -->
+    <line x1="42" y1="4" x2="36" y2="-8" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="54" y1="4" x2="60" y2="-8" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="36" cy="-8" r="2.5" fill="#fbbf24"/>
+    <circle cx="60" cy="-8" r="2.5" fill="#fbbf24"/>
+    <!-- Legs -->
+    <line x1="24" y1="55" x2="10" y2="45" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="24" y1="65" x2="8" y2="70" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="72" y1="55" x2="86" y2="45" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="72" y1="65" x2="88" y2="70" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- Mandibles -->
+    <line x1="44" y1="22" x2="38" y2="28" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+    <line x1="52" y1="22" x2="58" y2="28" stroke="#d97706" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</svg>

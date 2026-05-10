@@ -148,6 +148,42 @@ body {
 .bar-fill.yellow { background: #f59e0b; }
 .bar-fill.red { background: #ef4444; }
 
+/* Touch optimization */
+@media (hover: none) and (pointer: coarse) {
+  /* Larger tap targets on touch devices */
+  a, button, [role="button"], .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Remove hover effects on touch */
+  a:hover, button:hover {
+    opacity: 1;
+  }
+
+  /* Prevent text selection during swipe */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Prevent iOS zoom on input focus */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+
+  /* Smooth scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PWA standalone mode adjustments */
+@media all and (display-mode: standalone) {
+  body {
+    /* Extra padding for status bar on iOS */
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
 /* Animation */
 @keyframes pulse {
   0%, 100% { opacity: 1; }
