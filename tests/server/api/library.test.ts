@@ -14,6 +14,8 @@ vi.mock('../../../src/server/myrmex.js', () => ({
   readState: (...args: unknown[]) => mockReadState(...args),
   writeState: (...args: unknown[]) => mockWriteState(...args),
   createLogEntry: (...args: unknown[]) => mockCreateLogEntry(...args),
+  isDemo: () => false,
+  runAsDemo: <T>(fn: () => T) => fn(),
 }));
 
 import { router } from '../../../src/server/api/library.js';

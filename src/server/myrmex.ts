@@ -5,20 +5,39 @@
 
 import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { AsyncLocalStorage } from 'async_hooks';
 import lockfile from 'proper-lockfile';
 import type { MyrmexState, ChangelogEntry } from '@shared/types.js';
 
-const MYRMEX_PATH = join(process.cwd(), 'myrmex.json');
-const TMP_PATH = join(process.cwd(), 'myrmex.json.tmp');
+const IS_DEMO_ENV = process.env.DEMO_MODE === 'true';
+const PATH_PROD = join(process.cwd(), 'myrmex.json');
+const PATH_DEMO = join(process.cwd(), 'myrmex-demo.json');
 const MAX_CHANGELOG = 1000;
+
+// AsyncLocalStorage for per-request demo context
+const demoStorage = new AsyncLocalStorage<boolean>();
+
+// Run function in demo context
+export function runAsDemo<T>(fn: () => T): T {
+  return demoStorage.run(true, fn);
+}
+
+// --- Path resolution ---
+
+function getDataPath(): string {
+  if (IS_DEMO_ENV) return PATH_DEMO;
+  const isDemo = demoStorage.getStore();
+  return isDemo ? PATH_DEMO : PATH_PROD;
+}
 
 // --- Read ---
 
 export function readState(): MyrmexState {
-  if (!existsSync(MYRMEX_PATH)) {
+  const path = getDataPath();
+  if (!existsSync(path)) {
     return createDefaultState();
   }
-  const raw = readFileSync(MYRMEX_PATH, 'utf-8');
+  const raw = readFileSync(path, 'utf-8');
   return JSON.parse(raw) as MyrmexState;
 }
 
@@ -29,6 +48,9 @@ export async function writeState(
   source: string,
   logEntry: ChangelogEntry
 ): Promise<void> {
+  const path = getDataPath();
+  const tmpPath = path + '.tmp';
+
   // 1. Обновить мету
   state._meta.last_updated = new Date().toISOString();
   state._meta.last_updated_by = source;
@@ -41,14 +63,14 @@ export async function writeState(
   }
 
   // 3. Атомарная запись через lock
-  const release = await lockfile.lock(MYRMEX_PATH, {
+  const release = await lockfile.lock(path, {
     retries: 3,
     stale: 5000,
   });
 
   try {
-    writeFileSync(TMP_PATH, JSON.stringify(state, null, 2), 'utf-8');
-    renameSync(TMP_PATH, MYRMEX_PATH);
+    writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
+    renameSync(tmpPath, path);
   } finally {
     await release();
   }
@@ -72,6 +94,12 @@ export function createLogEntry(
     entity_id: entityId,
     diff,
   };
+}
+
+// --- Check if current context is demo ---
+
+export function isDemo(): boolean {
+  return IS_DEMO_ENV || demoStorage.getStore() === true;
 }
 
 // --- Default state ---
@@ -110,7 +138,6 @@ function createDefaultState(): MyrmexState {
     refresh_tokens: [],
   };
 
-  // Создать директории для файлообменника
   for (const dir of ['inbox', 'outbox']) {
     if (!existsSync(dir)) {
       mkdirSync(dir, { recursive: true });

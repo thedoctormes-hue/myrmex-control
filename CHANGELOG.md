@@ -47,10 +47,18 @@ React 19 + TypeScript + Vite + Tailwind CSS + Express + JWT/TOTP/RBAC.
 - Auto-detection (browser, Telegram, localStorage)
 - Language toggle in sidebar
 
+#### Demo Mode
+- One server, two modes via nginx `X-Demo-Mode` header
+- Demo data: 8 agents, 20 tasks, 5 projects, 6 library items
+- `AsyncLocalStorage` for per-request demo context (no separate process)
+- systemd timer for automatic hourly demo data reset
+- Demo banner in UI: "🎮 Демо-режим — данные сбрасываются каждый час"
+- Accessible at `demo.shtab-ai.ru`
+
 #### Infrastructure
-- nginx reverse proxy (main + TWA subdomain)
+- nginx reverse proxy (main + TWA + demo subdomains)
 - Let's Encrypt SSL certificates
-- systemd services with watchdog
+- systemd services with watchdog + timer
 - Telegram bot (@tgminiappmyrmex_bot)
 
 ---

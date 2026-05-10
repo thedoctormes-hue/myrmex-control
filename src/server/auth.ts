@@ -21,7 +21,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { TOTP, Secret } from 'otpauth';
-import { readState, writeState, createLogEntry } from './myrmex.js';
+import { readState, writeState, createLogEntry, isDemo } from './myrmex.js';
 import type { User, UserRole, RefreshToken } from '@shared/types.js';
 
 // --- Config ---
@@ -151,8 +151,11 @@ function verifyTOTP(encryptedSecret: string, code: string): boolean {
 // --- Middleware ---
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  // Demo mode — skip auth
-  if (process.env.DEMO_MODE === 'true') return next();
+  // Demo mode — inject demo user
+  if (isDemo()) {
+    (req as any).auth = { sub: 'demo-user', username: 'demo', role: 'admin' as const };
+    return next();
+  }
 
   const authHeader = req.headers.authorization;
   if (!authHeader?.startsWith('Bearer ')) {
@@ -348,7 +351,7 @@ export function logout(req: Request, res: Response) {
 
 // Auth status
 export function authStatus(req: Request, res: Response) {
-  const isDemo = process.env.DEMO_MODE === 'true';
+  const demo = isDemo();
   const state = readState();
   const hasUsers = state.users.length > 0;
 
@@ -368,11 +371,11 @@ export function authStatus(req: Request, res: Response) {
   }
 
   res.json({
-    authenticated: isDemo ? true : authenticated,
-    needsAuth: hasUsers && !isDemo,
-    needsSetup: !hasUsers && !isDemo,
-    demo: isDemo,
-    user,
+    authenticated: demo ? true : authenticated,
+    needsAuth: hasUsers && !demo,
+    needsSetup: !hasUsers && !demo,
+    demo,
+    user: demo ? { id: 'demo-user', username: 'demo', role: 'admin' as const } : user,
   });
 }
 

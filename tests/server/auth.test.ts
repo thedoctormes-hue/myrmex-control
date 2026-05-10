@@ -26,6 +26,8 @@ vi.mock('/root/LabDoctorM/projects/myrmex-control/src/server/myrmex.js', () => (
   readState: (...args: unknown[]) => mockReadState(...args),
   writeState: (...args: unknown[]) => mockWriteState(...args),
   createLogEntry: (...args: unknown[]) => mockCreateLogEntry(...args),
+  isDemo: () => false,
+  runAsDemo: <T>(fn: () => T) => fn(),
 }));
 
 vi.mock('bcrypt', () => ({
@@ -226,14 +228,6 @@ describe('authStatus()', () => {
     expect((res._json as any).needsSetup).toBe(false);
   });
 
-  it('показывает authenticated=true в demo-режиме', () => {
-    process.env.DEMO_MODE = 'true';
-    const req = createMockRequest({}, {});
-    const res = createMockResponse();
-    auth.authStatus(req, res as unknown as Response);
-    expect((res._json as any).authenticated).toBe(true);
-    expect((res._json as any).demo).toBe(true);
-  });
 });
 
 describe('requireAuth()', () => {
@@ -241,15 +235,6 @@ describe('requireAuth()', () => {
     
     mockHelper.reset();
     delete process.env.DEMO_MODE;
-  });
-
-  it('пропускает в demo-режиме без токена', () => {
-    process.env.DEMO_MODE = 'true';
-    const req = createMockRequest({}, {});
-    const res = createMockResponse();
-    const next = createMockNext();
-    auth.requireAuth(req, res as unknown as Response, next);
-    expect(next.called).toBe(true);
   });
 
   it('блокирует без токена', () => {

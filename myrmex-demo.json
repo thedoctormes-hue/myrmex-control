@@ -1,0 +1,291 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "last_updated": "2026-05-10T22:00:00.000Z",
+    "last_updated_by": "demo-seed",
+    "change_count": 0
+  },
+  "workspace": {
+    "name": "Myrmex Control — Demo",
+    "description": "🐜 Hive Control Center — AI Agent Infrastructure Dashboard",
+    "owner": "demo",
+    "created_at": "2026-05-10T22:00:00.000Z"
+  },
+  "projects": [
+    {
+      "id": "proj-aurora",
+      "name": "Project Aurora",
+      "description": "AI-powered code review automation pipeline",
+      "status": "active",
+      "color": "#6366f1",
+      "created_at": "2026-04-15T10:00:00.000Z",
+      "updated_at": "2026-05-10T18:00:00.000Z"
+    },
+    {
+      "id": "proj-nexus",
+      "name": "Nexus Gateway",
+      "description": "Multi-model LLM routing and load balancing",
+      "status": "active",
+      "color": "#06b6d4",
+      "created_at": "2026-04-20T14:00:00.000Z",
+      "updated_at": "2026-05-09T12:00:00.000Z"
+    },
+    {
+      "id": "proj-forge",
+      "name": "Data Forge",
+      "description": "ETL pipeline for training data preparation",
+      "status": "paused",
+      "color": "#f59e0b",
+      "created_at": "2026-03-01T09:00:00.000Z",
+      "updated_at": "2026-05-01T16:00:00.000Z"
+    },
+    {
+      "id": "proj-hermes",
+      "name": "Hermes Messenger",
+      "description": "Cross-platform notification and alerting system",
+      "status": "active",
+      "color": "#10b981",
+      "created_at": "2026-05-01T08:00:00.000Z",
+      "updated_at": "2026-05-10T20:00:00.000Z"
+    },
+    {
+      "id": "proj-vault",
+      "name": "Vault Keeper",
+      "description": "Secrets management and rotation service",
+      "status": "completed",
+      "color": "#8b5cf6",
+      "created_at": "2026-02-10T11:00:00.000Z",
+      "updated_at": "2026-04-28T15:00:00.000Z"
+    }
+  ],
+  "agents": [
+    {
+      "id": "agent-eve",
+      "name": "Eve",
+      "role": "orchestrator",
+      "status": "online",
+      "project_id": "proj-aurora",
+      "last_heartbeat": "2026-05-10T22:00:00.000Z",
+      "tasks_completed": 142,
+      "capabilities": ["task-dispatch", "monitoring", "reporting"],
+      "avatar": "🤖"
+    },
+    {
+      "id": "agent-odin",
+      "name": "Odin",
+      "role": "worker",
+      "status": "working",
+      "project_id": "proj-aurora",
+      "last_heartbeat": "2026-05-10T21:58:00.000Z",
+      "tasks_completed": 89,
+      "capabilities": ["code-analysis", "linting", "security-scan"],
+      "avatar": "⚡"
+    },
+    {
+      "id": "agent-freya",
+      "name": "Freya",
+      "role": "worker",
+      "status": "online",
+      "project_id": "proj-nexus",
+      "last_heartbeat": "2026-05-10T21:59:00.000Z",
+      "tasks_completed": 215,
+      "capabilities": ["llm-routing", "load-balancing", "caching"],
+      "avatar": "🔮"
+    },
+    {
+      "id": "agent-tyr",
+      "name": "Tyr",
+      "role": "worker",
+      "status": "working",
+      "project_id": "proj-nexus",
+      "last_heartbeat": "2026-05-10T21:55:00.000Z",
+      "tasks_completed": 67,
+      "capabilities": ["api-gateway", "rate-limiting", "auth"],
+      "avatar": "🛡️"
+    },
+    {
+      "id": "agent-loki",
+      "name": "Loki",
+      "role": "analyst",
+      "status": "idle",
+      "project_id": "proj-forge",
+      "last_heartbeat": "2026-05-10T20:30:00.000Z",
+      "tasks_completed": 312,
+      "capabilities": ["data-validation", "schema-detection", "quality-score"],
+      "avatar": "🧪"
+    },
+    {
+      "id": "agent-hermes",
+      "name": "Hermes",
+      "role": "notifier",
+      "status": "online",
+      "project_id": "proj-hermes",
+      "last_heartbeat": "2026-05-10T22:00:00.000Z",
+      "tasks_completed": 1024,
+      "capabilities": ["telegram", "slack", "email", "webhook"],
+      "avatar": "📡"
+    },
+    {
+      "id": "agent-heimdall",
+      "name": "Heimdall",
+      "role": "security",
+      "status": "online",
+      "project_id": "proj-vault",
+      "last_heartbeat": "2026-05-10T21:59:00.000Z",
+      "tasks_completed": 56,
+      "capabilities": ["secret-rotation", "audit-log", "access-control"],
+      "avatar": "🔐"
+    },
+    {
+      "id": "agent-bragi",
+      "name": "Bragi",
+      "role": "documenter",
+      "status": "offline",
+      "project_id": null,
+      "last_heartbeat": "2026-05-10T15:00:00.000Z",
+      "tasks_completed": 78,
+      "capabilities": ["doc-generation", "changelog", "api-docs"],
+      "avatar": "📝"
+    }
+  ],
+  "tasks": [
+    { "id": "task-001", "title": "Implement JWT refresh rotation", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-08T10:00:00.000Z", "updated_at": "2026-05-09T14:00:00.000Z" },
+    { "id": "task-002", "title": "Add TOTP 2FA support", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-08T11:00:00.000Z", "updated_at": "2026-05-09T16:00:00.000Z" },
+    { "id": "task-003", "title": "Build analytics dashboard", "status": "in_progress", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-09T09:00:00.000Z", "updated_at": "2026-05-10T18:00:00.000Z" },
+    { "id": "task-004", "title": "Integrate Chart.js visualizations", "status": "in_progress", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-09T10:00:00.000Z", "updated_at": "2026-05-10T17:00:00.000Z" },
+    { "id": "task-005", "title": "Setup LLM routing table", "status": "done", "priority": "high", "project_id": "proj-nexus", "agent_id": "agent-freya", "created_at": "2026-05-07T08:00:00.000Z", "updated_at": "2026-05-08T12:00:00.000Z" },
+    { "id": "task-006", "title": "Implement rate limiting per model", "status": "review", "priority": "high", "project_id": "proj-nexus", "agent_id": "agent-tyr", "created_at": "2026-05-08T14:00:00.000Z", "updated_at": "2026-05-10T11:00:00.000Z" },
+    { "id": "task-007", "title": "Add fallback chain for model failures", "status": "todo", "priority": "medium", "project_id": "proj-nexus", "agent_id": null, "created_at": "2026-05-10T09:00:00.000Z", "updated_at": "2026-05-10T09:00:00.000Z" },
+    { "id": "task-008", "title": "Design data validation schema", "status": "done", "priority": "high", "project_id": "proj-forge", "agent_id": "agent-loki", "created_at": "2026-04-28T10:00:00.000Z", "updated_at": "2026-04-30T15:00:00.000Z" },
+    { "id": "task-009", "title": "Build quality scoring algorithm", "status": "backlog", "priority": "low", "project_id": "proj-forge", "agent_id": null, "created_at": "2026-05-01T08:00:00.000Z", "updated_at": "2026-05-01T08:00:00.000Z" },
+    { "id": "task-010", "title": "Telegram bot integration", "status": "done", "priority": "high", "project_id": "proj-hermes", "agent_id": "agent-hermes", "created_at": "2026-05-05T12:00:00.000Z", "updated_at": "2026-05-06T18:00:00.000Z" },
+    { "id": "task-011", "title": "Slack webhook receiver", "status": "in_progress", "priority": "medium", "project_id": "proj-hermes", "agent_id": "agent-hermes", "created_at": "2026-05-07T09:00:00.000Z", "updated_at": "2026-05-10T20:00:00.000Z" },
+    { "id": "task-012", "title": "Email template engine", "status": "todo", "priority": "low", "project_id": "proj-hermes", "agent_id": null, "created_at": "2026-05-08T14:00:00.000Z", "updated_at": "2026-05-08T14:00:00.000Z" },
+    { "id": "task-013", "title": "Secret rotation scheduler", "status": "done", "priority": "critical", "project_id": "proj-vault", "agent_id": "agent-heimdall", "created_at": "2026-04-20T08:00:00.000Z", "updated_at": "2026-04-25T10:00:00.000Z" },
+    { "id": "task-014", "title": "Audit log export to S3", "status": "review", "priority": "medium", "project_id": "proj-vault", "agent_id": "agent-heimdall", "created_at": "2026-05-02T11:00:00.000Z", "updated_at": "2026-05-10T09:00:00.000Z" },
+    { "id": "task-015", "title": "PWA manifest and service worker", "status": "done", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-10T08:00:00.000Z", "updated_at": "2026-05-10T21:00:00.000Z" },
+    { "id": "task-016", "title": "Telegram Web App integration", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-10T10:00:00.000Z", "updated_at": "2026-05-10T22:00:00.000Z" },
+    { "id": "task-017", "title": "i18n EN/RU support", "status": "done", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-10T14:00:00.000Z", "updated_at": "2026-05-10T22:00:00.000Z" },
+    { "id": "task-018", "title": "Docker Compose setup", "status": "todo", "priority": "low", "project_id": "proj-aurora", "agent_id": null, "created_at": "2026-05-10T16:00:00.000Z", "updated_at": "2026-05-10T16:00:00.000Z" },
+    { "id": "task-019", "title": "RBAC middleware testing", "status": "backlog", "priority": "medium", "project_id": "proj-aurora", "agent_id": null, "created_at": "2026-05-10T17:00:00.000Z", "updated_at": "2026-05-10T17:00:00.000Z" },
+    { "id": "task-020", "title": "Performance benchmarking suite", "status": "backlog", "priority": "low", "project_id": "proj-nexus", "agent_id": null, "created_at": "2026-05-10T18:00:00.000Z", "updated_at": "2026-05-10T18:00:00.000Z" }
+  ],
+  "library": [
+    {
+      "id": "lib-001",
+      "name": "SKILL.md Template",
+      "type": "template",
+      "description": "Standard template for creating new agent skills",
+      "content": "# Skill: {{name}}\n\n## Purpose\n{{description}}\n\n## Instructions\n1. Step one\n2. Step two\n3. Step three\n\n## Examples\n```\nExample usage here\n```",
+      "tags": ["template", "skill", "documentation"],
+      "source": "demo",
+      "created_at": "2026-05-01T10:00:00.000Z"
+    },
+    {
+      "id": "lib-002",
+      "name": "Git Commit Hook",
+      "type": "hook",
+      "description": "Pre-commit hook for conventional commits",
+      "content": "#!/bin/bash\n# Conventional commit validator\ncommit_msg=$(cat $1)\npattern=\"^(feat|fix|docs|style|refactor|test|chore|ci|build)(\\(.+\\))?: .{1,72}\"\nif ! [[ $commit_msg =~ $pattern ]]; then\n  echo \"❌ Commit message must follow conventional commits\"\n  exit 1\nfi\necho \"✅ Commit message valid\"",
+      "tags": ["git", "hook", "pre-commit", "conventional-commits"],
+      "source": "demo",
+      "created_at": "2026-05-02T14:00:00.000Z"
+    },
+    {
+      "id": "lib-003",
+      "name": "API Response Mask",
+      "type": "mask",
+      "description": "Standard API response wrapper for consistent output",
+      "content": "{\n  \"success\": true,\n  \"data\": {},\n  \"meta\": {\n    \"timestamp\": \"{{iso_date}}\",\n    \"version\": \"1.0.0\",\n    \"request_id\": \"{{uuid}}\"\n  },\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 20,\n    \"total\": 0\n  }\n}",
+      "tags": ["api", "mask", "response", "json"],
+      "source": "demo",
+      "created_at": "2026-05-03T09:00:00.000Z"
+    },
+    {
+      "id": "lib-004",
+      "name": "Docker Healthcheck",
+      "type": "skill",
+      "description": "Healthcheck script for Docker containers",
+      "content": "#!/bin/sh\n# Docker container healthcheck\nset -e\n\n# Check if process is running\nif ! pgrep -x \"node\" > /dev/null; then\n  echo \"Process not running\"\n  exit 1\nfi\n\n# Check HTTP endpoint\nif ! curl -sf http://localhost:${PORT}/api/health > /dev/null; then\n  echo \"Health endpoint not responding\"\n  exit 1\nfi\n\necho \"✅ Container healthy\"\nexit 0",
+      "tags": ["docker", "healthcheck", "devops", "monitoring"],
+      "source": "demo",
+      "created_at": "2026-05-04T11:00:00.000Z"
+    },
+    {
+      "id": "lib-005",
+      "name": "JWT Auth Middleware",
+      "type": "skill",
+      "description": "Express middleware for JWT verification with refresh rotation",
+      "content": "import jwt from 'jsonwebtoken';\n\nexport function requireAuth(req, res, next) {\n  const authHeader = req.headers.authorization;\n  if (!authHeader?.startsWith('Bearer ')) {\n    return res.status(401).json({ error: 'Missing token' });\n  }\n  try {\n    const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);\n    req.auth = payload;\n    next();\n  } catch {\n    res.status(401).json({ error: 'Invalid token' });\n  }\n}",
+      "tags": ["jwt", "auth", "middleware", "express", "security"],
+      "source": "demo",
+      "created_at": "2026-05-05T16:00:00.000Z"
+    },
+    {
+      "id": "lib-006",
+      "name": "React Error Boundary",
+      "type": "template",
+      "description": "Error boundary component for React applications",
+      "content": "import { Component } from 'react';\n\nexport class ErrorBoundary extends Component {\n  state = { hasError: false, error: null };\n\n  static getDerivedStateFromError(error) {\n    return { hasError: true, error };\n  }\n\n  componentDidCatch(error, info) {\n    console.error('ErrorBoundary:', error, info);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return this.props.fallback || (\n        <div className=\"error-fallback\">\n          <h2>Something went wrong</h2>\n          <button onClick={() => this.setState({ hasError: false })}>\n            Try again\n          </button>\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}",
+      "tags": ["react", "error-boundary", "component", "typescript"],
+      "source": "demo",
+      "created_at": "2026-05-06T13:00:00.000Z"
+    }
+  ],
+  "files": [],
+  "servers": [
+    {
+      "id": "srv-main",
+      "name": "Main Server",
+      "host": "185.138.90.150",
+      "port": 443,
+      "status": "online",
+      "services": ["myrmex-control", "nginx", "postgresql"],
+      "last_check": "2026-05-10T22:00:00.000Z"
+    },
+    {
+      "id": "srv-demo",
+      "name": "Demo Server",
+      "host": "185.138.90.150",
+      "port": 443,
+      "status": "online",
+      "services": ["myrmex-demo", "nginx"],
+      "last_check": "2026-05-10T22:00:00.000Z"
+    }
+  ],
+  "settings": {
+    "theme": "dark",
+    "language": "en",
+    "refresh_interval_sec": 30,
+    "notifications_enabled": true,
+    "custom": {}
+  },
+  "mcp_servers": [
+    {
+      "id": "mcp-filesystem",
+      "name": "Filesystem",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+      "status": "connected"
+    },
+    {
+      "id": "mcp-github",
+      "name": "GitHub",
+      "type": "http",
+      "url": "https://api.github.com/mcp",
+      "status": "connected"
+    },
+    {
+      "id": "mcp-postgres",
+      "name": "PostgreSQL",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "status": "disconnected"
+    }
+  ],
+  "changelog": [],
+  "users": [],
+  "refresh_tokens": []
+}

@@ -20,6 +20,7 @@ import { router as healthRouter } from './api/health.js';
 import { router as auditRouter } from './api/audit.js';
 import { router as analyticsRouter } from './api/analytics.js';
 import { startWatchdog, stopWatchdog } from './watchdog.js';
+import { runAsDemo } from './myrmex.js';
 // import { startBackupScheduler, stopBackupScheduler } from './backup.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -37,6 +38,15 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(rateLimit);
+
+// Demo mode middleware — if nginx sets X-Demo-Mode header, run in demo context
+app.use((req, _res, next) => {
+  const demoHeader = req.headers['x-demo-mode'];
+  if (demoHeader === 'true' || demoHeader === '1') {
+    return runAsDemo(() => next());
+  }
+  next();
+});
 
 // Auth routes (публичные)
 app.post('/api/auth/setup', setup);
