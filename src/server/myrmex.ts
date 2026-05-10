@@ -6,7 +6,6 @@
 import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { AsyncLocalStorage } from 'async_hooks';
-import lockfile from 'proper-lockfile';
 import type { MyrmexState, ChangelogEntry } from '@shared/types.js';
 
 const IS_DEMO_ENV = process.env.DEMO_MODE === 'true';
@@ -41,13 +40,13 @@ export function readState(): MyrmexState {
   return JSON.parse(raw) as MyrmexState;
 }
 
-// --- Write (атомарная + lock) ---
+// --- Write (атомарная через tmp + rename) ---
 
-export async function writeState(
+export function writeState(
   state: MyrmexState,
   source: string,
   logEntry: ChangelogEntry
-): Promise<void> {
+): void {
   const path = getDataPath();
   const tmpPath = path + '.tmp';
 
@@ -62,18 +61,9 @@ export async function writeState(
     state.changelog.length = MAX_CHANGELOG;
   }
 
-  // 3. Атомарная запись через lock
-  const release = await lockfile.lock(path, {
-    retries: 3,
-    stale: 5000,
-  });
-
-  try {
-    writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
-    renameSync(tmpPath, path);
-  } finally {
-    await release();
-  }
+  // 3. Атомарная запись: write to temp, then rename
+  writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
+  renameSync(tmpPath, path);
 }
 
 // --- Changelog helper ---
