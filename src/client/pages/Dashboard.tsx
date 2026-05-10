@@ -66,7 +66,7 @@ export function Dashboard({ state, onRefresh }: Props) {
   );
 }
 
-function StatCard({ label, value, sub, icon, color }: {
+function StatCard({ label, value, sub, icon: _icon, color }: {
   label: string; value: string | number; sub?: string; icon: string; color: string;
 }) {
   return (

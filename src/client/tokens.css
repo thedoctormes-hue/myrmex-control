@@ -1,0 +1,27 @@
+/* Myrmex Design System - Shared Tokens */
+:root {
+  /* Подход из demo: тёмные карточки с контрастом */
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 217.2 23% 18.8%; /* #1e293b из demo */
+  --card-foreground: 210 40% 98%;
+  --primary: 160 84% 39.4%; /* emerald #10b981 */
+  --primary-foreground: 222.2 84% 4.9%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 160 84% 39.4%;
+  --radius: 0.5rem;
+}
+
+/* Header gradient как в demo */
+.header-gradient {
+  background: linear-gradient(135deg, #181f34, #151c28);
+}
+
+/* JetBrains Mono шрифт */

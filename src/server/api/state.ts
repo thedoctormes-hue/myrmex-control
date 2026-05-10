@@ -8,7 +8,7 @@ router.get('/', (_req: Request, res: Response) => {
   try {
     const state = readState();
     res.json(state);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read myrmex state' });
   }
 });

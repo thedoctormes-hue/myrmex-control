@@ -27,6 +27,9 @@ myrmex.json
 .DS_Store
 Thumbs.db
 
+# Coverage
+coverage/
+
 # IDE
 .idea/
 .vscode/

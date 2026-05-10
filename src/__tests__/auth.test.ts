@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { writeFileSync, existsSync, rmSync } from 'fs';
 import { join } from 'path';
 import bcrypt from 'bcrypt';
 

@@ -1,3 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Header gradient like demo */
+.header-gradient {
+  background: linear-gradient(135deg, hsl(226 36% 15%), hsl(217 32% 12%));
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -5,9 +16,9 @@
 :root {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
+  --card: 217.2 23% 18.8%;
   --card-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
+  --primary: 160 84% 39.4%;
   --primary-foreground: 222.2 84% 4.9%;
   --secondary: 217.2 32.6% 17.5%;
   --secondary-foreground: 210 40% 98%;
@@ -19,7 +30,7 @@
   --destructive-foreground: 210 40% 98%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
+  --ring: 160 84% 39.4%;
   --radius: 0.5rem;
 }
 
@@ -73,3 +84,74 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground));
 }
+
+/* Card styles from demo */
+.card {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.card-header {
+  margin-bottom: 0.75rem;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: hsl(var(--primary));
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 0.85rem;
+}
+
+.stat:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  color: hsl(var(--muted-foreground));
+}
+
+.stat-value {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.stat-value.online { color: hsl(var(--primary)); }
+.stat-value.warn { color: #f59e0b; }
+.stat-value.offline { color: #ef4444; }
+
+/* Progress bar */
+.bar {
+  height: 6px;
+  background: hsl(var(--border));
+  border-radius: 3px;
+  margin-top: 4px;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+
+.bar-fill.green { background: hsl(var(--primary)); }
+.bar-fill.yellow { background: #f59e0b; }
+.bar-fill.red { background: #ef4444; }
+
+/* Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+/* UI v1778403188 */
+/* Shared tokens 1778404005  */

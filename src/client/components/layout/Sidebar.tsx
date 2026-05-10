@@ -18,10 +18,10 @@ const nav = [
 
 export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
   return (
-    <aside className="hidden md:flex flex-col w-56 bg-card border-r border-border">
+    <aside className="hidden md:flex flex-col w-56 header-gradient text-primary-foreground border-r border-border">
       {/* Logo */}
       <div className="p-4 border-b border-border">
-        <h1 className="text-lg font-bold flex items-center gap-2">
+        <h1 className="text-lg font-bold font-mono flex items-center gap-2">
           <span>🐜</span>
           <span>Myrmex</span>
         </h1>

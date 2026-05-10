@@ -71,16 +71,11 @@ function isValidSession(token: string): boolean {
   return true;
 }
 
-// Constant-time comparison
-function safeCompare(a: string, b: string): boolean {
-  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-}
-
 // --- Middleware ---
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   // Demo mode - skip auth
-  try { if (existsSync(join(process.cwd(), '.demo'))) return next(); } catch {}
+  if (existsSync(join(process.cwd(), '.demo'))) return next();
 
   const passwordHash = getPassword();
   if (!passwordHash) return next();

@@ -31,7 +31,7 @@ router.get('/', (req: Request, res: Response) => {
       });
 
     res.json(files);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to list files' });
   }
 });

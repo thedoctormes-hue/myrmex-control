@@ -9,7 +9,7 @@ router.get('/', (_req: Request, res: Response) => {
   try {
     const state = readState();
     res.json(state.projects);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read projects' });
   }
 });
@@ -21,7 +21,7 @@ router.get('/:id', (req: Request, res: Response) => {
     const project = state.projects.find(p => p.id === req.params.id);
     if (!project) return res.status(404).json({ error: 'Project not found' });
     res.json(project);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read project' });
   }
 });
@@ -49,7 +49,7 @@ router.post('/', async (req: Request, res: Response) => {
     ));
 
     res.status(201).json(project);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create project' });
   }
 });
@@ -75,7 +75,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update project' });
   }
 });
@@ -93,7 +93,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete project' });
   }
 });
