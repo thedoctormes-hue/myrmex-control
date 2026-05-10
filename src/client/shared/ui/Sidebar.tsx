@@ -75,6 +75,9 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
             v{state._meta.version} · {state._meta.change_count} изменений
           </p>
         )}
+        <p className="text-[10px] text-muted-foreground px-3">
+          🔐 JWT + TOTP + RBAC
+        </p>
       </div>
     </aside>
   );

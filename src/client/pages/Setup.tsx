@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { setup } from '../shared/lib/api';
 
 interface Props {
-  onSetup: () => void;
+  onSetup: (token: string) => void;
 }
 
 export function Setup({ onSetup }: Props) {
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -13,13 +14,16 @@ export function Setup({ onSetup }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 4) { setError('Минимум 4 символа'); return; }
+    if (!username.trim() || username.length < 3) { setError('Имя минимум 3 символа'); return; }
+    if (password.length < 8) { setError('Пароль минимум 8 символов'); return; }
     if (password !== confirm) { setError('Пароли не совпадают'); return; }
     try {
       setLoading(true);
       setError(null);
-      await setup(password);
-      onSetup();
+      const res = await setup(username, password);
+      if (res.access_token) {
+        onSetup(res.access_token);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка установки');
     } finally {
@@ -38,40 +42,34 @@ export function Setup({ onSetup }: Props) {
 
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4">
           <p className="text-sm text-muted-foreground">
-            Придумайте пароль для доступа к центру управления. Он будет сохранён и потребуется при каждом входе.
+            Создайте учётную запись администратора. Она будет использоваться для входа в центр управления.
           </p>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-              Пароль
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Минимум 4 символа"
+            <label htmlFor="username" className="block text-sm font-medium mb-1.5">Имя пользователя</label>
+            <input id="username" type="text" value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="admin"
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              autoFocus
-              required
-              minLength={4}
-            />
+              autoFocus required minLength={3} />
           </div>
 
           <div>
-            <label htmlFor="confirm" className="block text-sm font-medium mb-1.5">
-              Подтверждение
-            </label>
-            <input
-              id="confirm"
-              type="password"
-              value={confirm}
+            <label htmlFor="password" className="block text-sm font-medium mb-1.5">Пароль</label>
+            <input id="password" type="password" value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Минимум 8 символов"
+              className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              required minLength={8} />
+          </div>
+
+          <div>
+            <label htmlFor="confirm" className="block text-sm font-medium mb-1.5">Подтверждение</label>
+            <input id="confirm" type="password" value={confirm}
               onChange={e => setConfirm(e.target.value)}
               placeholder="Повторите пароль"
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              required
-              minLength={4}
-            />
+              required minLength={8} />
           </div>
 
           {error && (
@@ -80,12 +78,9 @@ export function Setup({ onSetup }: Props) {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading || !password || !confirm}
-            className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition"
-          >
-            {loading ? 'Установка...' : 'Установить пароль'}
+          <button type="submit" disabled={loading || !username || !password || !confirm}
+            className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition">
+            {loading ? 'Создание...' : 'Создать администратора'}
           </button>
         </form>
       </div>

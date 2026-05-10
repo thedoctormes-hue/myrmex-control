@@ -1,16 +1,30 @@
-// Unit-тесты для requireAuth middleware
-// Отдельный файл чтобы vi.mock на уровне модуля не конфликтовал с другими тестами
+// ============================================================
+// Unit-тесты для requireAuth + requireRole middleware
 // ============================================================
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response } from 'express';
+import type { MyrmexState } from '@shared/types.js';
 
-// Мокируем fs ДО импорта auth
-const mockExistsSync = vi.fn().mockReturnValue(false);
-vi.mock('fs', () => ({
-  readFileSync: vi.fn(),
-  writeFileSync: vi.fn(),
-  existsSync: (...args: any[]) => mockExistsSync(...args),
+function createEmptyState(): MyrmexState {
+  const now = new Date().toISOString();
+  return {
+    _meta: { version: '0.1.0', last_updated: now, last_updated_by: 'test', change_count: 0 },
+    workspace: { name: 'Test', description: '', owner: 'tester', created_at: now },
+    projects: [], tasks: [], skills: [], files: [], servers: [],
+    settings: { theme: 'dark', language: 'ru', auto_save: true, demo_mode: false, sidebar_collapsed: false },
+    mcp_servers: [], changelog: [], users: [], refresh_tokens: [],
+  };
+}
+
+const mockReadState = vi.fn();
+const mockWriteState = vi.fn();
+const mockCreateLogEntry = vi.fn();
+
+vi.mock('/root/LabDoctorM/projects/myrmex-control/src/server/myrmex.js', () => ({
+  readState: (...args: unknown[]) => mockReadState(...args),
+  writeState: (...args: unknown[]) => mockWriteState(...args),
+  createLogEntry: (...args: unknown[]) => mockCreateLogEntry(...args),
 }));
 
 vi.mock('bcrypt', () => ({
@@ -22,24 +36,29 @@ vi.mock('bcrypt', () => ({
   compare: vi.fn().mockResolvedValue(true),
 }));
 
-import * as auth from '../../src/server/auth.js';
+vi.mock('otpauth', () => ({
+  TOTP: class FakeTOTP { validate() { return 0; } },
+  Secret: { fromBase32: vi.fn() },
+}));
 
-// --- Хелперы ---
+import * as auth from '../../../src/server/auth.js';
 
-function createMockRequest(body: Record<string, unknown> = {}, cookies: Record<string, string> = {}): Request {
-  return {
-    body,
-    cookies,
-    ip: '127.0.0.1',
-    url: '/api/test',
-    method: 'GET',
-  } as unknown as Request;
+let mockState = createEmptyState();
+
+function resetMockState() {
+  mockState = createEmptyState();
+  mockReadState.mockImplementation(() => mockState);
+  mockWriteState.mockImplementation((s: MyrmexState) => { mockState = s; });
+  mockCreateLogEntry.mockImplementation(() => ({ timestamp: new Date().toISOString(), actor: 'test', action: 'test', entity_type: 'test', entity_id: 'test', diff: {} }));
+}
+
+function createMockRequest(body: Record<string, unknown> = {}, cookies: Record<string, string> = {}, headers: Record<string, string> = {}): Request {
+  return { body, cookies, headers, ip: '127.0.0.1', url: '/api/test', method: 'GET' } as unknown as Request;
 }
 
 function createMockResponse(): Response & { _json: unknown; _status: number } {
   const res: any = {
-    _json: null,
-    _status: 200,
+    _json: null, _status: 200,
     status(code: number) { res._status = code; return res; },
     json(data: unknown) { res._json = data; return res; },
     cookie() { return res; },
@@ -54,79 +73,86 @@ function createMockNext(): (() => void) & { called: boolean } {
   return fn;
 }
 
-// --- Tests ---
-
-describe('requireAuth()', () => {
+describe('requireAuth() middleware', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    delete process.env.MYRMEX_PASSWORD_HASH;
-    mockExistsSync.mockReturnValue(false);
-  });
-
-  it('пропускает если пароль не установлен (setup mode)', () => {
-    // getPassword() вернёт null т.к. MYRMEX_PASSWORD_HASH не установлен
-    // и existsSync возвращает false (нет .env с хешем)
-    const req = createMockRequest({}, {});
-    const res = createMockResponse();
-    const next = createMockNext();
-
-    auth.requireAuth(req, res as unknown as Response, next);
-
-    expect(next.called).toBe(true);
-  });
-
-  it('блокирует без сессии если пароль установлен', () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
-
-    const req = createMockRequest({}, {});
-    const res = createMockResponse();
-    const next = createMockNext();
-
-    auth.requireAuth(req, res as unknown as Response, next);
-
-    expect(next.called).toBe(false);
-    expect(res._status).toBe(401);
-    expect(res._json).toEqual({ error: 'Unauthorized', login: true });
+    
+    resetMockState();
+    delete process.env.DEMO_MODE;
   });
 
   it('пропускает в demo-режиме', () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
-
-    // Переопределяем existsSync чтобы .demo файл "существовал"
-    mockExistsSync.mockImplementation((path: any) => {
-      if (typeof path === 'string' && path.endsWith('.demo')) return true;
-      return false;
-    });
-
-    const req = createMockRequest({}, {});
+    process.env.DEMO_MODE = 'true';
+    const req = createMockRequest();
     const res = createMockResponse();
     const next = createMockNext();
-
     auth.requireAuth(req, res as unknown as Response, next);
-
     expect(next.called).toBe(true);
   });
 
-  it('пропускает с валидной сессией', () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
+  it('блокирует без Authorization header', () => {
+    const req = createMockRequest();
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+    expect((res._json as any).error).toBe('Missing access token');
+  });
 
-    // Логинимся чтобы создать сессию
-    const loginReq = createMockRequest({ password: 'test1234' });
-    const loginRes = createMockResponse();
-    auth.login(loginReq, loginRes as unknown as Response);
+  it('блокирует с невалидным токеном', () => {
+    const req = createMockRequest({}, {}, { authorization: 'Bearer invalid' });
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+  });
 
-    // Извлекаем токен из куки
-    const cookieCall = (loginRes as any).cookieCalls?.[0];
-    // К сожалению login вызывает res.cookie() который мы не мокаем полностью
-    // Вместо этого — проверим что без куки → 401 (уже проверено выше)
-    // А с невалидной кукой тоже → 401
-    const req = createMockRequest({}, { myrmex_session: 'invalid-token' });
+  it('пропускает с валидным JWT', async () => {
+    const setupReq = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const setupRes = createMockResponse();
+    await auth.setup(setupReq, setupRes as unknown as Response);
+    const token = (setupRes._json as any).access_token;
+
+    const req = createMockRequest({}, {}, { authorization: `Bearer ${token}` });
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(true);
+  });
+});
+
+describe('requireRole() middleware', () => {
+  beforeEach(() => {
+    
+    resetMockState();
+    delete process.env.DEMO_MODE;
+  });
+
+  it('блокирует без аутентификации', () => {
+    const middleware = auth.requireRole('admin');
+    const req = createMockRequest() as any;
+    const res = createMockResponse();
+    const next = createMockNext();
+    middleware(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+  });
+
+  it('admin имеет доступ ко всему', async () => {
+    const setupReq = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const setupRes = createMockResponse();
+    await auth.setup(setupReq, setupRes as unknown as Response);
+    const token = (setupRes._json as any).access_token;
+
+    const middleware = auth.requireRole('operator');
+    const req = createMockRequest({}, {}, { authorization: `Bearer ${token}` }) as any;
     const res = createMockResponse();
     const next = createMockNext();
 
-    auth.requireAuth(req, res as unknown as Response, next);
-
-    expect(next.called).toBe(false);
-    expect(res._status).toBe(401);
+    auth.requireAuth(req, res as unknown as Response, () => {
+      middleware(req, res as unknown as Response, next);
+    });
+    expect(next.called).toBe(true);
   });
 });

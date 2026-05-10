@@ -6,21 +6,72 @@ import type { MyrmexState, Task, Project, Skill, MyrmexFile, Server } from '@sha
 
 const BASE = '/api';
 
-// Колбэк для обработки 401 (вызывается из App.tsx)
+// Token storage
+let accessToken: string | null = localStorage.getItem('access_token');
+let refreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+export function getToken(): string | null {
+  return accessToken;
+}
+
+export function setToken(token: string | null) {
+  accessToken = token;
+  if (token) localStorage.setItem('access_token', token);
+  else localStorage.removeItem('access_token');
+}
+
+// Try to refresh token
+async function tryRefresh(): Promise<string | null> {
+  if (refreshPromise) return refreshPromise;
+  refreshing = true;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${BASE}/auth/refresh`, { method: 'POST', credentials: 'include' });
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (data.access_token) {
+        setToken(data.access_token);
+        return data.access_token;
+      }
+      return null;
+    } catch {
+      return null;
+    } finally {
+      refreshing = false;
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
+}
+
+// Колбэк для обработки 401 когда refresh тоже не сработал
 let onUnauthorized: (() => void) | null = null;
 export function setUnauthorizedHandler(cb: () => void) {
   onUnauthorized = cb;
 }
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
+async function request<T>(url: string, options?: RequestInit, retry = true): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+
   const res = await fetch(`${BASE}${url}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: { ...headers, ...(options?.headers as Record<string, string> || {}) },
   });
-  if (res.status === 401) {
+
+  if (res.status === 401 && retry) {
+    // Try refresh once
+    const newToken = await tryRefresh();
+    if (newToken) {
+      return request<T>(url, options, false);
+    }
+    // Refresh failed — clear and notify
+    setToken(null);
     onUnauthorized?.();
     throw new Error('Unauthorized');
   }
+
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.error || `HTTP ${res.status}`);
@@ -109,25 +160,49 @@ export const deleteServer = (id: string) =>
 export const checkServer = (id: string, status: string) =>
   request<Server>(`/servers/${id}/check`, { method: 'POST', body: JSON.stringify({ status }) });
 
-// --- Auth ---
+// --- Auth (JWT) ---
 
-export const login = (password: string) =>
-  request<{ success: boolean }>('/auth/login', {
+export interface AuthResponse {
+  success: boolean;
+  access_token: string;
+  user: { id: string; username: string; role: string };
+  totp_required?: boolean;
+}
+
+export const login = (username: string, password: string, totp_code?: string) =>
+  request<AuthResponse>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password, totp_code }),
   });
+
+export const refreshToken = () =>
+  request<{ success: boolean; access_token: string }>('/auth/refresh', { method: 'POST' });
 
 export const logout = () =>
   request<{ success: boolean }>('/auth/logout', { method: 'POST' });
 
 export const authStatus = () =>
-  request<{ authenticated: boolean; needsAuth: boolean; needsSetup: boolean; demo?: boolean }>('/auth/status');
+  request<{ authenticated: boolean; needsAuth: boolean; needsSetup: boolean; demo?: boolean; user: { id: string; username: string; role: string } | null }>('/auth/status');
 
-export const setup = (password: string) =>
-  request<{ success: boolean }>('/auth/setup', {
+export const setup = (username: string, password: string) =>
+  request<AuthResponse>('/auth/setup', {
     method: 'POST',
-    body: JSON.stringify({ password }),
+    body: JSON.stringify({ username, password }),
   });
+
+// --- TOTP ---
+
+export const totpSetup = () =>
+  request<{ secret: string; uri: string }>('/auth/totp/setup', { method: 'POST' });
+
+export const totpVerify = (code: string) =>
+  request<{ success: boolean; message: string }>('/auth/totp/verify', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+
+export const totpDisable = () =>
+  request<{ success: boolean }>('/auth/totp/disable', { method: 'POST' });
 
 // --- Health Score ---
 

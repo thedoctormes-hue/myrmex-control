@@ -149,6 +149,31 @@ export interface ChangelogEntry {
   diff: Record<string, unknown>; // что изменилось
 }
 
+// --- Users & RBAC ---
+
+export type UserRole = 'admin' | 'operator' | 'viewer';
+
+export interface User {
+  id: string;
+  username: string;
+  password_hash: string;
+  role: UserRole;
+  totp_secret: string | null;     // encrypted TOTP secret
+  totp_enabled: boolean;
+  created_at: string;
+  last_login: string | null;
+}
+
+export interface RefreshToken {
+  id: string;
+  user_id: string;
+  token_hash: string;             // SHA-256 hash of the token
+  created_at: string;
+  expires_at: string;
+  revoked: boolean;
+  replaced_by: string | null;      // token rotation: which token replaced this
+}
+
 // --- Root State ---
 
 export interface MyrmexState {
@@ -163,4 +188,6 @@ export interface MyrmexState {
   settings: Settings;
   mcp_servers: MCPServer[];
   changelog: ChangelogEntry[];
+  users: User[];
+  refresh_tokens: RefreshToken[];
 }

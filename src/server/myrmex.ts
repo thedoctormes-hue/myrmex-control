@@ -106,6 +106,8 @@ function createDefaultState(): MyrmexState {
     },
     mcp_servers: [],
     changelog: [],
+    users: [],
+    refresh_tokens: [],
   };
 
   // Создать директории для файлообменника

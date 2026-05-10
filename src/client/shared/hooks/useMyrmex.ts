@@ -24,5 +24,11 @@ export function useMyrmex() {
     refresh();
   }, [refresh]);
 
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const interval = setInterval(refresh, 30000);
+    return () => clearInterval(interval);
+  }, [refresh]);
+
   return { state, loading, error, refresh };
 }

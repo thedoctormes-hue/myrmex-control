@@ -1,19 +1,33 @@
 // ============================================================
-// Unit-тесты для auth.ts — аутентификация
+// Unit-тесты для auth.ts — JWT + TOTP + RBAC
 // ============================================================
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
+import type { MyrmexState } from '@shared/types.js';
 
-// Мокируем fs ДО импорта auth
-const mockExistsSync = vi.fn().mockReturnValue(false);
-vi.mock('fs', () => ({
-  readFileSync: vi.fn(),
-  writeFileSync: vi.fn(),
-  existsSync: (...args: any[]) => mockExistsSync(...args),
+function createEmptyState(): MyrmexState {
+  const now = new Date().toISOString();
+  return {
+    _meta: { version: '0.1.0', last_updated: now, last_updated_by: 'test', change_count: 0 },
+    workspace: { name: 'Test', description: '', owner: 'tester', created_at: now },
+    projects: [], tasks: [], skills: [], files: [], servers: [],
+    settings: { theme: 'dark', language: 'ru', auto_save: true, demo_mode: false, sidebar_collapsed: false },
+    mcp_servers: [], changelog: [], users: [], refresh_tokens: [],
+  };
+}
+
+// Мокируем myrmex.ts ДО импорта auth
+const mockReadState = vi.fn();
+const mockWriteState = vi.fn();
+const mockCreateLogEntry = vi.fn();
+
+vi.mock('/root/LabDoctorM/projects/myrmex-control/src/server/myrmex.js', () => ({
+  readState: (...args: unknown[]) => mockReadState(...args),
+  writeState: (...args: unknown[]) => mockWriteState(...args),
+  createLogEntry: (...args: unknown[]) => mockCreateLogEntry(...args),
 }));
 
-// Мокируем bcrypt
 vi.mock('bcrypt', () => ({
   default: {
     hash: vi.fn().mockResolvedValue('$2b$12$mockhash'),
@@ -23,43 +37,42 @@ vi.mock('bcrypt', () => ({
   compare: vi.fn().mockResolvedValue(true),
 }));
 
-import * as auth from '../../src/server/auth.js';
+vi.mock('otpauth', () => ({
+  TOTP: class FakeTOTP { validate() { return 0; } },
+  Secret: { fromBase32: vi.fn() },
+}));
+
+import * as auth from '../../../src/server/auth.js';
 
 // --- Хелперы ---
 
-function createMockRequest(body: Record<string, unknown> = {}, cookies: Record<string, string> = {}): Request {
+function setupMockState() {
+  let state = createEmptyState();
+  mockReadState.mockImplementation(() => state);
+  mockWriteState.mockImplementation((s: MyrmexState) => { state = s; });
+  mockCreateLogEntry.mockImplementation(() => ({ timestamp: new Date().toISOString(), actor: 'test', action: 'test', entity_type: 'test', entity_id: 'test', diff: {} }));
   return {
-    body,
-    cookies,
-    ip: '127.0.0.1',
-    url: '/api/auth/test',
-    method: 'POST',
-  } as unknown as Request;
+    reset: () => {
+      state = createEmptyState();
+      mockReadState.mockImplementation(() => state);
+      mockWriteState.mockImplementation((s: MyrmexState) => { state = s; });
+    },
+  };
+}
+
+const mockHelper = setupMockState();
+
+function createMockRequest(body: Record<string, unknown> = {}, cookies: Record<string, string> = {}, headers: Record<string, string> = {}): Request {
+  return { body, cookies, headers, ip: '127.0.0.1', url: '/api/auth/test', method: 'POST' } as unknown as Request;
 }
 
 function createMockResponse(): Response & { _json: unknown; _status: number; _cookies: Record<string, unknown>; _cleared: boolean } {
   const res: any = {
-    _json: null,
-    _status: 200,
-    _cookies: {},
-    _cleared: false,
-    status(code: number) {
-      res._status = code;
-      return res;
-    },
-    json(data: unknown) {
-      res._json = data;
-      return res;
-    },
-    cookie(name: string, value: string, opts: Record<string, unknown>) {
-      res._cookies[name] = { value, opts };
-      return res;
-    },
-    clearCookie(name: string) {
-      res._cleared = true;
-      delete res._cookies[name];
-      return res;
-    },
+    _json: null, _status: 200, _cookies: {}, _cleared: false,
+    status(code: number) { res._status = code; return res; },
+    json(data: unknown) { res._json = data; return res; },
+    cookie(_n: string, _v: string, _o: Record<string, unknown>) { return res; },
+    clearCookie(_n: string) { res._cleared = true; return res; },
   };
   return res;
 }
@@ -74,205 +87,234 @@ function createMockNext(): NextFunction & { called: boolean } {
 
 describe('setup()', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    // Сбрасываем env
-    delete process.env.MYRMEX_PASSWORD_HASH;
+    mockHelper.reset();
+    delete process.env.DEMO_MODE;
   });
 
-  it('создаёт пароль при валидном запросе', async () => {
-    const req = createMockRequest({ password: 'securePass123' });
+  it('создаёт admin при валидном запросе', async () => {
+    const req = createMockRequest({ username: 'admin', password: 'securePass123' });
     const res = createMockResponse();
-
     await auth.setup(req, res as unknown as Response);
-
     expect(res._status).toBe(200);
-    expect(res._json).toEqual({ success: true });
-    expect(res._cookies['myrmex_session']).toBeDefined();
+    expect((res._json as any).success).toBe(true);
+    expect((res._json as any).access_token).toBeDefined();
+    expect((res._json as any).user.role).toBe('admin');
+  });
+
+  it('отклоняет username короче 3 символов', async () => {
+    const req = createMockRequest({ username: 'ab', password: 'securePass123' });
+    const res = createMockResponse();
+    await auth.setup(req, res as unknown as Response);
+    expect(res._status).toBe(400);
   });
 
   it('отклоняет пароль короче 8 символов', async () => {
-    const req = createMockRequest({ password: 'short' });
+    const req = createMockRequest({ username: 'admin', password: 'short' });
     const res = createMockResponse();
-
     await auth.setup(req, res as unknown as Response);
-
     expect(res._status).toBe(400);
-    expect(res._json).toEqual({ error: 'Password must be at least 8 characters' });
+    expect((res._json as any).error).toContain('8');
   });
 
   it('отклоняет пустой пароль', async () => {
-    const req = createMockRequest({ password: '' });
+    const req = createMockRequest({ username: 'admin', password: '' });
     const res = createMockResponse();
-
     await auth.setup(req, res as unknown as Response);
-
     expect(res._status).toBe(400);
   });
 
-  it('отклоняет отсутствующий пароль в теле', async () => {
-    const req = createMockRequest({});
-    const res = createMockResponse();
-
-    await auth.setup(req, res as unknown as Response);
-
-    expect(res._status).toBe(400);
-  });
-
-  it('отклоняет повторный setup если пароль уже установлен', async () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$existinghash';
-
-    const req = createMockRequest({ password: 'newPassword123' });
-    const res = createMockResponse();
-
-    await auth.setup(req, res as unknown as Response);
-
-    expect(res._status).toBe(403);
-    expect(res._json).toEqual({ error: 'Password already set. Use login.' });
-  });
-
-  it('устанавливает httpOnly cookie после setup', async () => {
+  it('отклоняет отсутствующий username', async () => {
     const req = createMockRequest({ password: 'securePass123' });
     const res = createMockResponse();
-
     await auth.setup(req, res as unknown as Response);
+    expect(res._status).toBe(400);
+  });
 
-    const cookie = res._cookies['myrmex_session'];
-    expect(cookie).toBeDefined();
-    expect(cookie.opts.httpOnly).toBe(true);
-    expect(cookie.opts.sameSite).toBe('strict');
+  it('отклоняет повторный setup если пользователь уже существует', async () => {
+    const req1 = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const res1 = createMockResponse();
+    await auth.setup(req1, res1 as unknown as Response);
+
+    const req2 = createMockRequest({ username: 'admin2', password: 'anotherPass123' });
+    const res2 = createMockResponse();
+    await auth.setup(req2, res2 as unknown as Response);
+    expect(res2._status).toBe(403);
+  });
+
+  it('возвращает access_token и user после setup', async () => {
+    const req = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const res = createMockResponse();
+    await auth.setup(req, res as unknown as Response);
+    const json = res._json as any;
+    expect(json.access_token).toBeDefined();
+    expect(json.user.username).toBe('admin');
+    expect(json.user.role).toBe('admin');
   });
 });
 
 describe('login()', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    delete process.env.MYRMEX_PASSWORD_HASH;
+  beforeEach(async () => {
+    
+    mockHelper.reset();
+    delete process.env.DEMO_MODE;
+    const req = createMockRequest({ username: 'testuser', password: 'testPass123' });
+    const res = createMockResponse();
+    await auth.setup(req, res as unknown as Response);
   });
 
   it('авторизует с правильным паролем', async () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
-
-    const req = createMockRequest({ password: 'correctPassword' });
+    const req = createMockRequest({ username: 'testuser', password: 'testPass123' });
     const res = createMockResponse();
-
     await auth.login(req, res as unknown as Response);
-
     expect(res._status).toBe(200);
-    expect(res._json).toEqual({ success: true });
-    expect(res._cookies['myrmex_session']).toBeDefined();
+    expect((res._json as any).success).toBe(true);
+    expect((res._json as any).access_token).toBeDefined();
   });
 
   it('отклоняет неправильный пароль', async () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
-
-    // Переопределяем default.compare чтобы вернуть false
     const bcrypt = await import('bcrypt');
     vi.mocked(bcrypt.default.compare).mockResolvedValueOnce(false as never);
-
-    const req = createMockRequest({ password: 'wrongPassword' });
+    const req = createMockRequest({ username: 'testuser', password: 'wrongPass' });
     const res = createMockResponse();
-
     await auth.login(req, res as unknown as Response);
-
     expect(res._status).toBe(401);
-    expect(res._json).toEqual({ error: 'Invalid password' });
+    expect((res._json as any).error).toBe('Invalid credentials');
   });
 
-  it('отклоняет если setup не выполнен', async () => {
-    const req = createMockRequest({ password: 'anyPassword' });
+  it('отклоняет несуществующего пользователя', async () => {
+    const req = createMockRequest({ username: 'nobody', password: 'testPass123' });
     const res = createMockResponse();
-
     await auth.login(req, res as unknown as Response);
-
-    expect(res._status).toBe(400);
-    expect(res._json).toEqual({ error: 'Password not set. Run setup first.' });
-  });
-
-  it('отклоняет пустой пароль', async () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
-
-    const req = createMockRequest({});
-    const res = createMockResponse();
-
-    await auth.login(req, res as unknown as Response);
-
     expect(res._status).toBe(401);
-    expect(res._json).toEqual({ error: 'Invalid password' });
   });
 });
 
 describe('logout()', () => {
-  it('очищает сессию и куку', () => {
-    const req = createMockRequest({}, { myrmex_session: 'valid-token-123' });
-    const res = createMockResponse();
-
-    auth.logout(req, res as unknown as Response);
-
-    expect(res._json).toEqual({ success: true });
-    expect(res._cleared).toBe(true);
-  });
-
-  it('работает даже без куки', () => {
+  beforeEach(() => mockHelper.reset());
+  it('возвращает success', () => {
     const req = createMockRequest({}, {});
     const res = createMockResponse();
-
     auth.logout(req, res as unknown as Response);
-
-    expect(res._json).toEqual({ success: true });
+    expect((res._json as any).success).toBe(true);
   });
 });
 
 describe('authStatus()', () => {
   beforeEach(() => {
-    vi.clearAllMocks();
-    delete process.env.MYRMEX_PASSWORD_HASH;
+    
+    mockHelper.reset();
+    delete process.env.DEMO_MODE;
   });
 
-  it('показывает needsSetup=true когда пароль не установлен', () => {
+  it('показывает needsSetup=true когда нет пользователей', () => {
     const req = createMockRequest({}, {});
     const res = createMockResponse();
-
     auth.authStatus(req, res as unknown as Response);
-
-    expect(res._json).toMatchObject({
-      needsSetup: true,
-      needsAuth: false,
-    });
+    expect((res._json as any).needsSetup).toBe(true);
+    expect((res._json as any).needsAuth).toBe(false);
   });
 
-  it('показывает needsAuth=true когда пароль установлен', () => {
-    process.env.MYRMEX_PASSWORD_HASH = '$2b$12$mockhash';
+  it('показывает needsAuth=true когда есть пользователи', async () => {
+    const setupReq = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const setupRes = createMockResponse();
+    await auth.setup(setupReq, setupRes as unknown as Response);
 
     const req = createMockRequest({}, {});
     const res = createMockResponse();
-
     auth.authStatus(req, res as unknown as Response);
-
-    expect(res._json).toMatchObject({
-      needsAuth: true,
-      needsSetup: false,
-    });
+    expect((res._json as any).needsAuth).toBe(true);
+    expect((res._json as any).needsSetup).toBe(false);
   });
 
   it('показывает authenticated=true в demo-режиме', () => {
-    // Переопределяем existsSync чтобы .demo файл "существовал"
-    mockExistsSync.mockImplementation((path: any) => {
-      if (typeof path === 'string' && path.endsWith('.demo')) return true;
-      return false;
-    });
-
+    process.env.DEMO_MODE = 'true';
     const req = createMockRequest({}, {});
     const res = createMockResponse();
-
     auth.authStatus(req, res as unknown as Response);
-
-    expect(res._json).toMatchObject({
-      authenticated: true,
-      demo: true,
-    });
-
-    // Сбрасываем обратно
-    mockExistsSync.mockReturnValue(false);
+    expect((res._json as any).authenticated).toBe(true);
+    expect((res._json as any).demo).toBe(true);
   });
 });
 
+describe('requireAuth()', () => {
+  beforeEach(() => {
+    
+    mockHelper.reset();
+    delete process.env.DEMO_MODE;
+  });
+
+  it('пропускает в demo-режиме без токена', () => {
+    process.env.DEMO_MODE = 'true';
+    const req = createMockRequest({}, {});
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(true);
+  });
+
+  it('блокирует без токена', () => {
+    const req = createMockRequest({}, {});
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+  });
+
+  it('блокирует с невалидным токеном', () => {
+    const req = createMockRequest({}, {}, { authorization: 'Bearer invalid-token' });
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+  });
+
+  it('пропускает с валидным JWT токеном', async () => {
+    const setupReq = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const setupRes = createMockResponse();
+    await auth.setup(setupReq, setupRes as unknown as Response);
+    const token = (setupRes._json as any).access_token;
+
+    const req = createMockRequest({}, {}, { authorization: `Bearer ${token}` });
+    const res = createMockResponse();
+    const next = createMockNext();
+    auth.requireAuth(req, res as unknown as Response, next);
+    expect(next.called).toBe(true);
+  });
+});
+
+describe('requireRole()', () => {
+  beforeEach(() => {
+    
+    mockHelper.reset();
+    delete process.env.DEMO_MODE;
+  });
+
+  it('блокирует без аутентификации', () => {
+    const middleware = auth.requireRole('admin');
+    const req = createMockRequest() as any;
+    const res = createMockResponse();
+    const next = createMockNext();
+    middleware(req, res as unknown as Response, next);
+    expect(next.called).toBe(false);
+    expect(res._status).toBe(401);
+  });
+
+  it('admin имеет доступ ко всему', async () => {
+    const setupReq = createMockRequest({ username: 'admin', password: 'securePass123' });
+    const setupRes = createMockResponse();
+    await auth.setup(setupReq, setupRes as unknown as Response);
+    const token = (setupRes._json as any).access_token;
+
+    const middleware = auth.requireRole('operator');
+    const req = createMockRequest({}, {}, { authorization: `Bearer ${token}` }) as any;
+    const res = createMockResponse();
+    const next = createMockNext();
+
+    auth.requireAuth(req, res as unknown as Response, () => {
+      middleware(req, res as unknown as Response, next);
+    });
+    expect(next.called).toBe(true);
+  });
+});

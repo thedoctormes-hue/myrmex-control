@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useMyrmex } from '../shared/hooks/useMyrmex';
 import { useTheme } from '../shared/hooks/useTheme';
-import { authStatus, logout as logoutApi, setUnauthorizedHandler } from '../shared/lib/api';
+import { authStatus, logout as logoutApi, setUnauthorizedHandler, setToken, getToken } from '../shared/lib/api';
 import { Sidebar } from '../shared/ui/Sidebar';
 import { BottomBar } from '../shared/ui/BottomBar';
 import { Dashboard } from '../pages/Dashboard';
@@ -33,46 +33,53 @@ export default function App() {
     demo: false,
   });
 
-  // При 401 — сбрасываем авторизацию
+  // On 401 — reset auth
   useEffect(() => {
     setUnauthorizedHandler(() => {
+      setToken(null);
       setAuth(prev => ({ ...prev, authenticated: false }));
     });
   }, []);
 
-  // Проверяем статус при загрузке
+  // Check auth on mount
   useEffect(() => {
     authStatus()
       .then(status => {
-        setAuth({
-          checked: true,
-          authenticated: status.authenticated,
-          needsAuth: status.needsAuth,
-          needsSetup: status.needsSetup ?? false,
-          demo: status.demo ?? false,
-        });
+        if (status.authenticated && status.user) {
+          // We have a valid session — try to get a fresh token
+          if (getToken()) {
+            setAuth({ checked: true, authenticated: true, needsAuth: false, needsSetup: false, demo: status.demo ?? false });
+          } else {
+            setAuth({ checked: true, authenticated: false, needsAuth: status.needsAuth, needsSetup: status.needsSetup ?? false, demo: status.demo ?? false });
+          }
+        } else {
+          setAuth({ checked: true, authenticated: false, needsAuth: status.needsAuth, needsSetup: status.needsSetup ?? false, demo: status.demo ?? false });
+        }
       })
       .catch(() => {
         setAuth({ checked: true, authenticated: false, needsAuth: false, needsSetup: false, demo: false });
       });
   }, []);
 
-  const handleLogin = useCallback(() => {
+  const handleLogin = useCallback((token: string) => {
+    setToken(token);
     setAuth(prev => ({ ...prev, authenticated: true, needsSetup: false }));
     refresh();
   }, [refresh]);
 
-  const handleSetup = useCallback(() => {
+  const handleSetup = useCallback((token: string) => {
+    setToken(token);
     setAuth(prev => ({ ...prev, authenticated: true, needsSetup: false, needsAuth: true }));
     refresh();
   }, [refresh]);
 
   const handleLogout = useCallback(async () => {
     try { await logoutApi(); } catch { /* ignore */ }
+    setToken(null);
     setAuth(prev => ({ ...prev, authenticated: false }));
   }, []);
 
-  // Пока проверяем — загрузка
+  // Loading
   if (!auth.checked || loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
@@ -81,17 +88,17 @@ export default function App() {
     );
   }
 
-  // Первичная настройка (пароль ещё не задан)
+  // First-time setup
   if (auth.needsSetup) {
     return <Setup onSetup={handleSetup} />;
   }
 
-  // Нужна авторизация — показываем логин (в демо-режиме пропускаем)
+  // Need auth — show login (skip in demo)
   if (auth.needsAuth && !auth.authenticated && !auth.demo) {
     return <Login onLogin={handleLogin} />;
   }
 
-  // Ошибка загрузки данных
+  // Error
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">

@@ -8,7 +8,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { requireAuth, setup, login, logout, authStatus } from './auth.js';
+import { requireAuth, requireRole, setup, login, logout, authStatus, refresh, totpSetup, totpVerify, totpDisable } from './auth.js';
 import { securityHeaders, rateLimit, errorHandler } from './middleware.js';
 import { router as tasksRouter } from './api/tasks.js';
 import { router as projectsRouter } from './api/projects.js';
@@ -42,9 +42,16 @@ app.use(rateLimit);
 app.post('/api/auth/setup', setup);
 app.post('/api/auth/login', login);
 app.post('/api/auth/logout', logout);
+app.post('/api/auth/refresh', refresh);
 app.get('/api/auth/status', authStatus);
 
+// TOTP routes (требуют авторизации)
+app.post('/api/auth/totp/setup', requireAuth, totpSetup);
+app.post('/api/auth/totp/verify', requireAuth, totpVerify);
+app.post('/api/auth/totp/disable', requireAuth, totpDisable);
+
 // API routes (требуют авторизации)
+// Read: operator+ (viewer can read)
 app.use('/api/state', requireAuth, stateRouter);
 app.use('/api/tasks', requireAuth, tasksRouter);
 app.use('/api/projects', requireAuth, projectsRouter);
@@ -52,7 +59,7 @@ app.use('/api/library', requireAuth, libraryRouter);
 app.use('/api/files', requireAuth, filesRouter);
 app.use('/api/servers', requireAuth, serversRouter);
 app.use('/api/health', requireAuth, healthRouter);
-app.use('/api/audit', requireAuth, auditRouter);
+app.use('/api/audit', requireAuth, requireRole('admin'), auditRouter);
 app.use('/api/analytics', requireAuth, analyticsRouter);
 
 // Production: статические файлы клиента
