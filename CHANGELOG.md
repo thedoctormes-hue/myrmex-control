@@ -1,33 +1,65 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to Myrmex Control will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.0.0] — 2026-05-10
 
-## [0.1.0] - 2026-05-10
+### 🎉 First Stable Release
 
-### Added
-- Initial release
-- Dashboard with balance, server status, and signals feed widgets
-- Drag-and-drop Kanban board with customizable columns
-- Project management (create, organize, track)
-- Library for skills, hooks, and agent configurations
-- File exchange with inbox/outbox
-- Cookie-based authentication with bcrypt password hashing
-- Rate limiting (100 requests/minute per IP)
-- Security headers (CSP, HSTS, X-Frame-Options via Helmet)
-- Multi-language support (English, Russian, Chinese)
-- Demo mode without authentication
-- Health check endpoint
-- GitHub Actions CI workflow
+**Myrmex Control** — Hive Control Center for AI agent infrastructure.
+React 19 + TypeScript + Vite + Tailwind CSS + Express + JWT/TOTP/RBAC.
 
-### Security
-- Bcrypt password hashing (replacing plaintext)
-- Helmet security headers
-- CORS origin restriction
-- HttpOnly cookies with SameSite
+#### Features
+- **Dashboard** — real-time agent monitoring, task board, health score
+- **Projects** — Kanban board with drag-and-drop, project CRUD
+- **Library** — artifact storage (skills, masks, hooks, templates)
+- **Files** — file management with upload/download
+- **Graph** — visual dependency graph of agents and tasks
+- **Analytics** — charts and metrics (Chart.js)
+- **Audit Log** — full action history with filtering
 
-### Fixed
-- TypeScript path aliases for `@shared/types`
-- Build process for client and server separation
+#### Security
+- JWT access tokens (15 min) + refresh tokens (7 days) with rotation
+- TOTP 2FA (Google Authenticator compatible)
+- RBAC: admin / operator / viewer roles
+- HttpOnly cookies, CORS, Helmet headers
+
+#### Architecture
+- FSD (Feature-Sliced Design) client structure
+- REST API with OpenAPI 3.0 spec
+- JSON file-based database with atomic writes
+- 148 tests, 94%+ coverage
+
+#### DevOps
+- GitHub Actions CI/CD pipeline
+- ESLint flat config, Prettier, pre-commit hooks
+- Docker-ready (Dockerfile + docker-compose.yml)
+- Semantic versioning
+
+#### Mobile & PWA
+- Progressive Web App (manifest, service worker, offline)
+- Touch-optimized (44px tap targets, swipe navigation)
+- Telegram Web App integration (TWA SDK, theme sync)
+- Responsive design (mobile-first)
+
+#### i18n
+- English / Russian support
+- Auto-detection (browser, Telegram, localStorage)
+- Language toggle in sidebar
+
+#### Infrastructure
+- nginx reverse proxy (main + TWA subdomain)
+- Let's Encrypt SSL certificates
+- systemd services with watchdog
+- Telegram bot (@tgminiappmyrmex_bot)
+
+---
+
+## [0.1.0] — 2026-05-09
+
+### Initial Release
+- Basic dashboard, projects, tasks, agents
+- JWT authentication
+- File management
+- Server monitoring
+- 14 test files, 141 tests

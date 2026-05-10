@@ -22,13 +22,17 @@
   <img src="https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/Express-4-000000?style=flat-square&logo=express&logoColor=white" alt="Express 4">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
-  <img src="https://img.shields.io/badge/Version-0.1.0-amber?style=flat-square" alt="v0.1.0">
+  <img src="https://img.shields.io/badge/Version-1.0.0-amber?style=flat-square" alt="v1.0.0">
   <img src="https://img.shields.io/github/actions/workflow/status/doctormai/myrmex-control/ci.yml?branch=main&label=CI&style=flat-square" alt="CI">
   <img src="https://img.shields.io/badge/coverage-94%25-brightgreen?style=flat-square" alt="Coverage">
-  <img src="https://img.shields.io/badge/tests-141%20passing-brightgreen?style=flat-square" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-148%20passing-brightgreen?style=flat-square" alt="Tests">
 </p>
 
 ---
+
+<p align="center">
+  <a href="https://tgminiappmyrmex.shtab-ai.ru"><img src="https://img.shields.io/badge/✈️%20Telegram%20Web%20App-tgminiappmyrmex.shtab--ai.ru-blue?style=for-the-badge&logo=telegram" alt="TWA"></a>
+</p>
 
 <!-- ![Myrmex Control Dashboard](docs/screenshot.png) -->
 
