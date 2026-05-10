@@ -45,7 +45,7 @@ export default defineConfig({
   ],
   root: 'src/client/app',
   build: {
-    outDir: '../../dist/client',
+    outDir: '../../../dist/client',
     emptyOutDir: true,
   },
   server: {
