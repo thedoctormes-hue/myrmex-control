@@ -243,6 +243,14 @@ export const getAuditLog = (params?: Record<string, string>) => {
 export const getAuditEntityTypes = () => request<string[]>('/audit/entity-types');
 export const getAuditSources = () => request<string[]>('/audit/sources');
 
+// --- Version check ---
+
+export interface VersionResponse {
+  version: string;
+}
+
+export const getVersion = () => request<VersionResponse>('/version');
+
 // --- Analytics ---
 
 export interface AnalyticsResult {

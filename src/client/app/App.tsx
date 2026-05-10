@@ -3,7 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useMyrmex } from '../shared/hooks/useMyrmex';
 import { useTheme } from '../shared/hooks/useTheme';
 import { useSwipeNav } from '../shared/hooks/useSwipeNav';
-import { authStatus, logout as logoutApi, setUnauthorizedHandler, setToken, getToken } from '../shared/lib/api';
+import { authStatus, logout as logoutApi, setUnauthorizedHandler, setToken, getToken, getVersion } from '../shared/lib/api';
 import { initTWA, isTWA, getTWAColorScheme, getTWAUser, haptic } from '../shared/lib/twa';
 import { Sidebar } from '../shared/ui/Sidebar';
 import { BottomBar } from '../shared/ui/BottomBar';
@@ -18,7 +18,39 @@ import { Setup } from '../pages/Setup';
 import { AuditLog } from '../pages/AuditLog';
 import { Analytics } from '../pages/Analytics';
 
+// Force-reload if Service Worker serves stale version
+async function checkVersion() {
+  try {
+    const { version } = await getVersion();
+    const stored = localStorage.getItem('app_version');
+    if (stored && stored !== version) {
+      console.log(`[Version] ${stored} → ${version}, reloading...`);
+      localStorage.setItem('app_version', version);
+      // Unregister old SW, clear caches, then reload
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+      window.location.reload();
+    } else if (!stored) {
+      localStorage.setItem('app_version', version);
+    }
+  } catch {
+    // Server unreachable — skip version check
+  }
+}
+
 export default function App() {
+  // Check version on mount and periodically — force reload if stale
+  useEffect(() => {
+    checkVersion();
+    const interval = setInterval(checkVersion, 60_000);
+    return () => clearInterval(interval);
+  }, []);
   const { state, loading, error, refresh } = useMyrmex();
   const { theme, toggle } = useTheme();
   const [auth, setAuth] = useState<{

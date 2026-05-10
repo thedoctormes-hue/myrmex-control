@@ -48,6 +48,11 @@ app.use((req, _res, next) => {
   next();
 });
 
+// Version endpoint (public, for client update checks)
+app.get('/api/version', (_req, res) => {
+  res.json({ version: '1.0.0' });
+});
+
 // Auth routes (публичные)
 app.post('/api/auth/setup', setup);
 app.post('/api/auth/login', login);

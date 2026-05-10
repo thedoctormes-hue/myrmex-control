@@ -247,12 +247,14 @@ export async function login(req: Request, res: Response) {
   const user = findUser(username);
 
   if (!user) {
+    console.log(`[Auth] Login failed: user "${username}" not found (users: ${readState().users.map(u => u.username).join(', ')})`);
     res.status(401).json({ error: 'Invalid credentials' });
     return;
   }
 
   const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) {
+    console.log(`[Auth] Login failed: wrong password for "${username}"`);
     res.status(401).json({ error: 'Invalid credentials' });
     return;
   }
