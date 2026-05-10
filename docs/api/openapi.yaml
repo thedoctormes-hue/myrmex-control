@@ -1,0 +1,1251 @@
+openapi: 3.0.3
+info:
+  title: Myrmex Control API
+  description: |
+    REST API для управления AI-агентами — «пульт управления муравейником».
+
+    **Аутентификация:** Cookie-based sessions. Получить сессию через `POST /auth/login` или `POST /auth/setup` (первый запуск).
+
+    **Rate limiting:** 100 запросов в 60 секунд на IP.
+  version: 0.1.0
+  contact:
+    name: ЗавЛаб (Evgeny)
+    url: https://github.com/doctormai/myrmex-control
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api
+    description: Development
+  - url: https://myrmexcontrol.shtab-ai.ru/api
+    description: Production
+
+tags:
+  - name: Auth
+    description: Аутентификация и управление сессиями
+  - name: State
+    description: Глобальное состояние приложения
+  - name: Tasks
+    description: Управление задачами (Kanban)
+  - name: Projects
+    description: Управление проектами
+  - name: Library
+    description: Библиотека skills/hooks/agents
+  - name: Files
+    description: Файловый обмен (inbox/outbox)
+  - name: Servers
+    description: Мониторинг серверов
+  - name: System
+    description: Системные endpoints
+
+paths:
+  # ============================================================
+  # AUTH
+  # ============================================================
+  /auth/setup:
+    post:
+      tags: [Auth]
+      summary: Первичная установка пароля
+      description: Устанавливает пароль администратора. Доступен только когда пароль ещё не установлен.
+      operationId: setup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  minLength: 8
+                  example: "mySecurePass123"
+      responses:
+        '200':
+          description: Пароль установлен, сессия создана
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "myrmex_session=abc123; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '400':
+          description: Пароль слишком короткий (< 8 символов)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Пароль уже установлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Вход в систему
+      description: Аутентификация по паролю. Устанавливает session cookie.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+                  example: "mySecurePass123"
+      responses:
+        '200':
+          description: Успешный вход
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: "myrmex_session=abc123; HttpOnly; Secure; SameSite=Strict"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          description: Неверный пароль
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Выход из системы
+      description: Удаляет сессию и очищает cookie.
+      operationId: logout
+      responses:
+        '200':
+          description: Успешный выход
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+
+  /auth/status:
+    get:
+      tags: [Auth]
+      summary: Статус аутентификации
+      description: Возвращает информацию о текущем состоянии auth. Публичный endpoint.
+      operationId: authStatus
+      responses:
+        '200':
+          description: Статус аутентификации
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  needsSetup:
+                    type: boolean
+                    description: Требуется ли первичная установка пароля
+                  needsAuth:
+                    type: boolean
+                    description: Требуется ли аутентификация
+                  isAuthenticated:
+                    type: boolean
+                    description: Аутентифицирован ли текущий запрос
+                  isDemo:
+                    type: boolean
+                    description: Активен ли demo-режим
+
+  # ============================================================
+  # STATE
+  # ============================================================
+  /state:
+    get:
+      tags: [State]
+      summary: Получить полное состояние
+      description: Возвращает всё состояние приложения из myrmex.json.
+      operationId: getState
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Полное состояние приложения
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MyrmexState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [State]
+      summary: Обновить состояние
+      description: Записывает новое состояние в myrmex.json. Атомарная запись с file locking.
+      operationId: updateState
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MyrmexState'
+      responses:
+        '200':
+          description: Состояние обновлено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # TASKS
+  # ============================================================
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: Список задач
+      description: Возвращает все задачи. Поддерживает фильтрацию по project_id и status.
+      operationId: getTasks
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: project_id
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [backlog, todo, in_progress, review, done, cancelled]
+      responses:
+        '200':
+          description: Список задач
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Tasks]
+      summary: Создать задачу
+      operationId: createTask
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                  example: "Implement auth middleware"
+                description:
+                  type: string
+                status:
+                  type: string
+                  enum: [backlog, todo, in_progress, review, done, cancelled]
+                  default: backlog
+                priority:
+                  type: string
+                  enum: [low, medium, high, critical]
+                  default: medium
+                project_id:
+                  type: string
+                assignee_id:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Задача создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /tasks/{id}:
+    get:
+      tags: [Tasks]
+      summary: Получить задачу по ID
+      operationId: getTask
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Задача
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Tasks]
+      summary: Обновить задачу
+      description: Обновляет поля задачи. Поля id и created_at защищены от изменения.
+      operationId: updateTask
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Задача обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [Tasks]
+      summary: Удалить задачу
+      operationId: deleteTask
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: Задача удалена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # PROJECTS
+  # ============================================================
+  /projects:
+    get:
+      tags: [Projects]
+      summary: Список проектов
+      operationId: getProjects
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Список проектов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Projects]
+      summary: Создать проект
+      operationId: createProject
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  example: "Myrmex Control v2"
+                description:
+                  type: string
+                color:
+                  type: string
+                  example: "#f59e0b"
+                icon:
+                  type: string
+                status:
+                  type: string
+                  enum: [active, paused, archived]
+                  default: active
+      responses:
+        '201':
+          description: Проект создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Получить проект по ID
+      operationId: getProject
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Проект
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Projects]
+      summary: Обновить проект
+      operationId: updateProject
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Проект обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [Projects]
+      summary: Удалить проект
+      operationId: deleteProject
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Проект удалён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # LIBRARY
+  # ============================================================
+  /library:
+    get:
+      tags: [Library]
+      summary: Список элементов библиотеки
+      description: Возвращает skills, masks, hooks, agents. Фильтрация по типу.
+      operationId: getLibrary
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [skill, mask, hook, template]
+      responses:
+        '200':
+          description: Список элементов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Skill'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Library]
+      summary: Добавить элемент в библиотеку
+      operationId: createSkill
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type]
+              properties:
+                name:
+                  type: string
+                  example: "Code Review Skill"
+                type:
+                  type: string
+                  enum: [skill, mask, hook, template]
+                description:
+                  type: string
+                content:
+                  type: string
+                file_path:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Элемент создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /library/{id}:
+    get:
+      tags: [Library]
+      summary: Получить элемент по ID
+      operationId: getSkill
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/LibraryItemId'
+      responses:
+        '200':
+          description: Элемент библиотеки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Library]
+      summary: Обновить элемент
+      operationId: updateSkill
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/LibraryItemId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillUpdate'
+      responses:
+        '200':
+          description: Элемент обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [Library]
+      summary: Удалить элемент
+      operationId: deleteSkill
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/LibraryItemId'
+      responses:
+        '200':
+          description: Элемент удалён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # FILES
+  # ============================================================
+  /files:
+    get:
+      tags: [Files]
+      summary: Список файлов
+      description: Возвращает файлы из inbox или outbox директории.
+      operationId: getFiles
+      security:
+        - sessionCookie: []
+      parameters:
+        - name: dir
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [inbox, outbox]
+          description: Директория (inbox или outbox)
+      responses:
+        '200':
+          description: Список файлов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MyrmexFile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # SERVERS
+  # ============================================================
+  /servers:
+    get:
+      tags: [Servers]
+      summary: Список серверов
+      description: Возвращает все мониторируемые серверы.
+      operationId: getServers
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Список серверов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Server'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Servers]
+      summary: Добавить сервер
+      operationId: createServer
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, host]
+              properties:
+                name:
+                  type: string
+                  example: "Production Server"
+                host:
+                  type: string
+                  example: "192.168.1.100"
+                port:
+                  type: integer
+                  default: 22
+                services:
+                  type: array
+                  items:
+                    type: string
+                meta:
+                  type: object
+      responses:
+        '201':
+          description: Сервер добавлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /servers/{id}:
+    get:
+      tags: [Servers]
+      summary: Получить сервер по ID
+      operationId: getServer
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Сервер
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    put:
+      tags: [Servers]
+      summary: Обновить сервер
+      operationId: updateServer
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServerUpdate'
+      responses:
+        '200':
+          description: Сервер обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Server'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [Servers]
+      summary: Удалить сервер из мониторинга
+      operationId: deleteServer
+      security:
+        - sessionCookie: []
+      parameters:
+        - $ref: '#/components/parameters/ServerId'
+      responses:
+        '200':
+          description: Сервер удалён
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================
+  # SYSTEM
+  # ============================================================
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      description: Публичный endpoint для проверки работоспособности сервера.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Сервер работает
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  uptime:
+                    type: number
+                    description: Uptime в секундах
+                    example: 1234.56
+                  timestamp:
+                    type: string
+                    format: date-time
+
+# ============================================================
+# COMPONENTS
+# ============================================================
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: myrmex_session
+
+  parameters:
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ProjectId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    LibraryItemId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    ServerId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+
+  responses:
+    Unauthorized:
+      description: Требуется аутентификация
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Unauthorized"
+
+    MyrmexState:
+      type: object
+      properties:
+        _meta:
+          $ref: '#/components/schemas/MyrmexMeta'
+        workspace:
+          $ref: '#/components/schemas/Workspace'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/Agent'
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+        library:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/MyrmexFile'
+        servers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Server'
+        mcp_servers:
+          type: array
+          items:
+            $ref: '#/components/schemas/MCPServer'
+        settings:
+          $ref: '#/components/schemas/Settings'
+        changelog:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChangelogEntry'
+
+    MyrmexMeta:
+      type: object
+      properties:
+        version:
+          type: string
+          example: "0.1.0"
+        last_updated:
+          type: string
+          format: date-time
+        last_updated_by:
+          type: string
+        change_count:
+          type: integer
+
+    Workspace:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        owner:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, archived]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        icon:
+          type: string
+        status:
+          type: string
+          enum: [active, paused, archived]
+
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        model:
+          type: string
+        status:
+          type: string
+          enum: [idle, working, error, offline]
+        project_id:
+          type: string
+        current_task_id:
+          type: string
+        last_seen:
+          type: string
+          format: date-time
+        config:
+          type: object
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+        project_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [backlog, todo, in_progress, review, done, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        assignee_id:
+          type: string
+        parent_id:
+          type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [backlog, todo, in_progress, review, done, cancelled]
+        priority:
+          type: string
+          enum: [low, medium, high, critical]
+        assignee_id:
+          type: string
+        parent_id:
+          type: string
+        dependencies:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    Skill:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [skill, mask, hook, template]
+        name:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        file_path:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SkillUpdate:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [skill, mask, hook, template]
+        name:
+          type: string
+        description:
+          type: string
+        content:
+          type: string
+        file_path:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+
+    MyrmexFile:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        path:
+          type: string
+        size:
+          type: integer
+        mime_type:
+          type: string
+        uploaded_by:
+          type: string
+        uploaded_at:
+          type: string
+          format: date-time
+
+    Server:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        status:
+          type: string
+          enum: [online, offline, degraded]
+        services:
+          type: array
+          items:
+            type: string
+        last_check:
+          type: string
+          format: date-time
+        meta:
+          type: object
+
+    ServerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        services:
+          type: array
+          items:
+            type: string
+        meta:
+          type: object
+
+    MCPServer:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        command:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+        env:
+          type: object
+        enabled:
+          type: boolean
+
+    Settings:
+      type: object
+      properties:
+        theme:
+          type: string
+          enum: [dark, light, auto]
+        language:
+          type: string
+        refresh_interval_sec:
+          type: integer
+        notifications_enabled:
+          type: boolean
+        custom:
+          type: object
+
+    ChangelogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        source:
+          type: string
+        action:
+          type: string
+          enum: [create, update, delete, move]
+        entity_type:
+          type: string
+        entity_id:
+          type: string
+        diff:
+          type: object

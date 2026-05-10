@@ -239,6 +239,15 @@ myrmex-control/
 |---|---|---|---|
 | `GET` | `/api/health` | ❌ | Health check (uptime, timestamp) |
 
+## 📚 Documentation
+
+| Document | Description |
+|---|---|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Архитектурный обзор: слои, компоненты, data flow |
+| [docs/adr/](docs/adr/index.md) | Architecture Decision Records — ключевые решения |
+| [docs/api/openapi.yaml](docs/api/openapi.yaml) | OpenAPI 3.0 спецификация API |
+| [GETTING_STARTED.md](GETTING_STARTED.md) | Гайд для новых разработчиков |
+
 ## 🚢 Deployment
 
 ### Production Instance (with auth)
