@@ -9,7 +9,7 @@ export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export type AgentStatus = 'idle' | 'working' | 'error' | 'offline';
 export type ServerStatus = 'online' | 'offline' | 'degraded';
-export type SkillType = 'skill' | 'mask' | 'hook' | 'template';
+export type SkillType = 'skill' | 'hook' | 'card' | 'config' | 'knowledge';
 
 // --- Meta ---
 

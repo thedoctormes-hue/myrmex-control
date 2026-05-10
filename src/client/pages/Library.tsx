@@ -61,11 +61,12 @@ export function Library({ state, onRefresh }: Props) {
   };
 
   const typeLabels: Record<string, Record<Lang, string>> = {
-    all:    { en: 'All',       ru: 'Все' },
-    skill:  { en: 'Skills',    ru: 'Скиллы' },
-    mask:   { en: 'Masks',     ru: 'Маски' },
-    hook:   { en: 'Hooks',     ru: 'Хуки' },
-    template: { en: 'Templates', ru: 'Шаблоны' },
+    all:       { en: 'All',          ru: 'Все' },
+    skill:     { en: 'Skills',       ru: 'Скиллы' },
+    hook:      { en: 'Hooks',        ru: 'Хуки' },
+    card:      { en: 'Cards',        ru: 'Карточки' },
+    config:    { en: 'Configs',      ru: 'Конфигурации' },
+    knowledge: { en: 'Knowledge',    ru: 'Знания' },
   };
 
   const lt = (key: string) => typeLabels[key]?.[lang] ?? key;
@@ -123,9 +124,10 @@ export function Library({ state, onRefresh }: Props) {
               className="px-3 py-2 bg-background border border-border rounded-md text-sm"
             >
               <option value="skill">{t('lib.type.skill')}</option>
-              <option value="mask">{t('lib.type.mask')}</option>
               <option value="hook">{t('lib.type.hook')}</option>
-              <option value="template">{t('lib.type.template')}</option>
+              <option value="card">{t('lib.type.card')}</option>
+              <option value="config">{t('lib.type.config')}</option>
+              <option value="knowledge">{t('lib.type.knowledge')}</option>
             </select>
           </div>
           <input

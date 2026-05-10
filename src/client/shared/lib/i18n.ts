@@ -66,10 +66,11 @@ const translations: Record<string, Record<Lang, string>> = {
   'lib.description':  { en: 'Description',   ru: 'Описание' },
   'lib.content':      { en: 'Content *',     ru: 'Содержимое *' },
   'lib.tags':         { en: 'Tags (comma-separated)', ru: 'Теги (через запятую)' },
-  'lib.type.skill':   { en: 'Skill',         ru: 'Скилл' },
-  'lib.type.mask':    { en: 'Mask',          ru: 'Маска' },
-  'lib.type.hook':    { en: 'Hook',          ru: 'Хук' },
-  'lib.type.template':{ en: 'Template',      ru: 'Шаблон' },
+  'lib.type.skill':    { en: 'Skill',         ru: 'Скилл' },
+  'lib.type.hook':     { en: 'Hook',          ru: 'Хук' },
+  'lib.type.card':     { en: 'Card',          ru: 'Карточка' },
+  'lib.type.config':   { en: 'Config',        ru: 'Конфигурация' },
+  'lib.type.knowledge':{ en: 'Knowledge',     ru: 'Знание' },
 
   // Analytics
   'analytics.title':  { en: 'Analytics',     ru: 'Аналитика' },
