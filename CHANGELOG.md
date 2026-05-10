@@ -2,6 +2,34 @@
 
 All notable changes to Myrmex Control will be documented in this file.
 
+## [1.1.0] — 2026-05-11
+
+### 🔒 Security
+- **SETUP_TOKEN** — initial admin registration now requires a secret token (prevents unauthorized access if DB is reset)
+- Auth debug logging for failed login attempts
+
+### 📱 Mobile Fixes
+- **BottomBar** — added Library and Files to mobile navigation (was missing on iPhone Safari and Telegram Mini App)
+- **Service Worker** — version check + auto-reload when stale JS is detected
+- Removed 30s auto-refresh (was resetting form input)
+
+### 📚 Library
+- **5 artifact types**: skill, hook, card, config, knowledge (replaced mask/template)
+- Demo seed data updated with examples for each type
+
+### 🐛 Bug Fixes
+- Fixed VitePWA outDir (was outputting to src/dist/client instead of dist/client)
+- Fixed writeState async bug (user data was never persisting)
+- Fixed CORS for production domains
+- Added silent refresh to prevent form data loss
+
+### 📖 Documentation
+- Rewrote all 3 READMEs (EN/RU/ZH) — clean native language, no mixed translations
+- Updated version badges to v1.1.0
+- Updated GitHub repo description and topics
+
+---
+
 ## [1.0.0] — 2026-05-10
 
 ### 🎉 First Stable Release

@@ -173,36 +173,6 @@
   "library": [
     {
       "id": "lib-001",
-      "name": "SKILL.md Template",
-      "type": "template",
-      "description": "Standard template for creating new agent skills",
-      "content": "# Skill: {{name}}\n\n## Purpose\n{{description}}\n\n## Instructions\n1. Step one\n2. Step two\n3. Step three\n\n## Examples\n```\nExample usage here\n```",
-      "tags": ["template", "skill", "documentation"],
-      "source": "demo",
-      "created_at": "2026-05-01T10:00:00.000Z"
-    },
-    {
-      "id": "lib-002",
-      "name": "Git Commit Hook",
-      "type": "hook",
-      "description": "Pre-commit hook for conventional commits",
-      "content": "#!/bin/bash\n# Conventional commit validator\ncommit_msg=$(cat $1)\npattern=\"^(feat|fix|docs|style|refactor|test|chore|ci|build)(\\(.+\\))?: .{1,72}\"\nif ! [[ $commit_msg =~ $pattern ]]; then\n  echo \"❌ Commit message must follow conventional commits\"\n  exit 1\nfi\necho \"✅ Commit message valid\"",
-      "tags": ["git", "hook", "pre-commit", "conventional-commits"],
-      "source": "demo",
-      "created_at": "2026-05-02T14:00:00.000Z"
-    },
-    {
-      "id": "lib-003",
-      "name": "API Response Mask",
-      "type": "mask",
-      "description": "Standard API response wrapper for consistent output",
-      "content": "{\n  \"success\": true,\n  \"data\": {},\n  \"meta\": {\n    \"timestamp\": \"{{iso_date}}\",\n    \"version\": \"1.0.0\",\n    \"request_id\": \"{{uuid}}\"\n  },\n  \"pagination\": {\n    \"page\": 1,\n    \"per_page\": 20,\n    \"total\": 0\n  }\n}",
-      "tags": ["api", "mask", "response", "json"],
-      "source": "demo",
-      "created_at": "2026-05-03T09:00:00.000Z"
-    },
-    {
-      "id": "lib-004",
       "name": "Docker Healthcheck",
       "type": "skill",
       "description": "Healthcheck script for Docker containers",
@@ -212,7 +182,7 @@
       "created_at": "2026-05-04T11:00:00.000Z"
     },
     {
-      "id": "lib-005",
+      "id": "lib-002",
       "name": "JWT Auth Middleware",
       "type": "skill",
       "description": "Express middleware for JWT verification with refresh rotation",
@@ -222,12 +192,42 @@
       "created_at": "2026-05-05T16:00:00.000Z"
     },
     {
+      "id": "lib-003",
+      "name": "Git Commit Hook",
+      "type": "hook",
+      "description": "Pre-commit hook for conventional commits",
+      "content": "#!/bin/bash\n# Conventional commit validator\ncommit_msg=$(cat $1)\npattern=\"^(feat|fix|docs|style|refactor|test|chore|ci|build)(\\(.+\\))?: .{1,72}\"\nif ! [[ $commit_msg =~ $pattern ]]; then\n  echo \"❌ Commit message must follow conventional commits\"\n  exit 1\nfi\necho \"✅ Commit message valid\"",
+      "tags": ["git", "hook", "pre-commit", "conventional-commits"],
+      "source": "demo",
+      "created_at": "2026-05-02T14:00:00.000Z"
+    },
+    {
+      "id": "lib-004",
+      "name": "Eve — Orchestrator",
+      "type": "card",
+      "description": "Карточка агента Eve — оркестратор задач",
+      "content": "{\n  \"id\": \"agent-eve\",\n  \"name\": \"Eve\",\n  \"role\": \"orchestrator\",\n  \"capabilities\": [\"task-dispatch\", \"monitoring\", \"reporting\"],\n  \"status\": \"online\",\n  \"project\": \"Project Aurora\",\n  \"tasks_completed\": 142,\n  \"avatar\": \"🤖\"\n}",
+      "tags": ["agent", "orchestrator", "eve", "aurora"],
+      "source": "demo",
+      "created_at": "2026-05-01T10:00:00.000Z"
+    },
+    {
+      "id": "lib-005",
+      "name": "Nginx Production Config",
+      "type": "config",
+      "description": "Базовая конфигурация nginx для production",
+      "content": "server {\n    listen 443 ssl http2;\n    server_name example.com;\n\n    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;\n\n    # Security headers\n    add_header X-Frame-Options \"SAMEORIGIN\" always;\n    add_header X-Content-Type-Options \"nosniff\" always;\n    add_header Strict-Transport-Security \"max-age=31536000\" always;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n    }\n}",
+      "tags": ["nginx", "config", "production", "ssl", "security"],
+      "source": "demo",
+      "created_at": "2026-05-03T09:00:00.000Z"
+    },
+    {
       "id": "lib-006",
-      "name": "React Error Boundary",
-      "type": "template",
-      "description": "Error boundary component for React applications",
-      "content": "import { Component } from 'react';\n\nexport class ErrorBoundary extends Component {\n  state = { hasError: false, error: null };\n\n  static getDerivedStateFromError(error) {\n    return { hasError: true, error };\n  }\n\n  componentDidCatch(error, info) {\n    console.error('ErrorBoundary:', error, info);\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return this.props.fallback || (\n        <div className=\"error-fallback\">\n          <h2>Something went wrong</h2>\n          <button onClick={() => this.setState({ hasError: false })}>\n            Try again\n          </button>\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}",
-      "tags": ["react", "error-boundary", "component", "typescript"],
+      "name": "JWT Refresh Rotation Pattern",
+      "type": "knowledge",
+      "description": "Паттерн ротации refresh токенов для безопасной аутентификации",
+      "content": "## JWT Refresh Token Rotation\n\nПри каждом запросе /api/auth/refresh:\n1. Старый refresh token отзывается (revoked)\n2. Создаётся новый refresh token\n3. Новый access token возвращается клиенту\n4. Новый refresh token устанавливается в HttpOnly cookie\n\nЭто предотвращает replay-атаки даже если токен был украден.\n\nЕсли приходит запрос с отозванным токеном — все токены пользователя отзываются (возможная кража).",
+      "tags": ["jwt", "security", "auth", "pattern", "rotation"],
       "source": "demo",
       "created_at": "2026-05-06T13:00:00.000Z"
     }
