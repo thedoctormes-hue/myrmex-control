@@ -63,6 +63,21 @@ React 19 + TypeScript + Vite + Tailwind CSS + Express + JWT/TOTP/RBAC.
 
 ---
 
+## Backlog
+
+### 🧠 Brainstorm: Smart Auto-Refresh
+**Problem:** Simple interval-based polling (every 30s) wastes resources and can disrupt user input.
+**Goal:** Design intelligent auto-refresh that updates data only when needed.
+**Ideas to explore:**
+- `visibilitychange` — pause when tab is hidden, refresh on focus
+- `focus` event — refresh when user returns to the app
+- WebSocket / Server-Sent Events — push updates instead of polling
+- Adaptive interval — longer when idle, shorter when active
+- Stale-while-revalidate — show cached data, update in background
+**Status:** 📋 Pending brainstorm session
+
+---
+
 ## [0.1.0] — 2026-05-09
 
 ### Initial Release

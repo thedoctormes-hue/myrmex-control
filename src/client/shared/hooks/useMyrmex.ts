@@ -24,11 +24,8 @@ export function useMyrmex() {
     refresh();
   }, [refresh]);
 
-  // Auto-refresh every 30s — silent (no loading spinner)
-  useEffect(() => {
-    const interval = setInterval(() => refresh(false), 30000);
-    return () => clearInterval(interval);
-  }, [refresh]);
+  // Auto-refresh removed — use manual refresh button
+  // TODO: brainstorm smart auto-refresh (visibilitychange, focus, WebSocket)
 
   return { state, loading, error, refresh };
 }
