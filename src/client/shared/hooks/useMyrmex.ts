@@ -7,16 +7,16 @@ export function useMyrmex() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (showLoading = true) => {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       const data = await getState();
       setState(data);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }, []);
 
@@ -24,9 +24,9 @@ export function useMyrmex() {
     refresh();
   }, [refresh]);
 
-  // Auto-refresh every 30s
+  // Auto-refresh every 30s — silent (no loading spinner)
   useEffect(() => {
-    const interval = setInterval(refresh, 30000);
+    const interval = setInterval(() => refresh(false), 30000);
     return () => clearInterval(interval);
   }, [refresh]);
 
