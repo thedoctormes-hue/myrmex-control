@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { MyrmexState, Agent, AgentStatus } from '@shared/types';
 import { createAgent, deleteAgent, updateAgent } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
+import { notify } from '../shared/ui/Notifications';
+import { confirmDialog } from '../shared/ui/ConfirmDialog';
 import { Bot, Cpu, Play, Pause, Trash2, Plus, X } from 'lucide-react';
 
 interface Props {
@@ -34,6 +36,7 @@ export function Agents({ state, onRefresh }: Props) {
       setSaving(true);
       setError(null);
       await createAgent({ name: name.trim(), role: role.trim() || 'worker', model: model.trim() || 'unknown', source: 'ui' });
+      notify('success', `Агент «${name.trim()}» создан`);
       setName(''); setRole(''); setModel('');
       setShowForm(false);
       onRefresh();
@@ -44,10 +47,17 @@ export function Agents({ state, onRefresh }: Props) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Удалить агента?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    const ok = await confirmDialog({
+      title: 'Удалить агента?',
+      message: `Агент «${name}» будет удалён. Это действие нельзя отменить.`,
+      confirmLabel: 'Удалить',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteAgent(id);
+      notify('info', `Агент «${name}» удалён`);
       onRefresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка удаления');
@@ -162,7 +172,7 @@ function AgentCard({
           </div>
         </div>
         <button
-          onClick={() => onDelete(agent.id)}
+          onClick={() => onDelete(agent.id, agent.name)}
           className="text-muted-foreground hover:text-destructive transition-colors p-1"
           aria-label="Удалить"
         >

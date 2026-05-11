@@ -3,6 +3,7 @@ import { ServerWidget } from '../features/dashboard/ServerWidget';
 import { BalanceWidget } from '../features/dashboard/BalanceWidget';
 import { SignalsFeed } from '../features/dashboard/SignalsFeed';
 import { HealthScoreWidget } from '../features/dashboard/HealthScore';
+import { Network } from 'lucide-react';
 
 interface Props {
   state: MyrmexState | null;
@@ -77,6 +78,20 @@ export function Dashboard({ state, onRefresh }: Props) {
           })}
         </div>
       </div>
+
+      {/* Lab Map */}
+      <a
+        href="/graph"
+        className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors flex items-center gap-3"
+      >
+        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Network className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <div className="font-semibold text-sm">Карта лаборатории</div>
+          <div className="text-xs text-muted-foreground">Интерактивный граф связей</div>
+        </div>
+      </a>
 
       {/* Widgets */}
       <div className="grid md:grid-cols-2 gap-4">

@@ -9,6 +9,10 @@ import { Sidebar } from '../shared/ui/Sidebar';
 import { BottomBar } from '../shared/ui/BottomBar';
 import { ErrorBoundary } from '../shared/ui/ErrorBoundary';
 import { DashboardSkeleton, PageSkeleton } from '../shared/ui/Skeleton';
+import { NotificationProvider } from '../shared/ui/Notifications';
+import { Breadcrumbs } from '../shared/ui/Breadcrumbs';
+import { CommandPalette, useCommandPalette } from '../shared/ui/CommandPalette';
+import { ConfirmProvider } from '../shared/ui/ConfirmDialog';
 
 // Lazy-loaded pages — code splitting
 const Dashboard = lazy(() => import('../pages/Dashboard'));
@@ -90,6 +94,9 @@ export default function App() {
 
   const mainRoutes = ['/', '/projects', '/agents', '/library', '/files', '/servers', '/analytics', '/audit', '/settings'];
   useSwipeNav(mainRoutes);
+  const { isOpen, setIsOpen, commands } = useCommandPalette((path: string) => {
+    window.location.href = path;
+  });
 
   useEffect(() => {
     initTWA();
@@ -220,6 +227,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
+      <NotificationProvider>
       <div className="flex h-screen overflow-hidden bg-background text-foreground">
         {auth.demo && (
           <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-black text-center text-sm py-1 font-medium">
@@ -228,6 +236,7 @@ export default function App() {
         )}
         <Sidebar state={state} theme={theme} onToggleTheme={toggle} onLogout={auth.needsAuth && !auth.demo ? handleLogout : undefined} />
         <main className={`flex-1 overflow-auto p-4 md:p-6 pb-16 md:pb-6 ${auth.demo ? 'pt-8' : ''}`}>
+          <Breadcrumbs state={state} />
           <Suspense fallback={<DashboardSkeleton />}>
             <ErrorBoundary>
               <Routes>
@@ -250,6 +259,10 @@ export default function App() {
         </main>
         <BottomBar />
       </div>
+      <ConfirmProvider>
+        <CommandPalette isOpen={isOpen} onClose={() => setIsOpen(false)} commands={commands} />
+      </ConfirmProvider>
+      </NotificationProvider>
     </ErrorBoundary>
   );
 }

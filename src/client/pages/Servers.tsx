@@ -2,6 +2,8 @@ import { useState } from 'react';
 import type { MyrmexState, Server, ServerStatus } from '@shared/types';
 import { createServer, deleteServer, updateServer } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
+import { notify } from '../shared/ui/Notifications';
+import { confirmDialog } from '../shared/ui/ConfirmDialog';
 import { Server as ServerIcon, Plus, X, Trash2, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -38,6 +40,7 @@ export function Servers({ state, onRefresh }: Props) {
         port: parseInt(port) || 22,
         source: 'ui',
       });
+      notify('success', `Сервер «${name.trim()}» добавлен`);
       setName(''); setHost(''); setPort('22');
       setShowForm(false);
       onRefresh();
@@ -48,10 +51,17 @@ export function Servers({ state, onRefresh }: Props) {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Удалить сервер?')) return;
+  const handleDelete = async (id: string, name: string) => {
+    const ok = await confirmDialog({
+      title: 'Удалить сервер?',
+      message: `Сервер «${name}» будет удалён из списка.`,
+      confirmLabel: 'Удалить',
+      variant: 'danger',
+    });
+    if (!ok) return;
     try {
       await deleteServer(id);
+      notify('info', `Сервер «${name}» удалён`);
       onRefresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка удаления');
@@ -176,7 +186,7 @@ function ServerCard({
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onDelete(server.id)}
+            onClick={() => onDelete(server.id, server.name)}
             className="text-muted-foreground hover:text-destructive transition-colors p-1"
             aria-label="Удалить"
           >

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Settings as SettingsType } from '@shared/types';
 import { getSettings, updateSettings } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
+import { notify } from '../shared/ui/Notifications';
 import { Settings as SettingsIcon, Save, Sun, Moon, Monitor } from 'lucide-react';
 
 export function Settings() {
@@ -23,6 +24,7 @@ export function Settings() {
       const updated = await updateSettings({ ...settings, source: 'ui' });
       setSettings(updated);
       setSaved(true);
+      notify('success', 'Настройки сохранены');
       setTimeout(() => setSaved(false), 2000);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ошибка сохранения');

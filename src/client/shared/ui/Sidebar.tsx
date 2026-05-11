@@ -149,6 +149,13 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
         <p className="text-[10px] text-muted-foreground px-3">
           🔐 JWT + TOTP + RBAC
         </p>
+        <button
+          onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          className="w-full text-left text-[10px] text-muted-foreground hover:text-foreground px-3 flex items-center gap-1.5"
+        >
+          <kbd className="bg-secondary px-1 rounded text-[9px]">⌘K</kbd>
+          Команды
+        </button>
         {isTWA() && (
           <p className="text-[10px] text-green-400 px-3">
             ✈️ Telegram Web App
