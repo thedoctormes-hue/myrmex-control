@@ -9,7 +9,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-16x16.png'],
       manifest: {
         name: 'Myrmex Control — Hive Control Center',
         short_name: 'Myrmex',

@@ -132,3 +132,4 @@ export function Analytics() {
     </div>
   );
 }
+export default Analytics;

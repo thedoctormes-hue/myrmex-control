@@ -1,27 +1,73 @@
-/* Myrmex Design System - Shared Tokens */
+/* Myrmex Design System — Single Source of Truth */
+/* ЕДИНСТВЕННЫЙ файл с CSS-переменными. Не дублировать в index.css! */
+
 :root {
-  /* Подход из demo: тёмные карточки с контрастом */
+  /* === Цвета === */
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
-  --card: 217.2 23% 18.8%; /* #1e293b из demo */
+  --card: 217.2 23% 18.8%;
   --card-foreground: 210 40% 98%;
-  --primary: 160 84% 39.4%; /* emerald #10b981 */
+  --primary: 160 84% 39.4%;       /* emerald #10b981 */
   --primary-foreground: 222.2 84% 4.9%;
-  --secondary: 217.2 32.6% 17.5%;
+  --secondary: 217.2 32.6% 22%;    /* Отличичается от muted */
   --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
+  --muted: 215 20.2% 35%;         /* Отличичается от secondary */
   --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
+  --accent: 217.2 32.6% 25%;      /* Отличичается от secondary/muted */
   --accent-foreground: 210 40% 98%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
   --ring: 160 84% 39.4%;
   --radius: 0.5rem;
+
+  /* === Семантические цвета === */
+  --success: 142 76% 36%;          /* green-600 */
+  --warning: 38 92% 50%;           /* amber-500 */
+  --error: 0 84% 60%;              /* red-500 */
+  --info: 217 91% 60%;             /* blue-500 */
+
+  /* === Типографика === */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* === Z-index === */
+  --z-dropdown: 50;
+  --z-sticky: 100;
+  --z-overlay: 200;
+  --z-modal: 300;
+  --z-toast: 400;
+
+  /* === Shadows === */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+
+  /* === Transitions === */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 }
 
-/* Header gradient как в demo */
+/* Light theme overrides */
+.light {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 84% 4.9();
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+}
+
+/* Header gradient */
 .header-gradient {
   background: linear-gradient(135deg, #181f34, #151c28);
 }
-
-/* JetBrains Mono шрифт */

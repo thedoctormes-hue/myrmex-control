@@ -70,3 +70,4 @@ export function Graph({ state }: Props) {
     </div>
   );
 }
+export default Graph;

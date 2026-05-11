@@ -103,3 +103,4 @@ export function Login({ onLogin }: Props) {
     </div>
   );
 }
+export default Login;
