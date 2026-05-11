@@ -13,6 +13,8 @@ import { NotificationProvider } from '../shared/ui/Notifications';
 import { Breadcrumbs } from '../shared/ui/Breadcrumbs';
 import { CommandPalette, useCommandPalette } from '../shared/ui/CommandPalette';
 import { ConfirmProvider } from '../shared/ui/ConfirmDialog';
+import { Onboarding } from '../pages/Onboarding';
+import { ProfileDropdown } from '../shared/ui/ProfileDropdown';
 
 // Lazy-loaded pages — code splitting
 const Dashboard = lazy(() => import('../pages/Dashboard'));
@@ -97,6 +99,10 @@ export default function App() {
   const { isOpen, setIsOpen, commands } = useCommandPalette((path: string) => {
     window.location.href = path;
   });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    return !localStorage.getItem('myrmex_onboarded');
+  });
+  const navigate = useCallback((path: string) => { window.location.href = path; }, []);
 
   useEffect(() => {
     initTWA();
@@ -236,7 +242,19 @@ export default function App() {
         )}
         <Sidebar state={state} theme={theme} onToggleTheme={toggle} onLogout={auth.needsAuth && !auth.demo ? handleLogout : undefined} />
         <main className={`flex-1 overflow-auto p-4 md:p-6 pb-16 md:pb-6 ${auth.demo ? 'pt-8' : ''}`}>
-          <Breadcrumbs state={state} />
+          {/* Header with profile */}
+          <div className="flex items-center justify-between mb-4">
+            <Breadcrumbs state={state} />
+            <ProfileDropdown
+              username={auth.authenticated ? 'DoctorM' : undefined}
+              role="admin"
+              theme={theme}
+              onToggleTheme={toggle}
+              onLogout={auth.needsAuth && !auth.demo ? handleLogout : undefined}
+              onOpenSettings={() => navigate('/settings')}
+              onOpenShortcuts={() => setIsOpen(true)}
+            />
+          </div>
           <Suspense fallback={<DashboardSkeleton />}>
             <ErrorBoundary>
               <Routes>
@@ -259,6 +277,12 @@ export default function App() {
         </main>
         <BottomBar />
       </div>
+      {showOnboarding && (
+        <Onboarding onComplete={() => {
+          localStorage.setItem('myrmex_onboarded', '1');
+          setShowOnboarding(false);
+        }} />
+      )}
       <ConfirmProvider>
         <CommandPalette isOpen={isOpen} onClose={() => setIsOpen(false)} commands={commands} />
       </ConfirmProvider>

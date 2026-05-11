@@ -3,7 +3,7 @@ import { ServerWidget } from '../features/dashboard/ServerWidget';
 import { BalanceWidget } from '../features/dashboard/BalanceWidget';
 import { SignalsFeed } from '../features/dashboard/SignalsFeed';
 import { HealthScoreWidget } from '../features/dashboard/HealthScore';
-import { Network } from 'lucide-react';
+import { Network, Download } from 'lucide-react';
 
 interface Props {
   state: MyrmexState | null;
@@ -27,12 +27,28 @@ export function Dashboard({ state, onRefresh }: Props) {
             Обзор муравейника · Обновлено {new Date(state._meta.last_updated).toLocaleString('ru')}
           </p>
         </div>
-        <button
-          onClick={onRefresh}
-          className="px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition"
-        >
-          🔄 Обновить
-        </button>
+        <div className="flex items-center gap-2">
+          <a
+            href="/api/state/export?format=json"
+            className="px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition flex items-center gap-1"
+          >
+            <Download className="w-3 h-3" />
+            JSON
+          </a>
+          <a
+            href="/api/state/export?format=csv"
+            className="px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition flex items-center gap-1"
+          >
+            <Download className="w-3 h-3" />
+            CSV
+          </a>
+          <button
+            onClick={onRefresh}
+            className="px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition"
+          >
+            🔄 Обновить
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -48,9 +64,9 @@ export function Dashboard({ state, onRefresh }: Props) {
         <h2 className="text-sm font-semibold text-muted-foreground mb-3">Канбан-борда</h2>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { owner: 'cat', label: '🐱 Кот', color: '#f59e0b' },
-            { owner: 'ant', label: '🐜 Муравей', color: '#22c55e' },
-            { owner: 'zavlab', label: '🏭 ЗавЛаб', color: '#6366f1' },
+            { owner: 'zavlab', label: '🏭 ЗАВЛАБ', color: '#10b981' },
+            { owner: 'ant', label: '🐜 МУРАВЕЙ', color: '#f59e0b' },
+            { owner: 'cat', label: '🐱 КОТ', color: '#8b5cf6' },
           ].map(board => {
             const boardTasks = state.tasks.filter(t => t.owner === board.owner);
             const active = boardTasks.filter(t => t.status !== 'done' && t.status !== 'cancelled').length;
