@@ -95,7 +95,7 @@ declare global {
   }
 }
 
-function getTWA(): TWAInstance | null {
+export function getTWA(): TWAInstance | null {
   if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
     return window.Telegram.WebApp;
   }

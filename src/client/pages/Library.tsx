@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { MyrmexState, Skill } from '@shared/types';
 import { createSkill, deleteSkill } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
-import { t, useLang } from '../shared/lib/i18n';
+import { t, useLang, type Lang } from '../shared/lib/i18n';
 
 interface Props {
   state: MyrmexState | null;
@@ -20,9 +20,13 @@ export function Library({ state, onRefresh }: Props) {
   const [filter, setFilter] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 50;
 
   const allSkills = state?.library || [];
-  const skills = filter === 'all' ? allSkills : allSkills.filter(s => s.type === filter);
+  const filtered = filter === 'all' ? allSkills : allSkills.filter(s => s.type === filter);
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const skills = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,7 +81,7 @@ export function Library({ state, onRefresh }: Props) {
         <div>
           <h1 className="text-2xl font-bold">{t('lib.title')}</h1>
           <p className="text-sm text-muted-foreground">
-            {allSkills.length} {lang === 'ru' ? 'элементов' : 'items'}
+            {filtered.length} {lang === 'ru' ? 'элементов' : 'items'}{totalPages > 1 ? ` (стр. ${page} из ${totalPages})` : ''}
           </p>
         </div>
         <button
@@ -94,7 +98,7 @@ export function Library({ state, onRefresh }: Props) {
         {Object.keys(typeLabels).map(key => (
           <button
             key={key}
-            onClick={() => setFilter(key)}
+            onClick={() => { setFilter(key); setPage(1); }}
             className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
               filter === key
                 ? 'bg-primary text-primary-foreground'
@@ -197,6 +201,28 @@ export function Library({ state, onRefresh }: Props) {
         <div className="text-center py-12 text-muted-foreground">
           <div className="text-4xl mb-2">📚</div>
           <p>{t('lib.empty')}</p>
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="px-3 py-1.5 text-xs bg-secondary rounded-md disabled:opacity-50"
+          >
+            ←
+          </button>
+          <span className="text-xs text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="px-3 py-1.5 text-xs bg-secondary rounded-md disabled:opacity-50"
+          >
+            →
+          </button>
         </div>
       )}
     </div>

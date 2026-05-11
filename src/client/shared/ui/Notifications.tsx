@@ -41,7 +41,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const add = useCallback((type: NotificationType, message: string, duration = 4000) => {
-    const id = crypto.randomUUID();
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     setNotifications(prev => [...prev, { id, type, message, duration }]);
   }, []);
 

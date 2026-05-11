@@ -207,6 +207,22 @@ export const login = (username: string, password: string, totp_code?: string) =>
     body: JSON.stringify({ username, password, totp_code }),
   });
 
+/** Authenticate via Telegram Web App initData */
+export const twaLogin = (initData: string): Promise<AuthResponse> =>
+  fetch(`${BASE}/auth/twa`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ init_data: initData }),
+  }).then(async (res) => {
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    if (data.access_token) setToken(data.access_token);
+    return data;
+  });
+
 export const refreshToken = () =>
   request<{ success: boolean; access_token: string }>('/auth/refresh', { method: 'POST' });
 

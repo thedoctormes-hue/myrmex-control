@@ -25,7 +25,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   const addToast = useCallback((type: ToastType, message: string, duration = 4000) => {
-    const id = crypto.randomUUID();
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
     const toast: Toast = { id, type, message, duration };
     setToasts(prev => [...prev, toast]);
 

@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { login } from '../shared/lib/api';
+import { useState, useEffect, useRef } from 'react';
+import { login, twaLogin } from '../shared/lib/api';
 import { t, useLang } from '../shared/lib/i18n';
+import { isTWA, getTWA } from '../shared/lib/twa';
 
 interface Props {
   onLogin: (token: string) => void;
@@ -14,6 +15,31 @@ export function Login({ onLogin }: Props) {
   const [totpRequired, setTotpRequired] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [twaLoading, setTwaLoading] = useState(false);
+  const twaAttempted = useRef(false);
+
+  // Auto-login via Telegram Web App
+  useEffect(() => {
+    if (!isTWA() || twaAttempted.current) return;
+    twaAttempted.current = true;
+
+    const twa = getTWA();
+    if (!twa?.initData) return;
+
+    setTwaLoading(true);
+    twaLogin(twa.initData)
+      .then((res) => {
+        if (res.access_token) {
+          onLogin(res.access_token);
+        }
+      })
+      .catch((err) => {
+        // TWA auth failed — show login form
+        console.warn('[TWA] Auth failed:', err.message);
+        setError(lang === 'ru' ? '⚠️ Ошибка Telegram auth. Войдите вручную.' : '⚠️ Telegram auth failed. Please log in manually.');
+      })
+      .finally(() => setTwaLoading(false));
+  }, [onLogin, lang]);
 
   const err = (ru: string, en: string) => lang === 'ru' ? ru : en;
 
@@ -44,6 +70,20 @@ export function Login({ onLogin }: Props) {
       setLoading(false);
     }
   };
+
+  // TWA auto-login in progress
+  if (twaLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="text-center">
+          <div className="text-5xl mb-4 animate-bounce">🐜</div>
+          <p className="text-muted-foreground">
+            {lang === 'ru' ? 'Авторизация через Telegram...' : 'Authenticating via Telegram...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

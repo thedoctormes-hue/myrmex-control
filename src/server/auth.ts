@@ -24,6 +24,148 @@ import { TOTP, Secret } from 'otpauth';
 import { readState, writeState, createLogEntry, isDemo } from './myrmex.js';
 import type { User, UserRole, RefreshToken } from '@shared/types.js';
 
+// ============================================================
+// Telegram Web App (TWA) Auth
+// ============================================================
+//
+// Flow:
+//   1. Client detects window.Telegram.WebApp, sends initData to server
+//   2. Server verifies initData HMAC signature using bot token
+//   3. If valid, server creates/finds user by Telegram ID, issues JWT
+//
+// Env:
+//   TELEGRAM_BOT_TOKEN — bot token from @BotFather (required for TWA auth)
+// ============================================================
+
+interface TWAUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+  is_premium?: string;
+}
+
+function getBotToken(): string | null {
+  return process.env.TELEGRAM_BOT_TOKEN || null;
+}
+
+/**
+ * Verify Telegram Web App initData.
+ * https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
+ *
+ * Returns parsed user data if valid, null otherwise.
+ */
+function verifyTWAInitData(initData: string): TWAUser | null {
+  const botToken = getBotToken();
+  if (!botToken) return null;
+
+  try {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    if (!hash) return null;
+
+    // Build data_check_string: all params except hash, sorted alphabetically, joined with \n
+    params.delete('hash');
+    const dataCheckString = Array.from(params.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+
+    // Check auth_date is not too old (24h)
+    const authDate = parseInt(params.get('auth_date') || '0', 10);
+    if (Date.now() / 1000 - authDate > 86400) return null;
+
+    // Compute secret key: HMAC-SHA256 of bot token with key "WebAppData"
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
+
+    // Compute HMAC-SHA256 of data_check_string with secret key
+    const computedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+    if (computedHash !== hash) return null;
+
+    // Parse user
+    const userStr = params.get('user');
+    if (!userStr) return null;
+    return JSON.parse(userStr) as TWAUser;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Find or create a user by Telegram ID.
+ * Telegram users get 'viewer' role by default.
+ */
+function findOrCreateTWAUser(twaUser: TWAUser): User {
+  const state = readState();
+  const tgId = `tg-${twaUser.id}`;
+
+  // Try to find existing TWA user
+  let user = state.users.find(u => u.id === tgId);
+  if (user) {
+    // Update last login
+    user.last_login = new Date().toISOString();
+    writeState(state, 'auth', createLogEntry('auth', 'twa_login', 'user', user.id, { tg_id: twaUser.id }));
+    return user;
+  }
+
+  // Create new TWA user
+  user = {
+    id: tgId,
+    username: twaUser.username || `tg_${twaUser.id}`,
+    password_hash: '', // TWA users don't have passwords
+    role: 'viewer',
+    totp_secret: null,
+    totp_enabled: false,
+    created_at: new Date().toISOString(),
+    last_login: new Date().toISOString(),
+  };
+  state.users.push(user);
+  writeState(state, 'auth', createLogEntry('auth', 'twa_create', 'user', user.id, { tg_id: twaUser.id, username: user.username }));
+  return user;
+}
+
+/** POST /api/auth/twa — authenticate via Telegram Web App initData */
+export async function twaAuth(req: Request, res: Response) {
+  // Demo mode — skip TWA auth
+  if (isDemo()) {
+    const accessToken = generateAccessToken({ id: 'demo-user', username: 'demo', role: 'admin', password_hash: '', totp_secret: null, totp_enabled: false, created_at: '', last_login: null });
+    return res.json({ success: true, access_token: accessToken, user: { id: 'demo-user', username: 'demo', role: 'admin' } });
+  }
+
+  const { init_data } = req.body;
+  if (!init_data || typeof init_data !== 'string') {
+    res.status(400).json({ error: 'Missing init_data' });
+    return;
+  }
+
+  const twaUser = verifyTWAInitData(init_data);
+  if (!twaUser) {
+    res.status(401).json({ error: 'Invalid Telegram initData' });
+    return;
+  }
+
+  const user = findOrCreateTWAUser(twaUser);
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken();
+  storeRefreshToken(user.id, refreshToken);
+
+  res.cookie('refresh_token', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    path: '/api/auth/refresh',
+    maxAge: REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+  });
+
+  res.json({
+    success: true,
+    access_token: accessToken,
+    user: { id: user.id, username: user.username, role: user.role },
+  });
+}
+
 // --- Config ---
 
 const ACCESS_TOKEN_TTL = '15m';

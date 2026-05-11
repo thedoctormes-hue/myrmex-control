@@ -8,7 +8,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { requireAuth, requireRole, setup, login, logout, authStatus, refresh, totpSetup, totpVerify, totpDisable } from './auth.js';
+import { requireAuth, requireRole, setup, login, logout, authStatus, refresh, totpSetup, totpVerify, totpDisable, twaAuth } from './auth.js';
 import { securityHeaders, rateLimit, errorHandler } from './middleware.js';
 import { router as tasksRouter } from './api/tasks.js';
 import { router as projectsRouter } from './api/projects.js';
@@ -58,6 +58,7 @@ app.get('/api/version', (_req, res) => {
 // Auth routes (публичные)
 app.post('/api/auth/setup', setup);
 app.post('/api/auth/login', login);
+app.post('/api/auth/twa', twaAuth);
 app.post('/api/auth/logout', logout);
 app.post('/api/auth/refresh', refresh);
 app.get('/api/auth/status', authStatus);
