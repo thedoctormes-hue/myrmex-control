@@ -15,6 +15,9 @@ import {
   LogOut,
   Globe,
   Bug,
+  Bot,
+  Server,
+  Settings,
 } from 'lucide-react';
 
 interface Props {
@@ -24,17 +27,46 @@ interface Props {
   onLogout?: () => void;
 }
 
+interface NavItem {
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavItem[];
+}
+
 export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
   const [lang, , toggleLang] = useLang();
 
-  const navItems = [
-    { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { to: '/projects', label: t('nav.projects'), icon: FolderKanban },
-    { to: '/library', label: t('nav.library'), icon: Library },
-    { to: '/files', label: t('nav.files'), icon: FolderOpen },
-    { to: '/graph', label: t('nav.graph'), icon: Network },
-    { to: '/analytics', label: t('nav.analytics'), icon: BarChart3 },
-    { to: '/audit', label: t('nav.audit'), icon: ClipboardList },
+  const groups: NavGroup[] = [
+    {
+      label: t('nav.group.main'),
+      items: [
+        { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+      ],
+    },
+    {
+      label: t('nav.group.manage'),
+      items: [
+        { to: '/projects', label: t('nav.projects'), icon: FolderKanban },
+        { to: '/agents', label: t('nav.agents'), icon: Bot },
+        { to: '/library', label: t('nav.library'), icon: Library },
+        { to: '/files', label: t('nav.files'), icon: FolderOpen },
+      ],
+    },
+    {
+      label: t('nav.group.system'),
+      items: [
+        { to: '/servers', label: t('nav.servers'), icon: Server },
+        { to: '/graph', label: t('nav.graph'), icon: Network },
+        { to: '/analytics', label: t('nav.analytics'), icon: BarChart3 },
+        { to: '/audit', label: t('nav.audit'), icon: ClipboardList },
+        { to: '/settings', label: t('nav.settings'), icon: Settings },
+      ],
+    },
   ];
 
   return (
@@ -53,26 +85,35 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-1">
-        {navItems.map(item => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                }`
-              }
-            >
-              <Icon className="w-4 h-4" />
-              <span>{item.label}</span>
-            </NavLink>
-          );
-        })}
+      <nav className="flex-1 p-2 space-y-4 overflow-y-auto">
+        {groups.map(group => (
+          <div key={group.label}>
+            <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+              {group.label}
+            </div>
+            <div className="space-y-0.5 mt-1">
+              {group.items.map(item => {
+                const Icon = item.icon;
+                return (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                      }`
+                    }
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{item.label}</span>
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       {/* Footer */}

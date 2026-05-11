@@ -14,6 +14,12 @@ const translations: Record<string, Record<Lang, string>> = {
   'nav.graph':        { en: 'Graph',         ru: 'Граф' },
   'nav.analytics':    { en: 'Analytics',     ru: 'Аналитика' },
   'nav.audit':        { en: 'Audit',         ru: 'Аудит' },
+  'nav.agents':       { en: 'Agents',        ru: 'Агенты' },
+  'nav.servers':      { en: 'Servers',       ru: 'Серверы' },
+  'nav.settings':     { en: 'Settings',      ru: 'Настройки' },
+  'nav.group.main':   { en: 'Main',          ru: 'Основное' },
+  'nav.group.manage': { en: 'Management',    ru: 'Управление' },
+  'nav.group.system': { en: 'System',        ru: 'Система' },
 
   // Common
   'common.loading':   { en: 'Loading...',    ru: 'Загрузка...' },

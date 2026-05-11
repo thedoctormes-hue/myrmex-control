@@ -2,7 +2,7 @@
 // API клиент — fetch обёртки для всех эндпоинтов
 // ============================================================
 
-import type { MyrmexState, Task, Project, Skill, MyrmexFile, Server } from '@shared/types';
+import type { MyrmexState, Task, Project, Skill, MyrmexFile, Server, Agent, Settings } from '@shared/types';
 
 const BASE = '/api';
 
@@ -142,6 +142,38 @@ export const deleteSkill = (id: string) =>
 export const getFiles = (dir: 'inbox' | 'outbox' = 'inbox') =>
   request<MyrmexFile[]>(`/files?dir=${dir}`);
 
+export const uploadFile = (file: File, dir: 'inbox' | 'outbox' = 'inbox', onProgress?: (pct: number) => void) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  return new Promise<MyrmexFile>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${BASE}/files/upload?dir=${dir}`);
+    if (accessToken) xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        onProgress(Math.round((e.loaded / e.total) * 100));
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try { resolve(JSON.parse(xhr.responseText)); } catch { reject(new Error('Invalid JSON')); }
+      } else {
+        try { reject(new Error(JSON.parse(xhr.responseText).error || `HTTP ${xhr.status}`)); }
+        catch { reject(new Error(`HTTP ${xhr.status}`)); }
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('Network error'));
+    xhr.send(formData);
+  });
+};
+
+export const deleteFile = (id: string) =>
+  request<{ success: boolean; id: string }>(`/files/${id}`, { method: 'DELETE', body: JSON.stringify({}) });
+
 // --- Servers ---
 
 export const getServers = () => request<Server[]>('/servers');
@@ -243,6 +275,13 @@ export const getAuditLog = (params?: Record<string, string>) => {
 export const getAuditEntityTypes = () => request<string[]>('/audit/entity-types');
 export const getAuditSources = () => request<string[]>('/audit/sources');
 
+// --- Settings ---
+
+export const getSettings = () => request<Settings>('/settings');
+
+export const updateSettings = (data: Partial<Settings>) =>
+  request<Settings>('/settings', { method: 'PUT', body: JSON.stringify(data) });
+
 // --- Version check ---
 
 export interface VersionResponse {
@@ -250,6 +289,21 @@ export interface VersionResponse {
 }
 
 export const getVersion = () => request<VersionResponse>('/version');
+
+// --- Agents ---
+
+export const getAgents = () => request<Agent[]>('/agents');
+
+export const getAgent = (id: string) => request<Agent>(`/agents/${id}`);
+
+export const createAgent = (data: Partial<Agent>) =>
+  request<Agent>('/agents', { method: 'POST', body: JSON.stringify(data) });
+
+export const updateAgent = (id: string, data: Partial<Agent>) =>
+  request<Agent>(`/agents/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+export const deleteAgent = (id: string) =>
+  request<{ success: boolean; id: string }>(`/agents/${id}`, { method: 'DELETE', body: JSON.stringify({}) });
 
 // --- Analytics ---
 

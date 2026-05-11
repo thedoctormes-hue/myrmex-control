@@ -21,6 +21,9 @@ const Login = lazy(() => import('../pages/Login'));
 const Setup = lazy(() => import('../pages/Setup'));
 const AuditLog = lazy(() => import('../pages/AuditLog'));
 const Analytics = lazy(() => import('../pages/Analytics'));
+const Agents = lazy(() => import('../pages/Agents'));
+const Servers = lazy(() => import('../pages/Servers'));
+const Settings = lazy(() => import('../pages/Settings'));
 
 // Force-reload if Service Worker serves stale version
 async function checkVersion() {
@@ -85,7 +88,7 @@ export default function App() {
     demo: false,
   });
 
-  const mainRoutes = ['/', '/projects', '/analytics', '/audit', '/graph'];
+  const mainRoutes = ['/', '/projects', '/agents', '/library', '/files', '/servers', '/analytics', '/audit', '/settings'];
   useSwipeNav(mainRoutes);
 
   useEffect(() => {
@@ -231,11 +234,15 @@ export default function App() {
                 <Route path="/" element={<Dashboard state={state} onRefresh={refresh} />} />
                 <Route path="/projects" element={<Projects state={state} onRefresh={refresh} />} />
                 <Route path="/project/:id" element={<Board state={state} onRefresh={refresh} />} />
+                <Route path="/board/:owner" element={<Board state={state} onRefresh={refresh} />} />
+                <Route path="/agents" element={<Agents state={state} onRefresh={refresh} />} />
                 <Route path="/library" element={<Library state={state} onRefresh={refresh} />} />
                 <Route path="/files" element={<Files />} />
+                <Route path="/servers" element={<Servers state={state} onRefresh={refresh} />} />
                 <Route path="/graph" element={<Graph state={state} />} />
                 <Route path="/audit" element={<AuditLog />} />
                 <Route path="/analytics" element={<Analytics />} />
+                <Route path="/settings" element={<Settings />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ErrorBoundary>

@@ -42,6 +42,42 @@ export function Dashboard({ state, onRefresh }: Props) {
         <StatCard label="Серверы" value={`${onlineServers}/${state.servers.length}`} icon="🖥️" color="#3b82f6" />
       </div>
 
+      {/* Kanban Boards */}
+      <div>
+        <h2 className="text-sm font-semibold text-muted-foreground mb-3">Канбан-борда</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { owner: 'cat', label: '🐱 Кот', color: '#f59e0b' },
+            { owner: 'ant', label: '🐜 Муравей', color: '#22c55e' },
+            { owner: 'zavlab', label: '🏭 ЗавЛаб', color: '#6366f1' },
+          ].map(board => {
+            const boardTasks = state.tasks.filter(t => t.owner === board.owner);
+            const active = boardTasks.filter(t => t.status !== 'done' && t.status !== 'cancelled').length;
+            return (
+              <a
+                key={board.owner}
+                href={`/board/${board.owner}`}
+                className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+              >
+                <div className="font-semibold text-sm">{board.label}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {boardTasks.length} задач · {active} активных
+                </div>
+                <div className="mt-2 h-1.5 bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: boardTasks.length ? `${((boardTasks.length - active) / boardTasks.length) * 100}%` : '0%',
+                      backgroundColor: board.color,
+                    }}
+                  />
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Widgets */}
       <div className="grid md:grid-cols-2 gap-4">
         <HealthScoreWidget />

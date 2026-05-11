@@ -19,6 +19,8 @@ import { router as stateRouter } from './api/state.js';
 import { router as healthRouter } from './api/health.js';
 import { router as auditRouter } from './api/audit.js';
 import { router as analyticsRouter } from './api/analytics.js';
+import { router as agentsRouter } from './api/agents.js';
+import { router as settingsRouter } from './api/settings.js';
 import { startWatchdog, stopWatchdog } from './watchdog.js';
 import { runAsDemo } from './myrmex.js';
 // import { startBackupScheduler, stopBackupScheduler } from './backup.js';
@@ -76,6 +78,8 @@ app.use('/api/servers', requireAuth, serversRouter);
 app.use('/api/health', requireAuth, healthRouter);
 app.use('/api/audit', requireAuth, requireRole('admin'), auditRouter);
 app.use('/api/analytics', requireAuth, analyticsRouter);
+app.use('/api/agents', requireAuth, agentsRouter);
+app.use('/api/settings', requireAuth, settingsRouter);
 
 // Production: статические файлы клиента
 const clientDist = join(__dirname, '../client');

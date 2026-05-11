@@ -17,9 +17,19 @@ const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
 ];
 
 export function Board({ state, onRefresh }: Props) {
-  const { id } = useParams<{ id: string }>();
-  const project = state?.projects.find(p => p.id === id);
-  const tasks = state?.tasks.filter(t => t.project_id === id) || [];
+  const { id, owner } = useParams<{ id: string; owner: string }>();
+
+  // Kanban board by owner (cat/ant/zavlab) or project board by id
+  const isKanban = !!owner;
+  const project = !isKanban ? state?.projects.find(p => p.id === id) : undefined;
+
+  const tasks = isKanban
+    ? (state?.tasks.filter(t => t.owner === owner) || [])
+    : (state?.tasks.filter(t => t.project_id === id) || []);
+
+  const boardTitle = isKanban
+    ? { cat: '🐱 Кот', ant: '🐜 Муравей', zavLab: '🏭 ЗавЛаб' }[owner] || owner
+    : project?.name || 'Доска';
 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -28,8 +38,14 @@ export function Board({ state, onRefresh }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !id) return;
-    await createTask({ title, project_id: id, source: 'ui' });
+    if (!title.trim()) return;
+    const taskData: Record<string, string> = { title, source: 'ui' };
+    if (isKanban && owner) {
+      taskData.owner = owner;
+    } else if (id) {
+      taskData.project_id = id;
+    }
+    await createTask(taskData);
     setTitle('');
     setShowForm(false);
     onRefresh();
@@ -57,7 +73,7 @@ export function Board({ state, onRefresh }: Props) {
     setDragOverCol(null);
   };
 
-  if (!project) {
+  if (!isKanban && !project) {
     return (
       <div className="flex items-center justify-center h-64 text-muted-foreground">
         <div className="text-center">
@@ -73,8 +89,14 @@ export function Board({ state, onRefresh }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <span>{project.icon}</span>
-            <span>{project.name}</span>
+            {isKanban ? (
+              <span>{boardTitle}</span>
+            ) : (
+              <>
+                <span>{project?.icon}</span>
+                <span>{project?.name}</span>
+              </>
+            )}
           </h1>
           <p className="text-sm text-muted-foreground">{tasks.length} задач</p>
         </div>
