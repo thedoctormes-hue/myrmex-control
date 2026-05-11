@@ -74,7 +74,7 @@ export function Dashboard({ state, onRefresh }: Props) {
               <a
                 key={board.owner}
                 href={`/board/${board.owner}`}
-                className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-all hover-lift hover-glow"
               >
                 <div className="font-semibold text-sm">{board.label}</div>
                 <div className="text-xs text-muted-foreground mt-1">

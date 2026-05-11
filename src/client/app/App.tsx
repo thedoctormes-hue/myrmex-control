@@ -241,7 +241,7 @@ export default function App() {
           </div>
         )}
         <Sidebar state={state} theme={theme} onToggleTheme={toggle} onLogout={auth.needsAuth && !auth.demo ? handleLogout : undefined} />
-        <main className={`flex-1 overflow-auto p-4 md:p-6 pb-16 md:pb-6 ${auth.demo ? 'pt-8' : ''}`}>
+        <main className={`flex-1 overflow-auto p-4 md:p-6 pb-16 md:pb-6 animate-fade-in ${auth.demo ? 'pt-8' : ''}`}>
           {/* Header with profile */}
           <div className="flex items-center justify-between mb-4">
             <Breadcrumbs state={state} />

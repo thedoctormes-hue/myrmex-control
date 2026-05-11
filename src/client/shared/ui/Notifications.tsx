@@ -104,8 +104,8 @@ function NotificationToast({ notification, onRemove }: { notification: Notificat
 
   return (
     <div
-      className={`${colors.bg} ${colors.border} border rounded-lg p-3 flex items-start gap-2 shadow-lg transition-all duration-300 ${
-        exiting ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'
+      className={`animate-toast-in ${colors.bg} ${colors.border} border rounded-lg p-3 flex items-start gap-2 shadow-lg ${
+        exiting ? 'animate-toast-out' : ''
       }`}
     >
       <Icon className={`w-4 h-4 mt-0.5 flex-shrink-0 ${colors.icon}`} />

@@ -58,6 +58,14 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
       ],
     },
     {
+      label: 'Канбан',
+      items: [
+        { to: '/board/zavlab', label: '🏭 ЗАВЛАБ', icon: LayoutDashboard },
+        { to: '/board/ant', label: '🐜 МУРАВЕЙ', icon: LayoutDashboard },
+        { to: '/board/cat', label: '🐱 КОТ', icon: LayoutDashboard },
+      ],
+    },
+    {
       label: t('nav.group.system'),
       items: [
         { to: '/servers', label: t('nav.servers'), icon: Server },
@@ -91,7 +99,7 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
             <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
               {group.label}
             </div>
-            <div className="space-y-0.5 mt-1">
+            <div className="space-y-0.5 mt-1 stagger-children">
               {group.items.map(item => {
                 const Icon = item.icon;
                 return (

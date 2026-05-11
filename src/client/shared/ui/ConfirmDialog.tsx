@@ -65,8 +65,8 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
       {children}
       {dialog && (
         <div className="fixed inset-0 z-[300] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={handleCancel} />
-          <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-backdrop-in" onClick={handleCancel} />
+          <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden animate-modal-in">
             {/* Header */}
             <div className={`px-5 py-4 border-b border-border ${variantColors[dialog.variant || 'danger'].bg}`}>
               <div className="flex items-center gap-3">
