@@ -22,10 +22,10 @@
   <img src="https://img.shields.io/badge/Tailwind%20CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
   <img src="https://img.shields.io/badge/Express-4-000000?style=flat-square&logo=express&logoColor=white" alt="Express 4">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License">
-  <img src="https://img.shields.io/badge/Version-1.1.0-amber?style=flat-square" alt="v1.1.0">
+  <img src="https://img.shields.io/badge/Version-1.2.0-amber?style=flat-square" alt="v1.2.0">
   <img src="https://img.shields.io/github/actions/workflow/status/thedoctormes-hue/myrmex-control/ci.yml?branch=main&label=CI&style=flat-square" alt="CI">
   <img src="https://img.shields.io/badge/coverage-tested-brightgreen?style=flat-square" alt="Coverage">
-  <img src="https://img.shields.io/badge/tests-145%20passing-brightgreen?style=flat-square" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-174%20passing-brightgreen?style=flat-square" alt="Tests">
 </p>
 
 ---

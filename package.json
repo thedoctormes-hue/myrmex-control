@@ -1,7 +1,7 @@
 {
   "name": "myrmex-control",
-  "version": "1.0.0",
-  "description": "Hive Control Center — AI agent infrastructure dashboard",
+  "version": "1.2.0",
+  "description": "Hive Control Center \u2014 AI agent infrastructure dashboard",
   "type": "module",
   "scripts": {
     "dev:server": "tsx watch src/server/index.ts",
