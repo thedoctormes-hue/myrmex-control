@@ -8,8 +8,9 @@ import { join } from 'path';
 import lockfile from 'proper-lockfile';
 import type { MyrmexState, ChangelogEntry } from '@shared/types.js';
 
-const MYRMEX_PATH = join(process.cwd(), 'myrmex.json');
-const TMP_PATH = join(process.cwd(), 'myrmex.json.tmp');
+const MYRMEX_FILE = process.env.MYRMEX_FILE || 'myrmex.json';
+const MYRMEX_PATH = join(process.cwd(), MYRMEX_FILE);
+const TMP_PATH = join(process.cwd(), `${MYRMEX_FILE}.tmp`);
 const MAX_CHANGELOG = 1000;
 
 // --- BL-022: In-memory cache ---

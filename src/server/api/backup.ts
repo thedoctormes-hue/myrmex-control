@@ -5,6 +5,7 @@ import { join } from 'path';
 
 const BACKUP_DIR = '/root/LabDoctorM/backups';
 const PROJECT_DIR = '/root/LabDoctorM/projects/myrmex-control';
+const MYRMEX_FILE = process.env.MYRMEX_FILE || 'myrmex.json';
 
 export const router = Router();
 
@@ -16,7 +17,7 @@ router.post('/create', (req: Request, res: Response) => {
     const backupFile = join(BACKUP_DIR, `myrmex-${label}-${date}.json`);
 
     execSync(`mkdir -p "${BACKUP_DIR}"`);
-    execSync(`cp "${join(PROJECT_DIR, 'myrmex.json')}" "${backupFile}"`);
+    execSync(`cp "${join(PROJECT_DIR, MYRMEX_FILE)}" "${backupFile}"`);
 
     const stats = statSync(backupFile);
     res.json({
@@ -80,8 +81,8 @@ router.post('/restore', (req: Request, res: Response) => {
     // Бэкап текущего перед восстановлением
     const date = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const preRestore = join(BACKUP_DIR, `myrmex-pre-restore-${date}.json`);
-    execSync(`cp "${join(PROJECT_DIR, 'myrmex.json')}" "${preRestore}"`);
-    execSync(`cp "${backupFile}" "${join(PROJECT_DIR, 'myrmex.json')}"`);
+    execSync(`cp "${join(PROJECT_DIR, MYRMEX_FILE)}" "${preRestore}"`);
+    execSync(`cp "${backupFile}" "${join(PROJECT_DIR, MYRMEX_FILE)}"`);
 
     res.json({ success: true, restored_from: filename, pre_restore_backup: preRestore });
   } catch (err) {

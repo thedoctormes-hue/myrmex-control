@@ -5,7 +5,7 @@
 
 import { Request, Response, NextFunction } from 'express';
 import crypto, { timingSafeEqual } from 'crypto';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import bcrypt from 'bcryptjs';
 import { readState, writeState, createLogEntry } from './myrmex.js';
@@ -39,21 +39,30 @@ function markQueryIdUsed(queryId: string): void {
 
 // --- Password storage ---
 
-function getPassword(): string | null {
+function getPasswordHash(): string | null {
   // 1. Приоритет: переменная окружения
+  if (process.env.MYRMEX_PASSWORD_HASH) return process.env.MYRMEX_PASSWORD_HASH;
   if (process.env.MYRMEX_PASSWORD) return process.env.MYRMEX_PASSWORD;
 
   // 2. Из .env файла
   try {
-    const { readFileSync } = require('fs');
+    // readFileSync imported from 'fs' at top
     if (existsSync(ENV_FILE)) {
       const env = readFileSync(ENV_FILE, 'utf-8');
-      const match = env.match(/^MYRMEX_PASSWORD=(.+)$/m);
-      if (match) return match[1].trim();
+      const hashMatch = env.match(/^MYRMEX_PASSWORD_HASH=(.+)$/m);
+      if (hashMatch) return hashMatch[1].trim();
+      const passMatch = env.match(/^MYRMEX_PASSWORD=(.+)$/m);
+      if (passMatch) return passMatch[1].trim();
     }
-  } catch {}
+  } catch (e) {
+    console.error('[getPasswordHash] error:', e);
+  }
 
   return null;
+}
+
+function getPassword(): string | null {
+  return getPasswordHash();
 }
 
 // --- Sessions (in-memory) ---
@@ -86,8 +95,8 @@ function isValidSession(token: string): boolean {
 // --- Middleware ---
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  // Демо-режим — пропускаем авторизацию
-  try { if (existsSync(join(process.cwd(), '.demo'))) return next(); } catch {}
+  // Демо-процесс: авторизация не требуется
+  if (process.env.MYRMEX_FILE === 'myrmex-demo.json') return next();
 
   const password = getPassword();
   // Если пароль не задан — пропускаем (режим setup)
@@ -106,6 +115,16 @@ export function setup(req: Request, res: Response) {
   if (password) {
     res.status(403).json({ error: 'Пароль уже задан. Используйте логин.' });
     return;
+  }
+
+  // BL-017: Setup требует SETUP_TOKEN
+  const setupToken = process.env.SETUP_TOKEN;
+  if (setupToken) {
+    const providedToken = req.headers['x-setup-token'] || req.body?.setupToken;
+    if (providedToken !== setupToken) {
+      res.status(403).json({ error: 'SETUP_TOKEN required' });
+      return;
+    }
   }
 
   // BL-014: Zod validation
@@ -161,7 +180,15 @@ export function login(req: Request, res: Response) {
   }
   const { password: input } = parsed.data;
 
-  if (input !== password) {
+  // Сравнение: bcrypt hash или plain text
+  let valid = false;
+  if (password.startsWith('$2')) {
+    valid = bcrypt.compareSync(input, password);
+  } else {
+    valid = input === password;
+  }
+
+  if (!valid) {
     recordAuthFailure(req);
     res.status(401).json({ error: 'Неверный пароль' });
     return;
@@ -190,14 +217,13 @@ export function logout(req: Request, res: Response) {
 // --- Auth status ---
 
 export function authStatus(req: Request, res: Response) {
-  const isDemo = existsSync(join(process.cwd(), '.demo'));
+  const isDemo = process.env.MYRMEX_FILE === 'myrmex-demo.json';
   const password = getPassword();
   const token = req.cookies?.[SESSION_COOKIE];
-  const needsAuth = !!password && !isDemo;
   const isAuth = token && isValidSession(token);
   res.json({
     authenticated: isDemo ? true : !!isAuth,
-    needsAuth,
+    needsAuth: isDemo ? false : !!password,
     needsSetup: !password && !isDemo,
     demo: isDemo,
   });
