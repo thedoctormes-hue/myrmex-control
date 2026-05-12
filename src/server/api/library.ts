@@ -1,45 +1,44 @@
 import { Router, Request, Response } from 'express';
 import { readState, writeState, createLogEntry } from '../myrmex.js';
 import type { Skill } from '@shared/types.js';
+import { validate } from '../validation/validate.js';
+import { libraryCreateSchema, libraryUpdateSchema } from '../validation/schemas.js';
 
 export const router = Router();
 
-// GET /api/library
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     let items = state.library;
     if (req.query.type) {
       items = items.filter(s => s.type === req.query.type);
     }
     res.json(items);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read library' });
   }
 });
 
-// GET /api/library/:id
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const item = state.library.find(s => s.id === req.params.id);
     if (!item) return res.status(404).json({ error: 'Skill not found' });
     res.json(item);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read skill' });
   }
 });
 
-// POST /api/library
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(libraryCreateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const now = new Date().toISOString();
 
     const skill: Skill = {
       id: crypto.randomUUID(),
       type: req.body.type || 'skill',
-      name: req.body.name || 'Новый скилл',
+      name: req.body.name,
       description: req.body.description || '',
       content: req.body.content || '',
       file_path: req.body.file_path || null,
@@ -54,15 +53,14 @@ router.post('/', async (req: Request, res: Response) => {
     ));
 
     res.status(201).json(skill);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to create skill' });
   }
 });
 
-// PUT /api/library/:id
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', validate(libraryUpdateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.library.findIndex(s => s.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Skill not found' });
 
@@ -80,15 +78,14 @@ router.put('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to update skill' });
   }
 });
 
-// DELETE /api/library/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.library.findIndex(s => s.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Skill not found' });
 
@@ -98,7 +95,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to delete skill' });
   }
 });

@@ -1,9 +1,9 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "last_updated": "2026-05-10T22:00:00.000Z",
-    "last_updated_by": "demo-seed",
-    "change_count": 0
+    "last_updated": "2026-05-12T12:12:06.433Z",
+    "last_updated_by": "ui",
+    "change_count": 1
   },
   "workspace": {
     "name": "Myrmex Control — Demo",
@@ -67,7 +67,11 @@
       "project_id": "proj-aurora",
       "last_heartbeat": "2026-05-10T22:00:00.000Z",
       "tasks_completed": 142,
-      "capabilities": ["task-dispatch", "monitoring", "reporting"],
+      "capabilities": [
+        "task-dispatch",
+        "monitoring",
+        "reporting"
+      ],
       "avatar": "🤖"
     },
     {
@@ -78,7 +82,11 @@
       "project_id": "proj-aurora",
       "last_heartbeat": "2026-05-10T21:58:00.000Z",
       "tasks_completed": 89,
-      "capabilities": ["code-analysis", "linting", "security-scan"],
+      "capabilities": [
+        "code-analysis",
+        "linting",
+        "security-scan"
+      ],
       "avatar": "⚡"
     },
     {
@@ -89,7 +97,11 @@
       "project_id": "proj-nexus",
       "last_heartbeat": "2026-05-10T21:59:00.000Z",
       "tasks_completed": 215,
-      "capabilities": ["llm-routing", "load-balancing", "caching"],
+      "capabilities": [
+        "llm-routing",
+        "load-balancing",
+        "caching"
+      ],
       "avatar": "🔮"
     },
     {
@@ -100,7 +112,11 @@
       "project_id": "proj-nexus",
       "last_heartbeat": "2026-05-10T21:55:00.000Z",
       "tasks_completed": 67,
-      "capabilities": ["api-gateway", "rate-limiting", "auth"],
+      "capabilities": [
+        "api-gateway",
+        "rate-limiting",
+        "auth"
+      ],
       "avatar": "🛡️"
     },
     {
@@ -111,7 +127,11 @@
       "project_id": "proj-forge",
       "last_heartbeat": "2026-05-10T20:30:00.000Z",
       "tasks_completed": 312,
-      "capabilities": ["data-validation", "schema-detection", "quality-score"],
+      "capabilities": [
+        "data-validation",
+        "schema-detection",
+        "quality-score"
+      ],
       "avatar": "🧪"
     },
     {
@@ -122,7 +142,12 @@
       "project_id": "proj-hermes",
       "last_heartbeat": "2026-05-10T22:00:00.000Z",
       "tasks_completed": 1024,
-      "capabilities": ["telegram", "slack", "email", "webhook"],
+      "capabilities": [
+        "telegram",
+        "slack",
+        "email",
+        "webhook"
+      ],
       "avatar": "📡"
     },
     {
@@ -133,7 +158,11 @@
       "project_id": "proj-vault",
       "last_heartbeat": "2026-05-10T21:59:00.000Z",
       "tasks_completed": 56,
-      "capabilities": ["secret-rotation", "audit-log", "access-control"],
+      "capabilities": [
+        "secret-rotation",
+        "audit-log",
+        "access-control"
+      ],
       "avatar": "🔐"
     },
     {
@@ -144,31 +173,215 @@
       "project_id": null,
       "last_heartbeat": "2026-05-10T15:00:00.000Z",
       "tasks_completed": 78,
-      "capabilities": ["doc-generation", "changelog", "api-docs"],
+      "capabilities": [
+        "doc-generation",
+        "changelog",
+        "api-docs"
+      ],
       "avatar": "📝"
     }
   ],
   "tasks": [
-    { "id": "task-001", "title": "Implement JWT refresh rotation", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-08T10:00:00.000Z", "updated_at": "2026-05-09T14:00:00.000Z" },
-    { "id": "task-002", "title": "Add TOTP 2FA support", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-08T11:00:00.000Z", "updated_at": "2026-05-09T16:00:00.000Z" },
-    { "id": "task-003", "title": "Build analytics dashboard", "status": "in_progress", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-09T09:00:00.000Z", "updated_at": "2026-05-10T18:00:00.000Z" },
-    { "id": "task-004", "title": "Integrate Chart.js visualizations", "status": "in_progress", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-09T10:00:00.000Z", "updated_at": "2026-05-10T17:00:00.000Z" },
-    { "id": "task-005", "title": "Setup LLM routing table", "status": "done", "priority": "high", "project_id": "proj-nexus", "agent_id": "agent-freya", "created_at": "2026-05-07T08:00:00.000Z", "updated_at": "2026-05-08T12:00:00.000Z" },
-    { "id": "task-006", "title": "Implement rate limiting per model", "status": "review", "priority": "high", "project_id": "proj-nexus", "agent_id": "agent-tyr", "created_at": "2026-05-08T14:00:00.000Z", "updated_at": "2026-05-10T11:00:00.000Z" },
-    { "id": "task-007", "title": "Add fallback chain for model failures", "status": "todo", "priority": "medium", "project_id": "proj-nexus", "agent_id": null, "created_at": "2026-05-10T09:00:00.000Z", "updated_at": "2026-05-10T09:00:00.000Z" },
-    { "id": "task-008", "title": "Design data validation schema", "status": "done", "priority": "high", "project_id": "proj-forge", "agent_id": "agent-loki", "created_at": "2026-04-28T10:00:00.000Z", "updated_at": "2026-04-30T15:00:00.000Z" },
-    { "id": "task-009", "title": "Build quality scoring algorithm", "status": "backlog", "priority": "low", "project_id": "proj-forge", "agent_id": null, "created_at": "2026-05-01T08:00:00.000Z", "updated_at": "2026-05-01T08:00:00.000Z" },
-    { "id": "task-010", "title": "Telegram bot integration", "status": "done", "priority": "high", "project_id": "proj-hermes", "agent_id": "agent-hermes", "created_at": "2026-05-05T12:00:00.000Z", "updated_at": "2026-05-06T18:00:00.000Z" },
-    { "id": "task-011", "title": "Slack webhook receiver", "status": "in_progress", "priority": "medium", "project_id": "proj-hermes", "agent_id": "agent-hermes", "created_at": "2026-05-07T09:00:00.000Z", "updated_at": "2026-05-10T20:00:00.000Z" },
-    { "id": "task-012", "title": "Email template engine", "status": "todo", "priority": "low", "project_id": "proj-hermes", "agent_id": null, "created_at": "2026-05-08T14:00:00.000Z", "updated_at": "2026-05-08T14:00:00.000Z" },
-    { "id": "task-013", "title": "Secret rotation scheduler", "status": "done", "priority": "critical", "project_id": "proj-vault", "agent_id": "agent-heimdall", "created_at": "2026-04-20T08:00:00.000Z", "updated_at": "2026-04-25T10:00:00.000Z" },
-    { "id": "task-014", "title": "Audit log export to S3", "status": "review", "priority": "medium", "project_id": "proj-vault", "agent_id": "agent-heimdall", "created_at": "2026-05-02T11:00:00.000Z", "updated_at": "2026-05-10T09:00:00.000Z" },
-    { "id": "task-015", "title": "PWA manifest and service worker", "status": "done", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-10T08:00:00.000Z", "updated_at": "2026-05-10T21:00:00.000Z" },
-    { "id": "task-016", "title": "Telegram Web App integration", "status": "done", "priority": "high", "project_id": "proj-aurora", "agent_id": "agent-eve", "created_at": "2026-05-10T10:00:00.000Z", "updated_at": "2026-05-10T22:00:00.000Z" },
-    { "id": "task-017", "title": "i18n EN/RU support", "status": "done", "priority": "medium", "project_id": "proj-aurora", "agent_id": "agent-odin", "created_at": "2026-05-10T14:00:00.000Z", "updated_at": "2026-05-10T22:00:00.000Z" },
-    { "id": "task-018", "title": "Docker Compose setup", "status": "todo", "priority": "low", "project_id": "proj-aurora", "agent_id": null, "created_at": "2026-05-10T16:00:00.000Z", "updated_at": "2026-05-10T16:00:00.000Z" },
-    { "id": "task-019", "title": "RBAC middleware testing", "status": "backlog", "priority": "medium", "project_id": "proj-aurora", "agent_id": null, "created_at": "2026-05-10T17:00:00.000Z", "updated_at": "2026-05-10T17:00:00.000Z" },
-    { "id": "task-020", "title": "Performance benchmarking suite", "status": "backlog", "priority": "low", "project_id": "proj-nexus", "agent_id": null, "created_at": "2026-05-10T18:00:00.000Z", "updated_at": "2026-05-10T18:00:00.000Z" }
+    {
+      "id": "task-001",
+      "title": "Implement JWT refresh rotation",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-odin",
+      "created_at": "2026-05-08T10:00:00.000Z",
+      "updated_at": "2026-05-09T14:00:00.000Z"
+    },
+    {
+      "id": "task-002",
+      "title": "Add TOTP 2FA support",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-odin",
+      "created_at": "2026-05-08T11:00:00.000Z",
+      "updated_at": "2026-05-09T16:00:00.000Z"
+    },
+    {
+      "id": "task-003",
+      "title": "Build analytics dashboard",
+      "status": "in_progress",
+      "priority": "medium",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-eve",
+      "created_at": "2026-05-09T09:00:00.000Z",
+      "updated_at": "2026-05-10T18:00:00.000Z"
+    },
+    {
+      "id": "task-004",
+      "title": "Integrate Chart.js visualizations",
+      "status": "in_progress",
+      "priority": "medium",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-eve",
+      "created_at": "2026-05-09T10:00:00.000Z",
+      "updated_at": "2026-05-10T17:00:00.000Z"
+    },
+    {
+      "id": "task-005",
+      "title": "Setup LLM routing table",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-nexus",
+      "agent_id": "agent-freya",
+      "created_at": "2026-05-07T08:00:00.000Z",
+      "updated_at": "2026-05-08T12:00:00.000Z"
+    },
+    {
+      "id": "task-006",
+      "title": "Implement rate limiting per model",
+      "status": "review",
+      "priority": "high",
+      "project_id": "proj-nexus",
+      "agent_id": "agent-tyr",
+      "created_at": "2026-05-08T14:00:00.000Z",
+      "updated_at": "2026-05-10T11:00:00.000Z"
+    },
+    {
+      "id": "task-007",
+      "title": "Add fallback chain for model failures",
+      "status": "todo",
+      "priority": "medium",
+      "project_id": "proj-nexus",
+      "agent_id": null,
+      "created_at": "2026-05-10T09:00:00.000Z",
+      "updated_at": "2026-05-10T09:00:00.000Z"
+    },
+    {
+      "id": "task-008",
+      "title": "Design data validation schema",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-forge",
+      "agent_id": "agent-loki",
+      "created_at": "2026-04-28T10:00:00.000Z",
+      "updated_at": "2026-04-30T15:00:00.000Z"
+    },
+    {
+      "id": "task-009",
+      "title": "Build quality scoring algorithm",
+      "status": "backlog",
+      "priority": "low",
+      "project_id": "proj-forge",
+      "agent_id": null,
+      "created_at": "2026-05-01T08:00:00.000Z",
+      "updated_at": "2026-05-01T08:00:00.000Z"
+    },
+    {
+      "id": "task-010",
+      "title": "Telegram bot integration",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-hermes",
+      "agent_id": "agent-hermes",
+      "created_at": "2026-05-05T12:00:00.000Z",
+      "updated_at": "2026-05-06T18:00:00.000Z"
+    },
+    {
+      "id": "task-011",
+      "title": "Slack webhook receiver",
+      "status": "in_progress",
+      "priority": "medium",
+      "project_id": "proj-hermes",
+      "agent_id": "agent-hermes",
+      "created_at": "2026-05-07T09:00:00.000Z",
+      "updated_at": "2026-05-10T20:00:00.000Z"
+    },
+    {
+      "id": "task-012",
+      "title": "Email template engine",
+      "status": "todo",
+      "priority": "low",
+      "project_id": "proj-hermes",
+      "agent_id": null,
+      "created_at": "2026-05-08T14:00:00.000Z",
+      "updated_at": "2026-05-08T14:00:00.000Z"
+    },
+    {
+      "id": "task-013",
+      "title": "Secret rotation scheduler",
+      "status": "done",
+      "priority": "critical",
+      "project_id": "proj-vault",
+      "agent_id": "agent-heimdall",
+      "created_at": "2026-04-20T08:00:00.000Z",
+      "updated_at": "2026-04-25T10:00:00.000Z"
+    },
+    {
+      "id": "task-014",
+      "title": "Audit log export to S3",
+      "status": "review",
+      "priority": "medium",
+      "project_id": "proj-vault",
+      "agent_id": "agent-heimdall",
+      "created_at": "2026-05-02T11:00:00.000Z",
+      "updated_at": "2026-05-10T09:00:00.000Z"
+    },
+    {
+      "id": "task-015",
+      "title": "PWA manifest and service worker",
+      "status": "done",
+      "priority": "medium",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-eve",
+      "created_at": "2026-05-10T08:00:00.000Z",
+      "updated_at": "2026-05-10T21:00:00.000Z"
+    },
+    {
+      "id": "task-016",
+      "title": "Telegram Web App integration",
+      "status": "done",
+      "priority": "high",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-eve",
+      "created_at": "2026-05-10T10:00:00.000Z",
+      "updated_at": "2026-05-10T22:00:00.000Z"
+    },
+    {
+      "id": "task-017",
+      "title": "i18n EN/RU support",
+      "status": "done",
+      "priority": "medium",
+      "project_id": "proj-aurora",
+      "agent_id": "agent-odin",
+      "created_at": "2026-05-10T14:00:00.000Z",
+      "updated_at": "2026-05-10T22:00:00.000Z"
+    },
+    {
+      "id": "task-018",
+      "title": "Docker Compose setup",
+      "status": "todo",
+      "priority": "low",
+      "project_id": "proj-aurora",
+      "agent_id": null,
+      "created_at": "2026-05-10T16:00:00.000Z",
+      "updated_at": "2026-05-10T16:00:00.000Z"
+    },
+    {
+      "id": "task-019",
+      "title": "RBAC middleware testing",
+      "status": "backlog",
+      "priority": "medium",
+      "project_id": "proj-aurora",
+      "agent_id": null,
+      "created_at": "2026-05-10T17:00:00.000Z",
+      "updated_at": "2026-05-10T17:00:00.000Z"
+    },
+    {
+      "id": "task-020",
+      "title": "Performance benchmarking suite",
+      "status": "backlog",
+      "priority": "low",
+      "project_id": "proj-nexus",
+      "agent_id": null,
+      "created_at": "2026-05-10T18:00:00.000Z",
+      "updated_at": "2026-05-10T18:00:00.000Z"
+    }
   ],
   "library": [
     {
@@ -177,7 +390,12 @@
       "type": "skill",
       "description": "Healthcheck script for Docker containers",
       "content": "#!/bin/sh\n# Docker container healthcheck\nset -e\n\n# Check if process is running\nif ! pgrep -x \"node\" > /dev/null; then\n  echo \"Process not running\"\n  exit 1\nfi\n\n# Check HTTP endpoint\nif ! curl -sf http://localhost:${PORT}/api/health > /dev/null; then\n  echo \"Health endpoint not responding\"\n  exit 1\nfi\n\necho \"✅ Container healthy\"\nexit 0",
-      "tags": ["docker", "healthcheck", "devops", "monitoring"],
+      "tags": [
+        "docker",
+        "healthcheck",
+        "devops",
+        "monitoring"
+      ],
       "source": "demo",
       "created_at": "2026-05-04T11:00:00.000Z"
     },
@@ -187,7 +405,13 @@
       "type": "skill",
       "description": "Express middleware for JWT verification with refresh rotation",
       "content": "import jwt from 'jsonwebtoken';\n\nexport function requireAuth(req, res, next) {\n  const authHeader = req.headers.authorization;\n  if (!authHeader?.startsWith('Bearer ')) {\n    return res.status(401).json({ error: 'Missing token' });\n  }\n  try {\n    const payload = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);\n    req.auth = payload;\n    next();\n  } catch {\n    res.status(401).json({ error: 'Invalid token' });\n  }\n}",
-      "tags": ["jwt", "auth", "middleware", "express", "security"],
+      "tags": [
+        "jwt",
+        "auth",
+        "middleware",
+        "express",
+        "security"
+      ],
       "source": "demo",
       "created_at": "2026-05-05T16:00:00.000Z"
     },
@@ -197,7 +421,12 @@
       "type": "hook",
       "description": "Pre-commit hook for conventional commits",
       "content": "#!/bin/bash\n# Conventional commit validator\ncommit_msg=$(cat $1)\npattern=\"^(feat|fix|docs|style|refactor|test|chore|ci|build)(\\(.+\\))?: .{1,72}\"\nif ! [[ $commit_msg =~ $pattern ]]; then\n  echo \"❌ Commit message must follow conventional commits\"\n  exit 1\nfi\necho \"✅ Commit message valid\"",
-      "tags": ["git", "hook", "pre-commit", "conventional-commits"],
+      "tags": [
+        "git",
+        "hook",
+        "pre-commit",
+        "conventional-commits"
+      ],
       "source": "demo",
       "created_at": "2026-05-02T14:00:00.000Z"
     },
@@ -207,7 +436,12 @@
       "type": "card",
       "description": "Карточка агента Eve — оркестратор задач",
       "content": "{\n  \"id\": \"agent-eve\",\n  \"name\": \"Eve\",\n  \"role\": \"orchestrator\",\n  \"capabilities\": [\"task-dispatch\", \"monitoring\", \"reporting\"],\n  \"status\": \"online\",\n  \"project\": \"Project Aurora\",\n  \"tasks_completed\": 142,\n  \"avatar\": \"🤖\"\n}",
-      "tags": ["agent", "orchestrator", "eve", "aurora"],
+      "tags": [
+        "agent",
+        "orchestrator",
+        "eve",
+        "aurora"
+      ],
       "source": "demo",
       "created_at": "2026-05-01T10:00:00.000Z"
     },
@@ -217,7 +451,13 @@
       "type": "config",
       "description": "Базовая конфигурация nginx для production",
       "content": "server {\n    listen 443 ssl http2;\n    server_name example.com;\n\n    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem;\n    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem;\n\n    # Security headers\n    add_header X-Frame-Options \"SAMEORIGIN\" always;\n    add_header X-Content-Type-Options \"nosniff\" always;\n    add_header Strict-Transport-Security \"max-age=31536000\" always;\n\n    location / {\n        proxy_pass http://127.0.0.1:3000;\n        proxy_set_header Host $host;\n        proxy_set_header X-Real-IP $remote_addr;\n    }\n}",
-      "tags": ["nginx", "config", "production", "ssl", "security"],
+      "tags": [
+        "nginx",
+        "config",
+        "production",
+        "ssl",
+        "security"
+      ],
       "source": "demo",
       "created_at": "2026-05-03T09:00:00.000Z"
     },
@@ -227,12 +467,28 @@
       "type": "knowledge",
       "description": "Паттерн ротации refresh токенов для безопасной аутентификации",
       "content": "## JWT Refresh Token Rotation\n\nПри каждом запросе /api/auth/refresh:\n1. Старый refresh token отзывается (revoked)\n2. Создаётся новый refresh token\n3. Новый access token возвращается клиенту\n4. Новый refresh token устанавливается в HttpOnly cookie\n\nЭто предотвращает replay-атаки даже если токен был украден.\n\nЕсли приходит запрос с отозванным токеном — все токены пользователя отзываются (возможная кража).",
-      "tags": ["jwt", "security", "auth", "pattern", "rotation"],
+      "tags": [
+        "jwt",
+        "security",
+        "auth",
+        "pattern",
+        "rotation"
+      ],
       "source": "demo",
       "created_at": "2026-05-06T13:00:00.000Z"
     }
   ],
-  "files": [],
+  "files": [
+    {
+      "id": "outbox/1778587926429___________________________.jpg",
+      "name": "ÑÐ°Ð¹Ð»Ð¾Ð¾Ð±Ð¼ÐµÐ½Ð½Ð¸Ðº.jpg",
+      "path": "outbox/1778587926429___________________________.jpg",
+      "size": 68040,
+      "mime_type": "image/jpeg",
+      "uploaded_by": "ui",
+      "uploaded_at": "2026-05-12T12:12:06.433Z"
+    }
+  ],
   "servers": [
     {
       "id": "srv-main",
@@ -240,7 +496,11 @@
       "host": "185.138.90.150",
       "port": 443,
       "status": "online",
-      "services": ["myrmex-control", "nginx", "postgresql"],
+      "services": [
+        "myrmex-control",
+        "nginx",
+        "postgresql"
+      ],
       "last_check": "2026-05-10T22:00:00.000Z"
     },
     {
@@ -249,7 +509,10 @@
       "host": "185.138.90.150",
       "port": 443,
       "status": "online",
-      "services": ["myrmex-demo", "nginx"],
+      "services": [
+        "myrmex-demo",
+        "nginx"
+      ],
       "last_check": "2026-05-10T22:00:00.000Z"
     }
   ],
@@ -266,7 +529,11 @@
       "name": "Filesystem",
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/workspace"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/workspace"
+      ],
       "status": "connected"
     },
     {
@@ -281,11 +548,27 @@
       "name": "PostgreSQL",
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres"
+      ],
       "status": "disconnected"
     }
   ],
-  "changelog": [],
+  "changelog": [
+    {
+      "id": "25e9279b-962a-4cf2-95cc-041d3ee29e21",
+      "timestamp": "2026-05-12T12:12:06.433Z",
+      "source": "ui",
+      "action": "create",
+      "entity_type": "file",
+      "entity_id": "outbox/1778587926429___________________________.jpg",
+      "diff": {
+        "name": "ÑÐ°Ð¹Ð»Ð¾Ð¾Ð±Ð¼ÐµÐ½Ð½Ð¸Ðº.jpg",
+        "size": 68040
+      }
+    }
+  ],
   "users": [],
   "refresh_tokens": []
 }

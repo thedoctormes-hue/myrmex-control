@@ -72,7 +72,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
               <div className="flex items-center gap-3">
                 <AlertTriangle className={`w-5 h-5 ${variantColors[dialog.variant || 'danger'].icon}`} />
                 <h3 className="font-semibold">{dialog.title}</h3>
-                <button onClick={handleCancel} className="ml-auto text-muted-foreground hover:text-foreground">
+                <button onClick={handleCancel} className="ml-auto text-muted-foreground-foreground hover:text-foreground">
                   <X className="w-4 h-4" />
                 </button>
               </div>
@@ -80,7 +80,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
 
             {/* Body */}
             <div className="px-5 py-4">
-              <p className="text-sm text-muted-foreground">{dialog.message}</p>
+              <p className="text-sm text-muted-foreground-foreground">{dialog.message}</p>
             </div>
 
             {/* Footer */}

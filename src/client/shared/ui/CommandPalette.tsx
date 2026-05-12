@@ -98,28 +98,28 @@ export function CommandPalette({ isOpen, onClose, commands }: Props) {
       <div className="relative w-full max-w-lg bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-modal-in">
         {/* Search */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          <Search className="w-4 h-4 text-muted-foreground-foreground flex-shrink-0" />
           <input
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Поиск команд..."
-            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground-foreground"
           />
-          <kbd className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">ESC</kbd>
+          <kbd className="text-[10px] text-muted-foreground-foreground bg-secondary px-1.5 py-0.5 rounded">ESC</kbd>
         </div>
 
         {/* Results */}
         <div className="max-h-80 overflow-y-auto p-2">
           {filtered.length === 0 ? (
-            <div className="text-center py-8 text-sm text-muted-foreground">
+            <div className="text-center py-8 text-sm text-muted-foreground-foreground">
               Ничего не найдено
             </div>
           ) : (
             Array.from(grouped.entries()).map(([group, items]) => (
               <div key={group}>
-                <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                <div className="px-3 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground-foreground font-semibold">
                   {group}
                 </div>
                 {items.map(cmd => {
@@ -139,7 +139,7 @@ export function CommandPalette({ isOpen, onClose, commands }: Props) {
                       <div className="flex-1 min-w-0">
                         <div className="font-medium truncate">{cmd.label}</div>
                         {cmd.description && (
-                          <div className="text-xs text-muted-foreground truncate">{cmd.description}</div>
+                          <div className="text-xs text-muted-foreground-foreground truncate">{cmd.description}</div>
                         )}
                       </div>
                       {isSelected && <ArrowRight className="w-3 h-3 flex-shrink-0" />}
@@ -152,7 +152,7 @@ export function CommandPalette({ isOpen, onClose, commands }: Props) {
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-2 border-t border-border flex items-center gap-4 text-[10px] text-muted-foreground">
+        <div className="px-4 py-2 border-t border-border flex items-center gap-4 text-[10px] text-muted-foreground-foreground">
           <span>↑↓ Навигация</span>
           <span>↵ Выполнить</span>
           <span>ESC Закрыть</span>

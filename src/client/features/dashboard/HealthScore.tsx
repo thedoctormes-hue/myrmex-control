@@ -38,7 +38,7 @@ export function HealthScoreWidget() {
   if (loading) {
     return (
       <div className="bg-card rounded-xl p-4 border border-border">
-        <div className="animate-pulse text-muted">Loading health...</div>
+        <div className="animate-pulse text-muted-foreground">Loading health...</div>
       </div>
     );
   }
@@ -60,22 +60,22 @@ export function HealthScoreWidget() {
         </div>
         <div className="flex-1 space-y-1.5 text-xs">
           <div className="flex items-center gap-2">
-            <Server size={14} className="text-muted" />
+            <Server size={14} className="text-muted-foreground" />
             <span>Servers</span>
             <span className="ml-auto font-mono">{health.servers.online}/{health.servers.total}</span>
-            <span className="text-muted">({health.servers.score}%)</span>
+            <span className="text-muted-foreground">({health.servers.score}%)</span>
           </div>
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={14} className="text-muted" />
+            <CheckCircle2 size={14} className="text-muted-foreground" />
             <span>Tasks</span>
             <span className="ml-auto font-mono">{health.tasks.done}/{health.tasks.total}</span>
-            <span className="text-muted">({health.tasks.score}%)</span>
+            <span className="text-muted-foreground">({health.tasks.score}%)</span>
           </div>
           <div className="flex items-center gap-2">
-            <Users size={14} className="text-muted" />
+            <Users size={14} className="text-muted-foreground" />
             <span>Agents</span>
             <span className="ml-auto font-mono">{health.agents.active}/{health.agents.total}</span>
-            <span className="text-muted">({health.agents.score}%)</span>
+            <span className="text-muted-foreground">({health.agents.score}%)</span>
           </div>
         </div>
       </div>

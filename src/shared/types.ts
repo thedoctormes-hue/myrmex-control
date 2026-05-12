@@ -9,7 +9,7 @@ export type TaskStatus = 'backlog' | 'todo' | 'in_progress' | 'review' | 'done' 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export type AgentStatus = 'idle' | 'working' | 'error' | 'offline';
 export type ServerStatus = 'online' | 'offline' | 'degraded';
-export type SkillType = 'skill' | 'hook' | 'card' | 'config' | 'knowledge';
+export type SkillType = 'skill' | 'mask' | 'hook' | 'template';
 
 // --- Meta ---
 
@@ -68,12 +68,12 @@ export interface Task {
   priority: TaskPriority;
   assignee_id: string | null;
   parent_id: string | null;
-  dependencies: string[];       // task IDs
+  dependencies: string[];
   tags: string[];
   created_at: string;
   updated_at: string;
   completed_at: string | null;
-  source?: string;              // кто создал (опционально)
+  source?: string;
 }
 
 // --- Library (Skills / Masks / Hooks) ---
@@ -96,7 +96,7 @@ export interface Skill {
 export interface MyrmexFile {
   id: string;
   name: string;
-  path: string;                 // inbox/ или outbox/
+  path: string;
   size: number;
   mime_type: string;
   uploaded_by: string;
@@ -137,41 +137,27 @@ export interface MCPServer {
   enabled: boolean;
 }
 
-// --- Changelog ---
-
-export interface ChangelogEntry {
-  id: string;
-  timestamp: string;
-  source: string;               // кто внёс изменение
-  action: string;               // create, update, delete, move
-  entity_type: string;          // task, project, agent, etc.
-  entity_id: string;
-  diff: Record<string, unknown>; // что изменилось
-}
-
-// --- Users & RBAC ---
-
-export type UserRole = 'admin' | 'operator' | 'viewer';
+// --- Users (persistent auth) ---
 
 export interface User {
   id: string;
   username: string;
   password_hash: string;
-  role: UserRole;
-  totp_secret: string | null;     // encrypted TOTP secret
-  totp_enabled: boolean;
+  role: 'admin' | 'user';
   created_at: string;
-  last_login: string | null;
+  last_login?: string;
 }
 
-export interface RefreshToken {
+// --- Changelog ---
+
+export interface ChangelogEntry {
   id: string;
-  user_id: string;
-  token_hash: string;             // SHA-256 hash of the token
-  created_at: string;
-  expires_at: string;
-  revoked: boolean;
-  replaced_by: string | null;      // token rotation: which token replaced this
+  timestamp: string;
+  source: string;
+  action: string;
+  entity_type: string;
+  entity_id: string;
+  diff: Record<string, unknown>;
 }
 
 // --- Root State ---
@@ -189,5 +175,5 @@ export interface MyrmexState {
   mcp_servers: MCPServer[];
   changelog: ChangelogEntry[];
   users: User[];
-  refresh_tokens: RefreshToken[];
+  refresh_tokens: Record<string, { user_id: string; created_at: string }>;
 }

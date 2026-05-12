@@ -77,7 +77,7 @@ function createMockNext(): (() => void) & { called: boolean } {
 
 describe('requireAuth() middleware', () => {
   beforeEach(() => {
-    
+
     resetMockState();
     delete process.env.DEMO_MODE;
   });
@@ -117,7 +117,7 @@ describe('requireAuth() middleware', () => {
 
 describe('requireRole() middleware', () => {
   beforeEach(() => {
-    
+
     resetMockState();
     delete process.env.DEMO_MODE;
   });

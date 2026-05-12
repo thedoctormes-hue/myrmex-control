@@ -80,7 +80,7 @@ export function Breadcrumbs({ state }: Props) {
   if (crumbs.length <= 1) return null;
 
   return (
-    <nav className="flex items-center gap-1 text-xs text-muted-foreground mb-4">
+    <nav className="flex items-center gap-1 text-xs text-muted-foreground-foreground mb-4">
       {crumbs.map((crumb, i) => {
         const isLast = i === crumbs.length - 1;
         return (

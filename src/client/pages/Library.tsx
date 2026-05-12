@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import type { MyrmexState, Skill } from '@shared/types';
-import { createSkill, deleteSkill } from '../shared/lib/api';
-import { ErrorBanner } from '../shared/ui/ErrorBanner';
-import { t, useLang, type Lang } from '../shared/lib/i18n';
+import { createSkill, deleteSkill } from '../lib/api';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { confirmDialog } from '../shared/ui/ConfirmDialog';
 
 interface Props {
   state: MyrmexState | null;
@@ -10,7 +10,6 @@ interface Props {
 }
 
 export function Library({ state, onRefresh }: Props) {
-  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<Skill['type']>('skill');
@@ -20,18 +19,14 @@ export function Library({ state, onRefresh }: Props) {
   const [filter, setFilter] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [page, setPage] = useState(1);
-  const PER_PAGE = 50;
 
   const allSkills = state?.library || [];
-  const filtered = filter === 'all' ? allSkills : allSkills.filter(s => s.type === filter);
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
-  const skills = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const skills = filter === 'all' ? allSkills : allSkills.filter(s => s.type === filter);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError(lang === 'ru' ? 'Название обязательно' : 'Name is required'); return; }
-    if (!content.trim()) { setError(lang === 'ru' ? 'Содержимое обязательно' : 'Content is required'); return; }
+    if (!name.trim()) { setError('Название обязательно'); return; }
+    if (!content.trim()) { setError('Содержимое обязательно'); return; }
     try {
       setSaving(true);
       setError(null);
@@ -47,65 +42,56 @@ export function Library({ state, onRefresh }: Props) {
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : (lang === 'ru' ? 'Ошибка создания' : 'Create error'));
+      setError(err instanceof Error ? err.message : 'Ошибка создания');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const msg = lang === 'ru' ? 'Удалить?' : 'Delete?';
-    if (!confirm(msg)) return;
+    const ok = await confirmDialog({ title: 'Удалить?', message: 'Это действие нельзя отменить.', variant: 'danger' });
+    if (!ok) return;
     try {
       await deleteSkill(id);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : (lang === 'ru' ? 'Ошибка удаления' : 'Delete error'));
+      setError(err instanceof Error ? err.message : 'Ошибка удаления');
     }
   };
 
-  const typeLabels: Record<string, Record<Lang, string>> = {
-    all:       { en: 'All',          ru: 'Все' },
-    skill:     { en: 'Skills',       ru: 'Скиллы' },
-    hook:      { en: 'Hooks',        ru: 'Хуки' },
-    card:      { en: 'Cards',        ru: 'Карточки' },
-    config:    { en: 'Configs',      ru: 'Конфигурации' },
-    knowledge: { en: 'Knowledge',    ru: 'Знания' },
+  const typeLabels: Record<string, string> = {
+    all: 'Все', skill: 'Скиллы', mask: 'Маски', hook: 'Хуки', template: 'Шаблоны',
   };
-
-  const lt = (key: string) => typeLabels[key]?.[lang] ?? key;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('lib.title')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {filtered.length} {lang === 'ru' ? 'элементов' : 'items'}{totalPages > 1 ? ` (стр. ${page} из ${totalPages})` : ''}
-          </p>
+          <h1 className="text-2xl font-bold">Библиотека</h1>
+          <p className="text-sm text-muted-foreground-foreground">{allSkills.length} элементов</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
-          {showForm ? '✕' : `+ ${t('lib.add')}`}
+          {showForm ? '✕' : '+ Добавить'}
         </button>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
 
       <div className="flex gap-2 flex-wrap">
-        {Object.keys(typeLabels).map(key => (
+        {Object.entries(typeLabels).map(([key, label]) => (
           <button
             key={key}
-            onClick={() => { setFilter(key); setPage(1); }}
+            onClick={() => setFilter(key)}
             className={`px-3 py-1.5 text-xs rounded-md transition-colors ${
               filter === key
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-secondary-foreground hover:bg-accent'
             }`}
           >
-            {lt(key)}
+            {label}
           </button>
         ))}
       </div>
@@ -116,7 +102,7 @@ export function Library({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder={t('lib.name')}
+              placeholder="Название *"
               className="flex-1 px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -127,23 +113,22 @@ export function Library({ state, onRefresh }: Props) {
               onChange={e => setType(e.target.value as Skill['type'])}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm"
             >
-              <option value="skill">{t('lib.type.skill')}</option>
-              <option value="hook">{t('lib.type.hook')}</option>
-              <option value="card">{t('lib.type.card')}</option>
-              <option value="config">{t('lib.type.config')}</option>
-              <option value="knowledge">{t('lib.type.knowledge')}</option>
+              <option value="skill">Скилл</option>
+              <option value="mask">Маска</option>
+              <option value="hook">Хук</option>
+              <option value="template">Шаблон</option>
             </select>
           </div>
           <input
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder={t('lib.description')}
+            placeholder="Описание (опционально)"
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder={t('lib.content')}
+            placeholder="Содержимое *"
             rows={6}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
             required
@@ -151,7 +136,7 @@ export function Library({ state, onRefresh }: Props) {
           <input
             value={tags}
             onChange={e => setTags(e.target.value)}
-            placeholder={t('lib.tags')}
+            placeholder="Теги (через запятую)"
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
@@ -159,7 +144,7 @@ export function Library({ state, onRefresh }: Props) {
             disabled={saving || !name.trim() || !content.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50"
           >
-            {saving ? (lang === 'ru' ? 'Сохранение...' : 'Saving...') : t('common.save')}
+            {saving ? 'Сохранение...' : 'Сохранить'}
           </button>
         </form>
       )}
@@ -169,20 +154,20 @@ export function Library({ state, onRefresh }: Props) {
           <div key={skill.id} className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
             <div className="flex items-start justify-between">
               <div className="min-w-0 flex-1">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground-foreground">
                   {skill.type}
                 </span>
                 <h3 className="font-semibold mt-1 truncate">{skill.name}</h3>
               </div>
-              <button onClick={() => handleDelete(skill.id)} className="text-muted-foreground hover:text-destructive text-sm ml-2 flex-shrink-0">
+              <button onClick={() => handleDelete(skill.id)} className="text-muted-foreground-foreground hover:text-destructive text-sm ml-2 flex-shrink-0">
                 ✕
               </button>
             </div>
             {skill.description && (
-              <p className="text-sm text-muted-foreground mt-2">{skill.description}</p>
+              <p className="text-sm text-muted-foreground-foreground mt-2">{skill.description}</p>
             )}
             {skill.content && (
-              <pre className="text-xs text-muted-foreground mt-2 bg-background rounded p-2 overflow-x-auto max-h-24 overflow-y-auto">
+              <pre className="text-xs text-muted-foreground-foreground mt-2 bg-background rounded p-2 overflow-x-auto max-h-24 overflow-y-auto">
                 {skill.content}
               </pre>
             )}
@@ -198,34 +183,11 @@ export function Library({ state, onRefresh }: Props) {
       </div>
 
       {skills.length === 0 && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground-foreground">
           <div className="text-4xl mb-2">📚</div>
-          <p>{t('lib.empty')}</p>
-        </div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <button
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="px-3 py-1.5 text-xs bg-secondary rounded-md disabled:opacity-50"
-          >
-            ←
-          </button>
-          <span className="text-xs text-muted-foreground">
-            {page} / {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-            className="px-3 py-1.5 text-xs bg-secondary rounded-md disabled:opacity-50"
-          >
-            →
-          </button>
+          <p>Библиотека пуста</p>
         </div>
       )}
     </div>
   );
 }
-export default Library;

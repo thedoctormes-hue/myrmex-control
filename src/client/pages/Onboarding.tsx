@@ -91,7 +91,7 @@ export function Onboarding({ onComplete }: Props) {
         <div className="p-8 text-center">
           <div className="text-5xl mb-4">{current.icon}</div>
           <h2 className="text-xl font-bold mb-2">{current.title}</h2>
-          <p className="text-sm text-muted-foreground mb-6">{current.description}</p>
+          <p className="text-sm text-muted-foreground-foreground mb-6">{current.description}</p>
 
           <div className="space-y-2 text-left">
             {current.details.map((detail, i) => (
@@ -108,13 +108,13 @@ export function Onboarding({ onComplete }: Props) {
           <button
             onClick={() => setStep(s => Math.max(0, s - 1))}
             disabled={step === 0}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-1 text-sm text-muted-foreground-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             Назад
           </button>
 
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground-foreground">
             {step + 1} / {STEPS.length}
           </span>
 
@@ -141,7 +141,7 @@ export function Onboarding({ onComplete }: Props) {
         <div className="pb-4 text-center">
           <button
             onClick={onComplete}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs text-muted-foreground-foreground hover:text-foreground transition-colors"
           >
             Пропустить тур
           </button>

@@ -145,15 +145,15 @@ font-family: 'JetBrains Mono', 'Fira Code', monospace;
   --card: 222.2 84% 6.9%;        /* чуть светлее фона */
   --border: 217.2 32.6% 17.5%;
   --primary: 160 84% 39.4%;
-  
+
   /* Typography */
   --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-  
+
   /* Layout */
   --radius: 0.5rem;
   --border-radius: 8px;  /* для совместимости с demo */
-  
+
   /* Spacing */
   --gap: 1rem;
 }

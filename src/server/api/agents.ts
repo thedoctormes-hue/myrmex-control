@@ -5,9 +5,9 @@ import type { Agent, AgentStatus } from '@shared/types.js';
 export const router = Router();
 
 // GET /api/agents
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     res.json(state.agents);
   } catch {
     res.status(500).json({ error: 'Failed to read agents' });
@@ -15,9 +15,9 @@ router.get('/', (_req: Request, res: Response) => {
 });
 
 // GET /api/agents/:id
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const agent = state.agents.find(a => a.id === req.params.id);
     if (!agent) return res.status(404).json({ error: 'Agent not found' });
     res.json(agent);
@@ -29,7 +29,7 @@ router.get('/:id', (req: Request, res: Response) => {
 // POST /api/agents
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const now = new Date().toISOString();
 
     const agent: Agent = {
@@ -58,7 +58,7 @@ router.post('/', async (req: Request, res: Response) => {
 // PUT /api/agents/:id
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.agents.findIndex(a => a.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Agent not found' });
 
@@ -83,7 +83,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 // DELETE /api/agents/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.agents.findIndex(a => a.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Agent not found' });
 

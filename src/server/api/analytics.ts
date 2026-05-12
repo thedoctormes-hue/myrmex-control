@@ -38,8 +38,8 @@ interface Analytics {
   timestamp: string;
 }
 
-router.get('/', (_req: Request, res: Response) => {
-  const state = readState();
+router.get('/', async (_req: Request, res: Response) => {
+  const state = await readState();
   const now = new Date();
   const d7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const d24 = new Date(now.getTime() - 24 * 60 * 60 * 1000);

@@ -156,7 +156,7 @@ describe('setup()', () => {
 
 describe('login()', () => {
   beforeEach(async () => {
-    
+
     mockHelper.reset();
     delete process.env.DEMO_MODE;
     const req = createMockRequest({ username: 'testuser', password: 'testPass123' });
@@ -203,7 +203,7 @@ describe('logout()', () => {
 
 describe('authStatus()', () => {
   beforeEach(() => {
-    
+
     mockHelper.reset();
     delete process.env.DEMO_MODE;
   });
@@ -232,7 +232,7 @@ describe('authStatus()', () => {
 
 describe('requireAuth()', () => {
   beforeEach(() => {
-    
+
     mockHelper.reset();
     delete process.env.DEMO_MODE;
   });
@@ -271,7 +271,7 @@ describe('requireAuth()', () => {
 
 describe('requireRole()', () => {
   beforeEach(() => {
-    
+
     mockHelper.reset();
     delete process.env.DEMO_MODE;
   });

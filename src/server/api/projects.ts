@@ -1,40 +1,39 @@
 import { Router, Request, Response } from 'express';
 import { readState, writeState, createLogEntry } from '../myrmex.js';
 import type { Project } from '@shared/types.js';
+import { validate } from '../validation/validate.js';
+import { projectCreateSchema, projectUpdateSchema } from '../validation/schemas.js';
 
 export const router = Router();
 
-// GET /api/projects
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     res.json(state.projects);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read projects' });
   }
 });
 
-// GET /api/projects/:id
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const project = state.projects.find(p => p.id === req.params.id);
     if (!project) return res.status(404).json({ error: 'Project not found' });
     res.json(project);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read project' });
   }
 });
 
-// POST /api/projects
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(projectCreateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const now = new Date().toISOString();
 
     const project: Project = {
       id: crypto.randomUUID(),
-      name: req.body.name || 'Новый проект',
+      name: req.body.name,
       description: req.body.description || '',
       color: req.body.color || '#6366f1',
       icon: req.body.icon || '📦',
@@ -49,15 +48,14 @@ router.post('/', async (req: Request, res: Response) => {
     ));
 
     res.status(201).json(project);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to create project' });
   }
 });
 
-// PUT /api/projects/:id
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', validate(projectUpdateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.projects.findIndex(p => p.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Project not found' });
 
@@ -75,15 +73,14 @@ router.put('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to update project' });
   }
 });
 
-// DELETE /api/projects/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.projects.findIndex(p => p.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Project not found' });
 
@@ -93,7 +90,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to delete project' });
   }
 });

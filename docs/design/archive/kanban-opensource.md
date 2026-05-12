@@ -720,4 +720,4 @@ body:
 | 1 | Написать пост на Reddit r/opensource | Reddit |
 | 2 | Создать пост на Habr (RU) | Habr |
 | 3 | Анонс в Telegram-канале | Telegram |
-| 
+|

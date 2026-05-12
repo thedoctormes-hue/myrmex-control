@@ -8,102 +8,112 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { requireAuth, requireRole, setup, login, logout, authStatus, refresh, totpSetup, totpVerify, totpDisable, twaAuth } from './auth.js';
-import { securityHeaders, rateLimit, errorHandler } from './middleware.js';
+import { readFileSync, existsSync } from 'fs';
+import { requireAuth, setup, login, logout, authStatus, changePassword, twaLogin } from './auth.js';
+
 import { router as tasksRouter } from './api/tasks.js';
 import { router as projectsRouter } from './api/projects.js';
 import { router as libraryRouter } from './api/library.js';
 import { router as filesRouter } from './api/files.js';
 import { router as serversRouter } from './api/servers.js';
 import { router as stateRouter } from './api/state.js';
-import { router as healthRouter } from './api/health.js';
-import { router as auditRouter } from './api/audit.js';
-import { router as analyticsRouter } from './api/analytics.js';
-import { router as agentsRouter } from './api/agents.js';
-import { router as settingsRouter } from './api/settings.js';
 import { startWatchdog, stopWatchdog } from './watchdog.js';
-import { runAsDemo } from './myrmex.js';
-// import { startBackupScheduler, stopBackupScheduler } from './backup.js';
+import { rateLimit, errorHandler, cspHeaders, authRateLimit } from './middleware.js';
+import { router as backupRouter } from './api/backup.js';
+import { router as healthRouter } from './api/health.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+// --- BL-011: Required env check ---
+const REQUIRED_ENV: string[] = [];
+if (process.env.NODE_ENV === 'production') {
+  REQUIRED_ENV.push('JWT_SECRET');
+}
+
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`FATAL: ${key} is not set in environment`);
+    process.exit(1);
+  }
+}
+
+// --- Read version from package.json ---
+function getAppVersion(): string {
+  try {
+    const pkgPath = join(__dirname, '../package.json');
+    if (existsSync(pkgPath)) {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      return pkg.version || '0.0.0';
+    }
+  } catch {}
+  return '0.0.0';
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// BL-025: Trust proxy (for CDN/VPN X-Forwarded-For)
+app.set('trust proxy', ['loopback', 'linklocal', 'uniquelocal']);
+
 // Middleware
-app.use(securityHeaders());
-app.use(cors({
-  origin: process.env.CORS_ORIGIN?.split(',') || 'http://localhost:5173',
-  credentials: true,
-}));
+app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
+app.use(cspHeaders);
 app.use(rateLimit);
 
-// Demo mode middleware — if nginx sets X-Demo-Mode header, run in demo context
-app.use((req, _res, next) => {
-  const demoHeader = req.headers['x-demo-mode'];
-  if (demoHeader === 'true' || demoHeader === '1') {
-    return runAsDemo(() => next());
-  }
-  next();
-});
-
-// Version endpoint (public, for client update checks)
+// BL-011: Version endpoint (public)
 app.get('/api/version', (_req, res) => {
-  res.json({ version: '1.0.0' });
+  res.json({
+    version: getAppVersion(),
+    name: 'Myrmex Control',
+    node_env: process.env.NODE_ENV || 'development',
+  });
 });
 
-// Auth routes (публичные)
-app.post('/api/auth/setup', setup);
-app.post('/api/auth/login', login);
-app.post('/api/auth/twa', twaAuth);
+// Health check (public, no auth)
+app.use('/api/health', healthRouter);
+
+// Auth routes (public, with stricter rate limit)
+app.post('/api/auth/setup', authRateLimit, setup);
+app.post('/api/auth/login', authRateLimit, login);
 app.post('/api/auth/logout', logout);
-app.post('/api/auth/refresh', refresh);
 app.get('/api/auth/status', authStatus);
+app.post('/api/auth/change-password', requireAuth, changePassword);
+app.post('/api/auth/twa', authRateLimit, twaLogin);
 
-// TOTP routes (требуют авторизации)
-app.post('/api/auth/totp/setup', requireAuth, totpSetup);
-app.post('/api/auth/totp/verify', requireAuth, totpVerify);
-app.post('/api/auth/totp/disable', requireAuth, totpDisable);
-
-// API routes (требуют авторизации)
-// Read: operator+ (viewer can read)
+// API routes (require auth)
 app.use('/api/state', requireAuth, stateRouter);
 app.use('/api/tasks', requireAuth, tasksRouter);
 app.use('/api/projects', requireAuth, projectsRouter);
 app.use('/api/library', requireAuth, libraryRouter);
 app.use('/api/files', requireAuth, filesRouter);
 app.use('/api/servers', requireAuth, serversRouter);
-app.use('/api/health', requireAuth, healthRouter);
-app.use('/api/audit', requireAuth, requireRole('admin'), auditRouter);
-app.use('/api/analytics', requireAuth, analyticsRouter);
-app.use('/api/agents', requireAuth, agentsRouter);
-app.use('/api/settings', requireAuth, settingsRouter);
 
-// Production: статические файлы клиента
+// BL-016: Backup API
+app.use('/api/backup', requireAuth, backupRouter);
+
+// Production: static client files
 const clientDist = join(__dirname, '../client');
 app.use(express.static(clientDist));
 
-// SPA fallback — все не-API запросы → index.html
+// SPA fallback
 app.get('*', (_req, res) => {
   res.sendFile(join(clientDist, 'index.html'));
 });
 
-// Global error handler (должен быть последним)
+// Global error handler
 app.use(errorHandler);
 
 const server = app.listen(PORT, () => {
-  console.log(`🐜 Myrmex Control запущен на http://localhost:${PORT}`);
+  console.log(`🐜 Myrmex Control v${getAppVersion()} запущен на http://localhost:${PORT}`);
   startWatchdog();
-  // startBackupScheduler();
 });
 
 // Graceful shutdown
 function shutdown() {
   stopWatchdog();
-  // stopBackupScheduler();
   server.close(() => process.exit(0));
 }
 process.on('SIGTERM', shutdown);

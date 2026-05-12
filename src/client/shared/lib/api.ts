@@ -306,6 +306,19 @@ export interface VersionResponse {
 
 export const getVersion = () => request<VersionResponse>('/version');
 
+// --- Change password ---
+
+export interface ChangePasswordResponse {
+  success: boolean;
+  message?: string;
+}
+
+export const changePassword = (current_password: string, new_password: string) =>
+  request<ChangePasswordResponse>('/auth/change-password', {
+    method: 'POST',
+    body: JSON.stringify({ current_password, new_password }),
+  });
+
 // --- Agents ---
 
 export const getAgents = () => request<Agent[]>('/agents');

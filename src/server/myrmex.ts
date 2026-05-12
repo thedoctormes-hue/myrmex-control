@@ -1,69 +1,120 @@
 // ============================================================
 // Myrmex Nerve — ядро хранения
-// Атомарная запись + file lock + changelog
+// Атомарная запись + file lock + changelog + merge
 // ============================================================
 
-import { readFileSync, writeFileSync, renameSync, existsSync, mkdirSync } from 'fs';
+import { readFile, writeFile, rename, stat, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { AsyncLocalStorage } from 'async_hooks';
+import lockfile from 'proper-lockfile';
 import type { MyrmexState, ChangelogEntry } from '@shared/types.js';
 
-const IS_DEMO_ENV = process.env.DEMO_MODE === 'true';
-const PATH_PROD = join(process.cwd(), 'myrmex.json');
-const PATH_DEMO = join(process.cwd(), 'myrmex-demo.json');
+const MYRMEX_PATH = join(process.cwd(), 'myrmex.json');
+const TMP_PATH = join(process.cwd(), 'myrmex.json.tmp');
 const MAX_CHANGELOG = 1000;
 
-// AsyncLocalStorage for per-request demo context
-const demoStorage = new AsyncLocalStorage<boolean>();
+// --- BL-022: In-memory cache ---
+let cachedState: MyrmexState | null = null;
+let cacheTime = 0;
+const CACHE_TTL_MS = 1000; // 1 секунда
 
-// Run function in demo context
-export function runAsDemo<T>(fn: () => T): T {
-  return demoStorage.run(true, fn);
+function invalidateCache(): void {
+  cachedState = null;
+  cacheTime = 0;
 }
 
-// --- Path resolution ---
-
-function getDataPath(): string {
-  if (IS_DEMO_ENV) return PATH_DEMO;
-  const isDemo = demoStorage.getStore();
-  return isDemo ? PATH_DEMO : PATH_PROD;
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await stat(path);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
-// --- Read ---
+// --- Merge strategies for persistent fields ---
+const MERGE_FIELDS = ['users', 'refresh_tokens'];
 
-export function readState(): MyrmexState {
-  const path = getDataPath();
-  if (!existsSync(path)) {
+function deepMerge(target: MyrmexState, source: Partial<MyrmexState>): MyrmexState {
+  const result: MyrmexState = { ...target };
+
+  for (const key of Object.keys(source) as (keyof MyrmexState)[]) {
+    if (key === '_meta') continue;
+    if (key === 'changelog') continue;
+    if (MERGE_FIELDS.includes(key as string) && typeof source[key] === 'object' && source[key] !== null) {
+      (result[key] as unknown) = {
+        ...(target[key] as object),
+        ...(source[key] as object),
+      };
+    } else if (Array.isArray(source[key])) {
+      (result[key] as unknown) = source[key];
+    } else {
+      (result[key] as unknown) = source[key];
+    }
+  }
+  return result;
+}
+
+// --- Read (async + cache) ---
+
+export async function readState(): Promise<MyrmexState> {
+  const now = Date.now();
+  if (cachedState && now - cacheTime < CACHE_TTL_MS) {
+    return cachedState;
+  }
+
+  if (!(await fileExists(MYRMEX_PATH))) {
     return createDefaultState();
   }
-  const raw = readFileSync(path, 'utf-8');
-  return JSON.parse(raw) as MyrmexState;
+  const raw = await readFile(MYRMEX_PATH, 'utf-8');
+  cachedState = JSON.parse(raw) as MyrmexState;
+  cacheTime = now;
+  return cachedState;
 }
 
-// --- Write (атомарная через tmp + rename) ---
+// --- Write (атомарная + lock + merge + async I/O) ---
 
-export function writeState(
-  state: MyrmexState,
+export async function writeState(
+  state: Partial<MyrmexState>,
   source: string,
   logEntry: ChangelogEntry
-): void {
-  const path = getDataPath();
-  const tmpPath = path + '.tmp';
-
-  // 1. Обновить мету
-  state._meta.last_updated = new Date().toISOString();
-  state._meta.last_updated_by = source;
-  state._meta.change_count += 1;
-
-  // 2. Добавить в changelog
-  state.changelog.unshift(logEntry);
-  if (state.changelog.length > MAX_CHANGELOG) {
-    state.changelog.length = MAX_CHANGELOG;
+): Promise<void> {
+  // 1. Прочитать текущее состояние для мерджа (async)
+  let current: MyrmexState;
+  try {
+    current = await readState();
+  } catch {
+    current = createDefaultState();
   }
 
-  // 3. Атомарная запись: write to temp, then rename
-  writeFileSync(tmpPath, JSON.stringify(state, null, 2), 'utf-8');
-  renameSync(tmpPath, path);
+  // 2. Мердж с новым состоянием (сохраняем MERGE_FIELDS)
+  const merged = deepMerge(current, state);
+
+  // 3. Обновить мету
+  merged._meta.last_updated = new Date().toISOString();
+  merged._meta.last_updated_by = source;
+  merged._meta.change_count += 1;
+
+  // 4. Добавить в changelog
+  merged.changelog.unshift(logEntry);
+  if (merged.changelog.length > MAX_CHANGELOG) {
+    merged.changelog.length = MAX_CHANGELOG;
+  }
+
+  // 5. Атомарная запись через lock (async I/O)
+  const release = await lockfile.lock(MYRMEX_PATH, {
+    retries: 3,
+    stale: 5000,
+  });
+
+  try {
+    await writeFile(TMP_PATH, JSON.stringify(merged, null, 2), 'utf-8');
+    await rename(TMP_PATH, MYRMEX_PATH);
+  } finally {
+    await release();
+  }
+
+  // 6. Инвалидировать кэш
+  invalidateCache();
 }
 
 // --- Changelog helper ---
@@ -84,12 +135,6 @@ export function createLogEntry(
     entity_id: entityId,
     diff,
   };
-}
-
-// --- Check if current context is demo ---
-
-export function isDemo(): boolean {
-  return IS_DEMO_ENV || demoStorage.getStore() === true;
 }
 
 // --- Default state ---
@@ -125,13 +170,12 @@ function createDefaultState(): MyrmexState {
     mcp_servers: [],
     changelog: [],
     users: [],
-    refresh_tokens: [],
+    refresh_tokens: {},
   };
 
+  // Создать директории для файлообменника (async fire-and-forget)
   for (const dir of ['inbox', 'outbox']) {
-    if (!existsSync(dir)) {
-      mkdirSync(dir, { recursive: true });
-    }
+    mkdir(dir, { recursive: true }).catch(() => {});
   }
 
   return state;

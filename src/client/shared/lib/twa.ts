@@ -127,20 +127,62 @@ export function getTWAStartParam(): string | undefined {
   return getTWA()?.initDataUnsafe?.start_param;
 }
 
+/**
+ * Apply Telegram theme params to CSS variables.
+ * Maps TWA colors to Tailwind CSS custom properties.
+ */
+function applyThemeToCSS(theme: TWAThemeParams): void {
+  const root = document.documentElement;
+  const set = (name: string, value?: string) => {
+    if (value) root.style.setProperty(name, value);
+  };
+  set('--background', theme.bg_color);
+  set('--foreground', theme.text_color);
+  set('--muted-foreground', theme.hint_color);
+  set('--primary', theme.button_color);
+  set('--primary-foreground', theme.button_text_color);
+  set('--secondary', theme.secondary_bg_color);
+}
+
 /** Initialize Telegram Web App (call once on mount) */
 export function initTWA(): void {
   const twa = getTWA();
   if (!twa) return;
 
+  // 1. Signal readiness immediately
   twa.ready();
-  twa.expand();
+
+  // 2. Apply theme params to CSS variables
+  const theme = getTWATheme();
+  if (theme && Object.keys(theme).length > 0) {
+    applyThemeToCSS(theme);
+  }
+
+  // 3. Set header/background colors from theme
   twa.setHeaderColor('#0f172a');
   twa.setBackgroundColor('#0f172a');
 
-  // Enable closing confirmation on mobile
+  // 4. Enable closing confirmation on mobile
   if (twa.version && parseInt(twa.version) >= 6.2) {
     twa.enableClosingConfirmation();
   }
+
+  // 5. Listen for viewport changes (keyboard open/close)
+  twa.onEvent('viewportChanged', (isStateStable: boolean) => {
+    if (!isStateStable) {
+      // Keyboard opened — add padding to prevent content overlap
+      document.body.classList.add('twa-keyboard-open');
+    } else {
+      document.body.classList.remove('twa-keyboard-open');
+    }
+  });
+}
+
+/** Expand TWA after successful auth (call after login) */
+export function expandTWA(): void {
+  const twa = getTWA();
+  if (!twa) return;
+  twa.expand();
 }
 
 /** Haptic feedback wrapper */

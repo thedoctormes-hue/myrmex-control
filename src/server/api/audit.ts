@@ -16,8 +16,8 @@ interface AuditLogQuery {
   offset?: string;
 }
 
-router.get('/', (req: Request<object, object, object, AuditLogQuery>, res: Response) => {
-  const state = readState();
+router.get('/', async (req: Request<object, object, object, AuditLogQuery>, res: Response) => {
+  const state = await readState();
   const {
     entity_type,
     entity_id,
@@ -58,15 +58,15 @@ router.get('/', (req: Request<object, object, object, AuditLogQuery>, res: Respo
 });
 
 // Entity types for filter dropdown
-router.get('/entity-types', (_req: Request, res: Response) => {
-  const state = readState();
+router.get('/entity-types', async (_req: Request, res: Response) => {
+  const state = await readState();
   const types = [...new Set(state.changelog.map(e => e.entity_type))];
   res.json(types);
 });
 
 // Sources for filter dropdown
-router.get('/sources', (_req: Request, res: Response) => {
-  const state = readState();
+router.get('/sources', async (_req: Request, res: Response) => {
+  const state = await readState();
   const sources = [...new Set(state.changelog.map(e => e.source))];
   res.json(sources);
 });

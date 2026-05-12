@@ -5,9 +5,9 @@ import type { Settings } from '@shared/types.js';
 export const router = Router();
 
 // GET /api/settings
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     res.json(state.settings);
   } catch {
     res.status(500).json({ error: 'Failed to read settings' });
@@ -17,7 +17,7 @@ router.get('/', (_req: Request, res: Response) => {
 // PUT /api/settings
 router.put('/', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
 
     const updated: Settings = {
       ...state.settings,

@@ -1,0 +1,19 @@
+# ============================================================
+# BL-016: systemd timer для автоматического бэкапа myrmex.json
+# Установка:
+#   sudo cp scripts/myrmex-backup.timer /etc/systemd/system/
+#   sudo cp scripts/myrmex-backup.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now myrmex-backup.timer
+# ============================================================
+
+[Unit]
+Description=Myrmex Control — ежедневный бэкап myrmex.json
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

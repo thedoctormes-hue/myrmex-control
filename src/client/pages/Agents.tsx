@@ -81,7 +81,7 @@ export function Agents({ state, onRefresh }: Props) {
             <Bot className="w-6 h-6 text-primary" />
             Агенты
           </h1>
-          <p className="text-sm text-muted-foreground">{agents.length} агентов</p>
+          <p className="text-sm text-muted-foreground-foreground">{agents.length} агентов</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
@@ -135,7 +135,7 @@ export function Agents({ state, onRefresh }: Props) {
       </div>
 
       {agents.length === 0 && !showForm && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground-foreground">
           <Bot className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p>Нет агентов. Создайте первого!</p>
         </div>
@@ -168,12 +168,12 @@ function AgentCard({
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold truncate">{agent.name}</h3>
-            <p className="text-xs text-muted-foreground">{agent.role} · {agent.model}</p>
+            <p className="text-xs text-muted-foreground-foreground">{agent.role} · {agent.model}</p>
           </div>
         </div>
         <button
           onClick={() => onDelete(agent.id, agent.name)}
-          className="text-muted-foreground hover:text-destructive transition-colors p-1"
+          className="text-muted-foreground-foreground hover:text-destructive transition-colors p-1"
           aria-label="Удалить"
         >
           <Trash2 className="w-4 h-4" />
@@ -190,13 +190,13 @@ function AgentCard({
           {config.label}
         </button>
         {project && (
-          <span className="text-xs text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+          <span className="text-xs text-muted-foreground-foreground bg-secondary px-1.5 py-0.5 rounded">
             {project.icon} {project.name}
           </span>
         )}
       </div>
 
-      <div className="mt-2 text-[10px] text-muted-foreground">
+      <div className="mt-2 text-[10px] text-muted-foreground-foreground">
         Виден: {new Date(agent.last_seen).toLocaleString('ru')}
       </div>
     </div>

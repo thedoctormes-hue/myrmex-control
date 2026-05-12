@@ -13,10 +13,10 @@ function StatCard({ icon: Icon, label, value, sub }: {
     <div className="bg-card rounded-xl p-4 border border-border">
       <div className="flex items-center gap-2 mb-2">
         <Icon size={16} className="text-accent" />
-        <span className="text-xs text-muted uppercase tracking-wide">{label}</span>
+        <span className="text-xs text-muted-foreground-foreground uppercase tracking-wide">{label}</span>
       </div>
       <div className="text-2xl font-bold">{value}</div>
-      {sub && <div className="text-xs text-muted mt-1">{sub}</div>}
+      {sub && <div className="text-xs text-muted-foreground-foreground mt-1">{sub}</div>}
     </div>
   );
 }
@@ -38,7 +38,7 @@ function BarChart({ data, label }: { data: Record<string, number>; label: string
       <div className="space-y-2">
         {Object.entries(data).map(([key, val]) => (
           <div key={key} className="flex items-center gap-2">
-            <span className="text-xs w-20 text-muted truncate">{key}</span>
+            <span className="text-xs w-20 text-muted-foreground-foreground truncate">{key}</span>
             <div className="flex-1 bg-secondary rounded-full h-4 overflow-hidden">
               <div className="h-full rounded-full transition-all duration-500"
                 style={{ width: `${(val / max) * 100}%`, backgroundColor: colors[key] || '#6b7280' }} />
@@ -47,7 +47,7 @@ function BarChart({ data, label }: { data: Record<string, number>; label: string
           </div>
         ))}
         {Object.keys(data).length === 0 && (
-          <div className="text-muted text-sm text-center py-4">No data</div>
+          <div className="text-muted-foreground-foreground text-sm text-center py-4">No data</div>
         )}
       </div>
     </div>
@@ -66,11 +66,11 @@ export function Analytics() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-muted animate-pulse">Loading analytics...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground-foreground animate-pulse">Loading analytics...</div>;
   }
 
   if (!data) {
-    return <div className="text-center text-muted py-8">Failed to load analytics</div>;
+    return <div className="text-center text-muted-foreground-foreground py-8">Failed to load analytics</div>;
   }
 
   return (
@@ -82,7 +82,7 @@ export function Analytics() {
 
       {/* Activity */}
       <div>
-        <h2 className="text-sm font-semibold text-muted mb-3 uppercase tracking-wide">Activity</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">Activity</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard icon={Zap} label="Last 24h" value={data.activity.last24h} sub="changes" />
           <StatCard icon={TrendingUp} label="Last 7 days" value={data.activity.last7d} sub="changes" />
@@ -94,7 +94,7 @@ export function Analytics() {
 
       {/* Task metrics */}
       <div>
-        <h2 className="text-sm font-semibold text-muted mb-3 uppercase tracking-wide">Tasks</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">Tasks</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard icon={BarChart3} label="Total" value={data.tasks.byStatus ? Object.values(data.tasks.byStatus).reduce((a, b) => a + b, 0) : 0} />
           <StatCard icon={TrendingUp} label="Completed (7d)" value={data.tasks.completedLast7Days} />

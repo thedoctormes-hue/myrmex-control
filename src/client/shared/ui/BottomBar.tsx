@@ -23,7 +23,7 @@ export function BottomBar() {
                 `flex flex-col items-center justify-center flex-1 py-1 transition-colors ${
                   isActive
                     ? 'text-primary'
-                    : 'text-muted-foreground'
+                    : 'text-muted-foreground-foreground'
                 }`
               }
             >

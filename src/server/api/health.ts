@@ -4,6 +4,7 @@
 
 import { Router, Request, Response } from 'express';
 import { readState } from '../myrmex.js';
+import os from 'os';
 
 export const router = Router();
 
@@ -28,8 +29,8 @@ interface HealthScore {
   timestamp: string;
 }
 
-router.get('/', (_req: Request, res: Response) => {
-  const state = readState();
+router.get('/', async (_req: Request, res: Response) => {
+  const state = await readState();
 
   // Servers score
   const totalServers = state.servers.length;
@@ -59,6 +60,63 @@ router.get('/', (_req: Request, res: Response) => {
     servers: { online: onlineServers, total: totalServers, score: serversScore },
     tasks: { total: totalTasks, done: doneTasks, inProgress: inProgressTasks, score: tasksScore },
     agents: { active: activeAgents, total: totalAgents, score: agentsScore },
+    timestamp: new Date().toISOString(),
+  };
+
+  res.json(result);
+});
+
+// --- BL-024: System metrics endpoint ---
+
+interface SystemMetrics {
+  uptime: number;           // секунды
+  uptime_human: string;
+  memory: {
+    total_mb: number;
+    used_mb: number;
+    free_mb: number;
+    usage_percent: number;
+  };
+  cpu: {
+    cores: number;
+    load_avg: number[];
+  };
+  node: {
+    version: string;
+    pid: number;
+  };
+  timestamp: string;
+}
+
+router.get('/metrics', async (_req: Request, res: Response) => {
+  const totalMem = os.totalmem();
+  const freeMem = os.freemem();
+  const usedMem = totalMem - freeMem;
+  const uptimeSec = process.uptime();
+
+  // Human-readable uptime
+  const d = Math.floor(uptimeSec / 86400);
+  const h = Math.floor((uptimeSec % 86400) / 3600);
+  const m = Math.floor((uptimeSec % 3600) / 60);
+  const uptimeHuman = d > 0 ? `${d}d ${h}h ${m}m` : `${h}h ${m}m`;
+
+  const result: SystemMetrics = {
+    uptime: Math.floor(uptimeSec),
+    uptime_human: uptimeHuman,
+    memory: {
+      total_mb: Math.round(totalMem / 1024 / 1024),
+      used_mb: Math.round(usedMem / 1024 / 1024),
+      free_mb: Math.round(freeMem / 1024 / 1024),
+      usage_percent: Math.round((usedMem / totalMem) * 100),
+    },
+    cpu: {
+      cores: os.cpus().length,
+      load_avg: os.loadavg(),
+    },
+    node: {
+      version: process.version,
+      pid: process.pid,
+    },
     timestamp: new Date().toISOString(),
   };
 

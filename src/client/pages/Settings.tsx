@@ -35,7 +35,7 @@ export function Settings() {
 
   if (!settings) {
     return (
-      <div className="flex items-center justify-center h-64 text-muted-foreground">
+      <div className="flex items-center justify-center h-64 text-muted-foreground-foreground">
         <div className="animate-pulse">Загрузка настроек...</div>
       </div>
     );
@@ -54,7 +54,7 @@ export function Settings() {
           <SettingsIcon className="w-6 h-6 text-primary" />
           Настройки
         </h1>
-        <p className="text-sm text-muted-foreground">Конфигурация приложения</p>
+        <p className="text-sm text-muted-foreground-foreground">Конфигурация приложения</p>
       </div>
 
       {error && <ErrorBanner message={error} onDismiss={() => setError(null)} />}
@@ -127,7 +127,7 @@ export function Settings() {
             onChange={e => setSettings({ ...settings, refresh_interval_sec: parseInt(e.target.value) })}
             className="w-full accent-primary"
           />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+          <div className="flex justify-between text-xs text-muted-foreground-foreground mt-1">
             <span>5с</span>
             <span>120с</span>
           </div>
@@ -137,7 +137,7 @@ export function Settings() {
         <div className="flex items-center justify-between">
           <div>
             <label className="text-sm font-medium">Уведомления</label>
-            <p className="text-xs text-muted-foreground">Показывать системные уведомления</p>
+            <p className="text-xs text-muted-foreground-foreground">Показывать системные уведомления</p>
           </div>
           <button
             onClick={() => setSettings({ ...settings, notifications_enabled: !settings.notifications_enabled })}

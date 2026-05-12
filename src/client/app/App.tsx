@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useMyrmex } from '../shared/hooks/useMyrmex';
 import { useTheme } from '../shared/hooks/useTheme';
 import { useSwipeNav } from '../shared/hooks/useSwipeNav';
 import { authStatus, logout as logoutApi, setUnauthorizedHandler, setToken, getToken, getVersion } from '../shared/lib/api';
-import { initTWA, isTWA, getTWAColorScheme, getTWAUser, haptic } from '../shared/lib/twa';
+import { initTWA, expandTWA, isTWA, getTWAColorScheme, getTWAUser, haptic } from '../shared/lib/twa';
 import { Sidebar } from '../shared/ui/Sidebar';
 import { BottomBar } from '../shared/ui/BottomBar';
 import { ErrorBoundary } from '../shared/ui/ErrorBoundary';
@@ -96,13 +96,13 @@ export default function App() {
 
   const mainRoutes = ['/', '/projects', '/agents', '/library', '/files', '/servers', '/analytics', '/audit', '/settings'];
   useSwipeNav(mainRoutes);
+  const navigate = useNavigate();
   const { isOpen, setIsOpen, commands } = useCommandPalette((path: string) => {
-    window.location.href = path;
+    navigate(path);
   });
   const [showOnboarding, setShowOnboarding] = useState(() => {
     return !localStorage.getItem('myrmex_onboarded');
   });
-  const navigate = useCallback((path: string) => { window.location.href = path; }, []);
 
   useEffect(() => {
     initTWA();
@@ -146,12 +146,14 @@ export default function App() {
   const handleLogin = useCallback((token: string) => {
     setToken(token);
     setAuth(prev => ({ ...prev, authenticated: true, needsSetup: false }));
+    expandTWA();
     refresh();
   }, [refresh]);
 
   const handleSetup = useCallback((token: string) => {
     setToken(token);
     setAuth(prev => ({ ...prev, authenticated: true, needsSetup: false, needsAuth: true }));
+    expandTWA();
     refresh();
   }, [refresh]);
 
@@ -194,7 +196,7 @@ export default function App() {
             <circle cx="355" cy="280" r="4"/>
           </g>
         </svg>
-        <p className="mt-4 text-sm text-muted-foreground animate-pulse">Загрузка муравейника...</p>
+        <p className="mt-4 text-sm text-muted-foreground-foreground animate-pulse">Загрузка муравейника...</p>
       </div>
     );
   }

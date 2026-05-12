@@ -1,51 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      includeAssets: ['favicon.svg', 'favicon-32x32.png', 'favicon-16x16.png'],
-      manifest: {
-        name: 'Myrmex Control — Hive Control Center',
-        short_name: 'Myrmex',
-        description: 'AI agent infrastructure dashboard',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
-        display: 'standalone',
-        orientation: 'any',
-        scope: '/',
-        start_url: '/',
-        icons: [
-          {
-            src: '/icons/icon-192.svg',
-            sizes: '192x192',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
-          {
-            src: '/icons/icon-192.svg',
-            sizes: '512x512',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
-        ],
-      },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
-      },
-      devOptions: {
-        enabled: false,
-      },
-    }),
-  ],
-  root: 'src/client/app',
+  plugins: [react()],
+  root: 'src/client',
   build: {
-    outDir: '../../../dist/client',
+    outDir: '../../dist/client',
     emptyOutDir: true,
   },
   server: {

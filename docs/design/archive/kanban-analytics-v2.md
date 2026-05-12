@@ -292,4 +292,4 @@ Cycle Time = WIP / Throughput
 | tasks_in_progress | Текущие в работе |
 | avg_cycle_time | Среднее время цикла |
 | utilization | Текущие / макс параллельные |
-| 
+|

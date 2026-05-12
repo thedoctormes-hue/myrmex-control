@@ -1,41 +1,40 @@
 import { Router, Request, Response } from 'express';
 import { readState, writeState, createLogEntry } from '../myrmex.js';
 import type { Server } from '@shared/types.js';
+import { validate } from '../validation/validate.js';
+import { serverCreateSchema, serverUpdateSchema } from '../validation/schemas.js';
 
 export const router = Router();
 
-// GET /api/servers
-router.get('/', (_req: Request, res: Response) => {
+router.get('/', async (_req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     res.json(state.servers);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read servers' });
   }
 });
 
-// GET /api/servers/:id
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const server = state.servers.find(s => s.id === req.params.id);
     if (!server) return res.status(404).json({ error: 'Server not found' });
     res.json(server);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read server' });
   }
 });
 
-// POST /api/servers
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(serverCreateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const now = new Date().toISOString();
 
     const server: Server = {
       id: crypto.randomUUID(),
-      name: req.body.name || 'Новый сервер',
-      host: req.body.host || '',
+      name: req.body.name,
+      host: req.body.host,
       port: req.body.port || 22,
       status: 'offline',
       services: req.body.services || [],
@@ -49,15 +48,14 @@ router.post('/', async (req: Request, res: Response) => {
     ));
 
     res.status(201).json(server);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to create server' });
   }
 });
 
-// PUT /api/servers/:id
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', validate(serverUpdateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.servers.findIndex(s => s.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Server not found' });
 
@@ -74,15 +72,14 @@ router.put('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to update server' });
   }
 });
 
-// DELETE /api/servers/:id
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.servers.findIndex(s => s.id === req.params.id);
     if (idx === -1) return res.status(404).json({ error: 'Server not found' });
 
@@ -92,19 +89,17 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to delete server' });
   }
 });
 
-// POST /api/servers/:id/check — проверить статус (watchdog вызывает)
 router.post('/:id/check', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const server = state.servers.find(s => s.id === req.params.id);
     if (!server) return res.status(404).json({ error: 'Server not found' });
 
-    // Обновить статус (watchdog передаёт результат)
     if (req.body.status) {
       server.status = req.body.status;
     }
@@ -115,7 +110,7 @@ router.post('/:id/check', async (req: Request, res: Response) => {
     ));
 
     res.json(server);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to check server' });
   }
 });

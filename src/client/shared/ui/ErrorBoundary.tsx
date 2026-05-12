@@ -39,7 +39,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <h2 className="text-lg font-semibold text-foreground mb-2">
               Что-то пошло не так
             </h2>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground-foreground mb-4">
               {this.state.error?.message ?? 'Неизвестная ошибка'}
             </p>
             <button

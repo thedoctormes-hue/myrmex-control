@@ -95,9 +95,13 @@ Myrmex Control fills the gap: a **single-file database** dashboard that's powerf
 | 📱 **PWA** | Installable, offline-capable, with service worker auto-update |
 | ✈️ **Telegram Web App** | Native Telegram Mini App integration |
 | 🔔 **Toast Notifications** | Real-time feedback for user actions |
-| 🛡️ **Rate Limiting** | 100 requests/minute per IP |
-| 🔒 **Security Headers** | HSTS, CSP, and other hardening headers |
+| 🛡️ **Rate Limiting** | 100 req/min per IP + auth lockout after 5 failures |
+| 🔒 **Security Headers** | HSTS, CSP (telegram.org for TWA), hardening headers |
 | 🐕 **Watchdog** | Background server monitoring (5-min TCP checks) |
+| 💾 **Automated Backups** | Daily systemd timer + manual create/restore API |
+| 🔐 **TWA Auth** | Telegram Web App auth with timingSafeEqual + replay protection |
+| ✅ **Zod Validation** | All POST/PUT endpoints validated with Zod schemas |
+| ⚡ **Async I/O** | Non-blocking file operations + 1s in-memory cache |
 
 ## 🛠 Tech Stack
 
@@ -165,6 +169,9 @@ npm start
 | `PORT` | `3000` | Server port |
 | `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin for API requests |
 | `SETUP_TOKEN` | *(none)* | Required for initial admin registration |
+| `JWT_SECRET` | *(none)* | Secret for JWT signing (auto-generated if absent) |
+| `TELEGRAM_BOT_TOKEN` | *(none)* | Telegram bot token for TWA authentication |
+| `MYRMEX_PASSWORD` | *(none)* | Plaintext password (set via /api/auth/setup) |
 | `NODE_ENV` | `development` | Set to `production` for HSTS and secure cookies |
 
 ## 📁 Project Structure
@@ -205,13 +212,18 @@ myrmex-control/
 │   │   │   ├── library.ts       # Artifact library CRUD
 │   │   │   ├── files.ts         # File exchange
 │   │   │   ├── servers.ts       # Server monitoring
+│   │   │   ├── agents.ts        # Agent management
 │   │   │   ├── analytics.ts     # Analytics data
 │   │   │   ├── audit.ts         # Audit log
-│   │   │   └── state.ts         # Global state read/write
-│   │   ├── auth.ts              # JWT auth, TOTP, RBAC
-│   │   ├── middleware.ts        # Rate limiter + error logger
-│   │   ├── myrmex.ts            # JSON DB read/write + audit log
+│   │   │   ├── state.ts         # Global state read/write
+│   │   │   ├── settings.ts      # Settings management
+│   │   │   ├── health.ts        # Health score endpoint
+│   │   │   └── backup.ts        # Backup create/list/restore
+│   │   ├── auth.ts              # Auth: login, setup, TWA, change-password
+│   │   ├── middleware.ts        # Rate limiter + auth lockout + error logger
+│   │   ├── myrmex.ts            # Async JSON DB read/write + cache + audit log
 │   │   ├── watchdog.ts          # Background server monitoring
+│   │   ├── validation/          # Zod schemas + validate middleware
 │   │   └── index.ts             # Express app entry point
 │   └── shared/
 │       └── types.ts             # Shared TypeScript interfaces
@@ -245,6 +257,8 @@ myrmex-control/
 | `GET` | `/api/auth/status` | ❌ | Check auth state |
 | `POST` | `/api/auth/totp/setup` | ✅ | Configure TOTP 2FA |
 | `POST` | `/api/auth/totp/verify` | ✅ | Verify TOTP code |
+| `POST` | `/api/auth/twa` | ❌ | Telegram Web App authentication |
+| `POST` | `/api/auth/change-password` | ✅ | Change user password (bcrypt) |
 
 ### State
 | Method | Path | Auth | Description |
@@ -297,10 +311,34 @@ myrmex-control/
 | `GET` | `/api/analytics` | ✅ | Get analytics data |
 | `GET` | `/api/audit` | ✅ | Get audit log entries |
 
+### Agents
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/agents` | ✅ | List all agents |
+| `GET` | `/api/agents/:id` | ✅ | Get agent by ID |
+| `POST` | `/api/agents` | ✅ | Create agent |
+| `PUT` | `/api/agents/:id` | ✅ | Update agent |
+| `DELETE` | `/api/agents/:id` | ✅ | Delete agent |
+
+### Settings
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/settings` | ✅ | Read settings |
+| `PUT` | `/api/settings` | ✅ | Update settings |
+
+### Backup
+| Method | Path | Auth | Description |
+|---|---|---|---|
+| `POST` | `/api/backup/create` | ✅ | Create backup |
+| `GET` | `/api/backup/list` | ✅ | List backups |
+| `POST` | `/api/backup/restore` | ✅ | Restore from backup |
+
 ### System
 | Method | Path | Auth | Description |
 |---|---|---|---|
 | `GET` | `/api/health` | ❌ | Health check (uptime, timestamp) |
+| `GET` | `/api/health/score` | ❌ | Aggregated health score (0-100) |
+| `GET` | `/api/version` | ❌ | Server version (for client update check) |
 
 ## 📚 Documentation
 
@@ -371,7 +409,7 @@ Every design decision has a cost. Here's what we gave up and why:
 | File-based sessions | Horizontal scaling, survive restarts | Simplicity, no Redis, instant invalidation |
 | In-memory rate limiting | Works behind proxy, multi-instance | Zero dependencies, fast, enough for personal dashboard |
 | No SSR/SSG | SEO (not needed for a dashboard) | Simpler architecture, no framework lock-in |
-| Minimal input validation | Runtime type safety | Trade-off for v1.0 — Zod can be added in v1.1 |
+| Sync → Async I/O | Slightly more complex code | Non-blocking file ops, better concurrency |
 
 ## 🗺️ Roadmap
 
@@ -393,11 +431,23 @@ Every design decision has a cost. Here's what we gave up and why:
 - [x] CI/CD pipeline with quality gates
 - [x] Architecture documentation + ADR
 
-### v1.1 — Polish 🚧
+### v1.1 — Hardening ✅
+- [x] Zod validation on all POST/PUT endpoints
+- [x] Auth rate limiting + account lockout
+- [x] TWA security hardening (timingSafeEqual, replay protection)
+- [x] Async I/O + in-memory caching
+- [x] Automated backup system (systemd timer)
+- [x] Secure secrets generation
+- [x] UX fixes (ARIA, confirm dialogs, navigation)
+- [x] CSP headers for Telegram Web App
+
+### v1.2 — Polish 🚧
 - [ ] Visual design overhaul (animations, cards, charts, empty states)
 - [ ] Smart auto-refresh (visibilitychange, WebSocket, adaptive interval)
 - [ ] Docker Compose deployment
 - [ ] Automated demo instance deployment
+- [ ] Monitoring dashboard + alerting
+- [ ] CDN and VPN integration
 
 ### v2.0 — Scale 📋
 - [ ] PostgreSQL backend option

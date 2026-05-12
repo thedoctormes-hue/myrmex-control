@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { MyrmexState, Project } from '@shared/types';
-import { createProject, deleteProject } from '../shared/lib/api';
-import { ErrorBanner } from '../shared/ui/ErrorBanner';
+import { createProject, deleteProject } from '../lib/api';
+import { ErrorBanner } from '../components/ui/ErrorBanner';
+import { confirmDialog } from '../shared/ui/ConfirmDialog';
 
 interface Props {
   state: MyrmexState | null;
@@ -44,7 +45,8 @@ export function Projects({ state, onRefresh }: Props) {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Удалить проект?')) return;
+    const ok = await confirmDialog({ title: 'Удалить проект?', message: 'Это действие нельзя отменить.', variant: 'danger' });
+    if (!ok) return;
     try {
       await deleteProject(id);
       onRefresh();
@@ -58,7 +60,7 @@ export function Projects({ state, onRefresh }: Props) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Проекты</h1>
-          <p className="text-sm text-muted-foreground">{projects.length} проектов</p>
+          <p className="text-sm text-muted-foreground-foreground">{projects.length} проектов</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
@@ -110,7 +112,7 @@ export function Projects({ state, onRefresh }: Props) {
       </div>
 
       {projects.length === 0 && !showForm && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground-foreground">
           <div className="text-4xl mb-2">📁</div>
           <p>Нет проектов. Создайте первый!</p>
         </div>
@@ -129,12 +131,12 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: s
             <h3 className="font-semibold truncate">{project.name}</h3>
           </div>
           {project.description && (
-            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{project.description}</p>
+            <p className="text-sm text-muted-foreground-foreground mt-1 line-clamp-2">{project.description}</p>
           )}
         </Link>
         <button
           onClick={() => onDelete(project.id)}
-          className="text-muted-foreground hover:text-destructive text-sm ml-2 flex-shrink-0"
+          className="text-muted-foreground-foreground hover:text-destructive text-sm ml-2 flex-shrink-0"
           aria-label="Удалить проект"
         >
           ✕
@@ -142,12 +144,11 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: s
       </div>
       <div className="flex items-center gap-2 mt-3">
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
-        <span className="text-xs text-muted-foreground">{project.status}</span>
-        <span className="text-xs text-muted-foreground ml-auto">
+        <span className="text-xs text-muted-foreground-foreground">{project.status}</span>
+        <span className="text-xs text-muted-foreground-foreground ml-auto">
           {new Date(project.created_at).toLocaleDateString('ru')}
         </span>
       </div>
     </div>
   );
 }
-export default Projects;

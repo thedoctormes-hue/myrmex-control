@@ -16,7 +16,7 @@ export function startWatchdog() {
   // Проверка серверов
   serverTimer = setInterval(async () => {
     try {
-      const state = readState();
+      const state = await readState();
       for (const server of state.servers) {
         const status = await pingServer(server.host, server.port);
         if (status !== server.status) {

@@ -86,7 +86,7 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
           <span>Myrmex</span>
         </h1>
         {state && (
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground-foreground mt-1">
             {state.workspace.name}
           </p>
         )}
@@ -96,7 +96,7 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
       <nav className="flex-1 p-2 space-y-4 overflow-y-auto">
         {groups.map(group => (
           <div key={group.label}>
-            <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+            <div className="px-3 py-1 text-[10px] uppercase tracking-wider text-muted-foreground-foreground font-semibold">
               {group.label}
             </div>
             <div className="space-y-0.5 mt-1 stagger-children">
@@ -106,15 +106,16 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
                   <NavLink
                     key={item.to}
                     to={item.to}
+                    aria-label={item.label}
                     className={({ isActive }) =>
                       `flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors ${
                         isActive
                           ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                          : 'text-muted-foreground-foreground hover:text-foreground hover:bg-accent'
                       }`
                     }
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-4 h-4" aria-hidden="true" />
                     <span>{item.label}</span>
                   </NavLink>
                 );
@@ -128,14 +129,14 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
       <div className="p-3 border-t border-border space-y-2">
         <button
           onClick={toggleLang}
-          className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
+          className="w-full text-left text-xs text-muted-foreground-foreground hover:text-foreground px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
         >
           <Globe className="w-3.5 h-3.5" />
           {lang === 'en' ? 'Русский' : 'English'}
         </button>
         <button
           onClick={onToggleTheme}
-          className="w-full text-left text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
+          className="w-full text-left text-xs text-muted-foreground-foreground hover:text-foreground px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
         >
           {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
           {theme === 'dark' ? t('theme.light') : t('theme.dark')}
@@ -143,23 +144,23 @@ export function Sidebar({ state, theme, onToggleTheme, onLogout }: Props) {
         {onLogout && (
           <button
             onClick={onLogout}
-            className="w-full text-left text-xs text-muted-foreground hover:text-destructive px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
+            className="w-full text-left text-xs text-muted-foreground-foreground hover:text-destructive px-3 py-1.5 rounded hover:bg-accent transition-colors flex items-center gap-2"
           >
             <LogOut className="w-3.5 h-3.5" />
             {t('auth.logout')}
           </button>
         )}
         {state && (
-          <p className="text-[10px] text-muted-foreground px-3">
+          <p className="text-[10px] text-muted-foreground-foreground px-3">
             v{state._meta.version} · {state._meta.change_count} {lang === 'ru' ? 'изменений' : 'changes'}
           </p>
         )}
-        <p className="text-[10px] text-muted-foreground px-3">
+        <p className="text-[10px] text-muted-foreground-foreground px-3">
           🔐 JWT + TOTP + RBAC
         </p>
         <button
           onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
-          className="w-full text-left text-[10px] text-muted-foreground hover:text-foreground px-3 flex items-center gap-1.5"
+          className="w-full text-left text-[10px] text-muted-foreground-foreground hover:text-foreground px-3 flex items-center gap-1.5"
         >
           <kbd className="bg-secondary px-1 rounded text-[9px]">⌘K</kbd>
           Команды

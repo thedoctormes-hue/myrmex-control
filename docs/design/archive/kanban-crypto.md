@@ -516,4 +516,4 @@ W_crypto = W_volatility + W_alert_urgency + W_pnl_impact + W_market_timing
 | Компонент | Диапазон | Формула | Описание |
 |-----------|----------|---------|----------|
 | `W_volatility` | 0-15 | `min(15, abs(price_change_1h_pct) / 2)` | Чем выше волатильность — тем важнее задача |
-| `W_alert_urgency` | 0-20 | `20 - (ttl_remaining_min / ttl_total_min * 20)` | Чем меньше времени до истечения алерта — тем выше 
+| `W_alert_urgency` | 0-20 | `20 - (ttl_remaining_min / ttl_total_min * 20)` | Чем меньше времени до истечения алерта — тем выше

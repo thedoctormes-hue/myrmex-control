@@ -85,7 +85,7 @@ export function Servers({ state, onRefresh }: Props) {
             <ServerIcon className="w-6 h-6 text-primary" />
             Серверы
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground-foreground">
             {servers.length} серверов · {servers.filter(s => s.status === 'online').length} онлайн
           </p>
         </div>
@@ -144,7 +144,7 @@ export function Servers({ state, onRefresh }: Props) {
       </div>
 
       {servers.length === 0 && !showForm && (
-        <div className="text-center py-12 text-muted-foreground">
+        <div className="text-center py-12 text-muted-foreground-foreground">
           <ServerIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
           <p>Нет серверов. Добавьте первый!</p>
         </div>
@@ -173,13 +173,13 @@ function ServerCard({
           </div>
           <div className="min-w-0">
             <h3 className="font-semibold truncate">{server.name}</h3>
-            <p className="text-xs text-muted-foreground font-mono">{server.host}:{server.port}</p>
+            <p className="text-xs text-muted-foreground-foreground font-mono">{server.host}:{server.port}</p>
           </div>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={() => onCheck(server.id)}
-            className="text-muted-foreground hover:text-primary transition-colors p-1"
+            className="text-muted-foreground-foreground hover:text-primary transition-colors p-1"
             aria-label="Проверить"
             title="Проверить статус"
           >
@@ -187,7 +187,7 @@ function ServerCard({
           </button>
           <button
             onClick={() => onDelete(server.id, server.name)}
-            className="text-muted-foreground hover:text-destructive transition-colors p-1"
+            className="text-muted-foreground-foreground hover:text-destructive transition-colors p-1"
             aria-label="Удалить"
           >
             <Trash2 className="w-4 h-4" />
@@ -204,13 +204,13 @@ function ServerCard({
           {config.label}
         </span>
         {server.services.length > 0 && (
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-muted-foreground-foreground">
             {server.services.join(', ')}
           </span>
         )}
       </div>
 
-      <div className="mt-2 text-[10px] text-muted-foreground">
+      <div className="mt-2 text-[10px] text-muted-foreground-foreground">
         Проверен: {new Date(server.last_check).toLocaleString('ru')}
       </div>
     </div>

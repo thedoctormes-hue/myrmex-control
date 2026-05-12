@@ -112,7 +112,7 @@ function NotificationToast({ notification, onRemove }: { notification: Notificat
       <p className="text-sm flex-1">{message}</p>
       <button
         onClick={() => { setExiting(true); setTimeout(() => onRemove(id), 300); }}
-        className="text-muted-foreground hover:text-foreground flex-shrink-0"
+        className="text-muted-foreground-foreground hover:text-foreground flex-shrink-0"
       >
         <X className="w-3.5 h-3.5" />
       </button>

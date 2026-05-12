@@ -1,13 +1,15 @@
 import { Router, Request, Response } from 'express';
 import { readState, writeState, createLogEntry } from '../myrmex.js';
 import type { Task, TaskStatus } from '@shared/types.js';
+import { validate } from '../validation/validate.js';
+import { taskCreateSchema, taskUpdateSchema, taskMoveSchema } from '../validation/schemas.js';
 
 export const router = Router();
 
 // GET /api/tasks — все задачи (фильтр по project_id, status, assignee_id)
-router.get('/', (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     let tasks = state.tasks;
 
     if (req.query.project_id) {
@@ -21,29 +23,29 @@ router.get('/', (req: Request, res: Response) => {
     }
 
     res.json(tasks);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read tasks' });
   }
 });
 
 // GET /api/tasks/:id — одна задача
-router.get('/:id', (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const task = state.tasks.find(t => t.id === req.params.id);
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
     }
     res.json(task);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to read task' });
   }
 });
 
 // POST /api/tasks — создать задачу
-router.post('/', async (req: Request, res: Response) => {
+router.post('/', validate(taskCreateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const now = new Date().toISOString();
 
     const task: Task = {
@@ -68,15 +70,15 @@ router.post('/', async (req: Request, res: Response) => {
     ));
 
     res.status(201).json(task);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to create task' });
   }
 });
 
 // PUT /api/tasks/:id — обновить задачу
-router.put('/:id', async (req: Request, res: Response) => {
+router.put('/:id', validate(taskUpdateSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.tasks.findIndex(t => t.id === req.params.id);
     if (idx === -1) {
       return res.status(404).json({ error: 'Task not found' });
@@ -88,8 +90,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     const updated: Task = {
       ...old,
       ...req.body,
-      id: old.id,              // id не меняется
-      created_at: old.created_at, // created_at не меняется
+      id: old.id,
+      created_at: old.created_at,
       updated_at: now,
       completed_at: req.body.status === 'done' && old.status !== 'done'
         ? now
@@ -102,7 +104,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json(updated);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to update task' });
   }
 });
@@ -110,7 +112,7 @@ router.put('/:id', async (req: Request, res: Response) => {
 // DELETE /api/tasks/:id — удалить задачу
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const idx = state.tasks.findIndex(t => t.id === req.params.id);
     if (idx === -1) {
       return res.status(404).json({ error: 'Task not found' });
@@ -122,15 +124,15 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to delete task' });
   }
 });
 
 // POST /api/tasks/:id/move — переместить в другой статус
-router.post('/:id/move', async (req: Request, res: Response) => {
+router.post('/:id/move', validate(taskMoveSchema), async (req: Request, res: Response) => {
   try {
-    const state = readState();
+    const state = await readState();
     const task = state.tasks.find(t => t.id === req.params.id);
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
@@ -148,7 +150,7 @@ router.post('/:id/move', async (req: Request, res: Response) => {
     ));
 
     res.json(task);
-  } catch {
+  } catch (err) {
     res.status(500).json({ error: 'Failed to move task' });
   }
 });

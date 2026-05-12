@@ -1,584 +1,357 @@
 // ============================================================
-// Auth — JWT access + refresh tokens, TOTP 2FA, RBAC
-// ============================================================
-//
-// Flow:
-//   1. POST /api/auth/setup — create admin user (first time)
-//   2. POST /api/auth/login — returns access_token (15min) + sets refresh cookie (7d)
-//   3. POST /api/auth/refresh — rotate refresh token, return new access token
-//   4. POST /api/auth/logout — revoke refresh token
-//   5. POST /api/auth/totp/setup — generate TOTP secret + QR code
-//   6. POST /api/auth/totp/verify — verify TOTP code + enable 2FA
-//   7. GET  /api/auth/status — check auth state
-//
-// RBAC middleware:
-//   requireAuth — valid JWT access token
-//   requireRole(role) — user must have role (admin > operator > viewer)
+// Auth — простая авторизация через пароль
+// Первичная установка пароля + сессия в cookie + change password
 // ============================================================
 
 import { Request, Response, NextFunction } from 'express';
-import crypto from 'crypto';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { TOTP, Secret } from 'otpauth';
-import { readState, writeState, createLogEntry, isDemo } from './myrmex.js';
-import type { User, UserRole, RefreshToken } from '@shared/types.js';
+import crypto, { timingSafeEqual } from 'crypto';
+import { existsSync } from 'fs';
+import { join } from 'path';
+import bcrypt from 'bcryptjs';
+import { readState, writeState, createLogEntry } from './myrmex.js';
+import { recordAuthFailure, clearAuthFailures } from './middleware.js';
+import { validate } from './validation/validate.js';
+import { loginSchema, setupSchema, changePasswordSchema } from './validation/schemas.js';
 
-// ============================================================
-// Telegram Web App (TWA) Auth
-// ============================================================
-//
-// Flow:
-//   1. Client detects window.Telegram.WebApp, sends initData to server
-//   2. Server verifies initData HMAC signature using bot token
-//   3. If valid, server creates/finds user by Telegram ID, issues JWT
-//
-// Env:
-//   TELEGRAM_BOT_TOKEN — bot token from @BotFather (required for TWA auth)
-// ============================================================
+const SESSION_COOKIE = 'myrmex_session';
+const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 часа
+const ENV_FILE = join(process.cwd(), '.env');
 
-interface TWAUser {
-  id: number;
-  first_name: string;
-  last_name?: string;
-  username?: string;
-  language_code?: string;
-  is_premium?: string;
+// --- BL-019: TWA replay protection ---
+const usedQueryIds = new Map<string, number>(); // query_id → timestamp
+const QUERY_ID_TTL = 24 * 60 * 60 * 1000; // 24 часа
+
+// Периодическая очистка старых query_id
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, ts] of usedQueryIds) {
+    if (now - ts > QUERY_ID_TTL) usedQueryIds.delete(id);
+  }
+}, 60 * 60 * 1000); // каждый час
+
+function isReplayAttack(queryId: string): boolean {
+  return usedQueryIds.has(queryId);
 }
 
-function getBotToken(): string | null {
-  return process.env.TELEGRAM_BOT_TOKEN || null;
+function markQueryIdUsed(queryId: string): void {
+  usedQueryIds.set(queryId, Date.now());
 }
 
-/**
- * Verify Telegram Web App initData.
- * https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
- *
- * Returns parsed user data if valid, null otherwise.
- */
-function verifyTWAInitData(initData: string): TWAUser | null {
-  const botToken = getBotToken();
-  if (!botToken) return null;
+// --- Password storage ---
 
+function getPassword(): string | null {
+  // 1. Приоритет: переменная окружения
+  if (process.env.MYRMEX_PASSWORD) return process.env.MYRMEX_PASSWORD;
+
+  // 2. Из .env файла
   try {
-    const params = new URLSearchParams(initData);
-    const hash = params.get('hash');
-    if (!hash) return null;
-
-    // Build data_check_string: all params except hash, sorted alphabetically, joined with \n
-    params.delete('hash');
-    const dataCheckString = Array.from(params.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
-
-    // Check auth_date is not too old (24h)
-    const authDate = parseInt(params.get('auth_date') || '0', 10);
-    if (Date.now() / 1000 - authDate > 86400) return null;
-
-    // Compute secret key: HMAC-SHA256 of bot token with key "WebAppData"
-    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
-
-    // Compute HMAC-SHA256 of data_check_string with secret key
-    const computedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
-
-    if (computedHash !== hash) return null;
-
-    // Parse user
-    const userStr = params.get('user');
-    if (!userStr) return null;
-    return JSON.parse(userStr) as TWAUser;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Find or create a user by Telegram ID.
- * Telegram users get 'viewer' role by default.
- */
-function findOrCreateTWAUser(twaUser: TWAUser): User {
-  const state = readState();
-  const tgId = `tg-${twaUser.id}`;
-
-  // Try to find existing TWA user
-  let user = state.users.find(u => u.id === tgId);
-  if (user) {
-    // Update last login
-    user.last_login = new Date().toISOString();
-    writeState(state, 'auth', createLogEntry('auth', 'twa_login', 'user', user.id, { tg_id: twaUser.id }));
-    return user;
-  }
-
-  // Create new TWA user
-  user = {
-    id: tgId,
-    username: twaUser.username || `tg_${twaUser.id}`,
-    password_hash: '', // TWA users don't have passwords
-    role: 'viewer',
-    totp_secret: null,
-    totp_enabled: false,
-    created_at: new Date().toISOString(),
-    last_login: new Date().toISOString(),
-  };
-  state.users.push(user);
-  writeState(state, 'auth', createLogEntry('auth', 'twa_create', 'user', user.id, { tg_id: twaUser.id, username: user.username }));
-  return user;
-}
-
-/** POST /api/auth/twa — authenticate via Telegram Web App initData */
-export async function twaAuth(req: Request, res: Response) {
-  // Demo mode — skip TWA auth
-  if (isDemo()) {
-    const accessToken = generateAccessToken({ id: 'demo-user', username: 'demo', role: 'admin', password_hash: '', totp_secret: null, totp_enabled: false, created_at: '', last_login: null });
-    return res.json({ success: true, access_token: accessToken, user: { id: 'demo-user', username: 'demo', role: 'admin' } });
-  }
-
-  const { init_data } = req.body;
-  if (!init_data || typeof init_data !== 'string') {
-    res.status(400).json({ error: 'Missing init_data' });
-    return;
-  }
-
-  const twaUser = verifyTWAInitData(init_data);
-  if (!twaUser) {
-    res.status(401).json({ error: 'Invalid Telegram initData' });
-    return;
-  }
-
-  const user = findOrCreateTWAUser(twaUser);
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken();
-  storeRefreshToken(user.id, refreshToken);
-
-  res.cookie('refresh_token', refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/api/auth/refresh',
-    maxAge: REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
-  });
-
-  res.json({
-    success: true,
-    access_token: accessToken,
-    user: { id: user.id, username: user.username, role: user.role },
-  });
-}
-
-// --- Config ---
-
-const ACCESS_TOKEN_TTL = '15m';
-const REFRESH_TOKEN_TTL_DAYS = 7;
-const SALT_ROUNDS = 12;
-
-// JWT secret: from env or generate (regenerated on restart — acceptable for single-instance)
-const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
-const JWT_ISSUER = 'myrmex-control';
-
-// --- Helpers ---
-
-function findUser(username: string): User | undefined {
-  return readState().users.find(u => u.username === username);
-}
-
-function findUserById(id: string): User | undefined {
-  return readState().users.find(u => u.id === id);
-}
-
-function hashToken(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
-
-function generateAccessToken(user: User): string {
-  return jwt.sign(
-    { sub: user.id, username: user.username, role: user.role },
-    JWT_SECRET,
-    { expiresIn: ACCESS_TOKEN_TTL, issuer: JWT_ISSUER }
-  );
-}
-
-function generateRefreshToken(): string {
-  return crypto.randomBytes(48).toString('hex');
-}
-
-function storeRefreshToken(userId: string, token: string): RefreshToken {
-  const state = readState();
-  const tokenHash = hashToken(token);
-  const now = new Date();
-  const entry: RefreshToken = {
-    id: crypto.randomUUID(),
-    user_id: userId,
-    token_hash: tokenHash,
-    created_at: now.toISOString(),
-    expires_at: new Date(now.getTime() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
-    revoked: false,
-    replaced_by: null,
-  };
-  state.refresh_tokens.push(entry);
-  // Cleanup: keep only last 50 tokens per user
-  const userTokens = state.refresh_tokens.filter(t => t.user_id === userId);
-  if (userTokens.length > 50) {
-    const toRemove = userTokens.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    for (let i = 0; i < toRemove.length - 50; i++) {
-      const idx = state.refresh_tokens.findIndex(t => t.id === toRemove[i].id);
-      if (idx !== -1) state.refresh_tokens.splice(idx, 1);
+    const { readFileSync } = require('fs');
+    if (existsSync(ENV_FILE)) {
+      const env = readFileSync(ENV_FILE, 'utf-8');
+      const match = env.match(/^MYRMEX_PASSWORD=(.+)$/m);
+      if (match) return match[1].trim();
     }
+  } catch {}
+
+  return null;
+}
+
+// --- Sessions (in-memory) ---
+
+const sessions = new Map<string, { createdAt: number }>();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [token, session] of sessions) {
+    if (now - session.createdAt > SESSION_TTL) sessions.delete(token);
   }
-  writeState(state, 'auth', createLogEntry('auth', 'create', 'refresh_token', entry.id, { user_id: userId }));
-  return entry;
+}, 30 * 60 * 1000);
+
+function createSession(): string {
+  const token = crypto.randomBytes(32).toString('hex');
+  sessions.set(token, { createdAt: Date.now() });
+  return token;
 }
 
-function findRefreshToken(token: string): RefreshToken | undefined {
-  const state = readState();
-  const hash = hashToken(token);
-  return state.refresh_tokens.find(t => t.token_hash === hash);
-}
-
-function revokeToken(token: string, replacedBy?: string): void {
-  const state = readState();
-  const hash = hashToken(token);
-  const entry = state.refresh_tokens.find(t => t.token_hash === hash);
-  if (entry) {
-    entry.revoked = true;
-    if (replacedBy) entry.replaced_by = replacedBy;
-    writeState(state, 'auth', createLogEntry('auth', 'revoke', 'refresh_token', entry.id, {}));
-  }
-}
-
-// --- JWT verification ---
-
-export interface AuthPayload {
-  sub: string;
-  username: string;
-  role: UserRole;
-}
-
-function verifyAccessToken(token: string): AuthPayload {
-  const payload = jwt.verify(token, JWT_SECRET, { issuer: JWT_ISSUER }) as AuthPayload;
-  return payload;
-}
-
-// --- TOTP ---
-
-function createTOTP(username: string): { secret: string; uri: string } {
-  const secret = new Secret({ size: 32 });
-  const totp = new TOTP({
-    issuer: 'Myrmex Control',
-    label: username,
-    algorithm: 'SHA1',
-    digits: 6,
-    period: 30,
-    secret,
-  });
-  return { secret: secret.base32, uri: totp.toString() };
-}
-
-function verifyTOTP(encryptedSecret: string, code: string): boolean {
-  try {
-    const totp = new TOTP({
-      issuer: 'Myrmex Control',
-      algorithm: 'SHA1',
-      digits: 6,
-      period: 30,
-      secret: Secret.fromBase32(encryptedSecret),
-    });
-    const delta = totp.validate({ token: code, window: 1 });
-    return delta !== null;
-  } catch {
+function isValidSession(token: string): boolean {
+  const session = sessions.get(token);
+  if (!session) return false;
+  if (Date.now() - session.createdAt > SESSION_TTL) {
+    sessions.delete(token);
     return false;
   }
+  return true;
 }
 
 // --- Middleware ---
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  // Demo mode — inject demo user
-  if (isDemo()) {
-    (req as any).auth = { sub: 'demo-user', username: 'demo', role: 'admin' as const };
-    return next();
-  }
+  // Демо-режим — пропускаем авторизацию
+  try { if (existsSync(join(process.cwd(), '.demo'))) return next(); } catch {}
 
-  const authHeader = req.headers.authorization;
-  if (!authHeader?.startsWith('Bearer ')) {
-    res.status(401).json({ error: 'Missing access token' });
-    return;
-  }
+  const password = getPassword();
+  // Если пароль не задан — пропускаем (режим setup)
+  if (!password) return next();
 
-  try {
-    const token = authHeader.slice(7);
-    const payload = verifyAccessToken(token);
-    (req as any).auth = payload;
-    next();
-  } catch {
-    res.status(401).json({ error: 'Invalid or expired access token' });
-  }
+  const token = req.cookies?.[SESSION_COOKIE];
+  if (token && isValidSession(token)) return next();
+
+  res.status(401).json({ error: 'Unauthorized', login: true });
 }
 
-export function requireRole(...roles: UserRole[]) {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const auth = (req as any).auth as AuthPayload | undefined;
-    if (!auth) {
-      res.status(401).json({ error: 'Not authenticated' });
-      return;
-    }
-    // Admin always has access
-    if (auth.role === 'admin') return next();
-    if (!roles.includes(auth.role)) {
-      res.status(403).json({ error: 'Insufficient permissions' });
-      return;
-    }
-    next();
-  };
-}
+// --- Setup (первичная установка пароля) ---
 
-// --- Routes ---
-
-// Setup (first user — becomes admin)
-// Requires SETUP_TOKEN env var to prevent unauthorized registration
-export async function setup(req: Request, res: Response) {
-  // If SETUP_TOKEN is configured, require it (check FIRST, before user count)
-  const setupToken = process.env.SETUP_TOKEN;
-  if (setupToken) {
-    const provided = req.body.setup_token || req.headers['x-setup-token'];
-    if (provided !== setupToken) {
-      console.log('[Auth] Setup failed: invalid or missing SETUP_TOKEN');
-      res.status(403).json({ error: 'Invalid setup token' });
-      return;
-    }
-  }
-
-  const state = readState();
-  if (state.users.length > 0) {
-    res.status(403).json({ error: 'Users already exist. Use login.' });
+export function setup(req: Request, res: Response) {
+  const password = getPassword();
+  if (password) {
+    res.status(403).json({ error: 'Пароль уже задан. Используйте логин.' });
     return;
   }
 
-  const { username, password } = req.body;
-  if (!username || typeof username !== 'string' || username.length < 3) {
-    res.status(400).json({ error: 'Username must be at least 3 characters' });
-    return;
+  // BL-014: Zod validation
+  const parsed = setupSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const issues = (parsed.error as unknown as { issues: Array<{ path: (string | number)[]; message: string }> }).issues;
+    return res.status(400).json({
+      error: 'Validation error',
+      details: issues.map(e => ({ path: e.path.join('.'), message: e.message })),
+    });
   }
-  if (!password || typeof password !== 'string' || password.length < 8) {
-    res.status(400).json({ error: 'Password must be at least 8 characters' });
-    return;
+  const { password: newPassword } = parsed.data;
+
+  // Сохраняем в .env
+  process.env.MYRMEX_PASSWORD = newPassword;
+  const { writeFileSync, readFileSync } = require('fs');
+  let env = '';
+  if (existsSync(ENV_FILE)) {
+    env = readFileSync(ENV_FILE, 'utf-8');
+    env = env.replace(/^MYRMEX_PASSWORD=.*$/m, '').trim();
   }
+  env += `${env ? '\n' : ''}MYRMEX_PASSWORD=${newPassword}\n`;
+  writeFileSync(ENV_FILE, env, 'utf-8');
 
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-  const user: User = {
-    id: crypto.randomUUID(),
-    username,
-    password_hash: passwordHash,
-    role: 'admin',
-    totp_secret: null,
-    totp_enabled: false,
-    created_at: new Date().toISOString(),
-    last_login: null,
-  };
-
-  state.users.push(user);
-  writeState(state, 'auth', createLogEntry('auth', 'create', 'user', user.id, { username, role: user.role }));
-
-  // Auto-login
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken();
-  storeRefreshToken(user.id, refreshToken);
-
-  res.cookie('refresh_token', refreshToken, {
+  // Автоматически логиним после установки
+  const token = createSession();
+  res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    path: '/api/auth/refresh',
-    maxAge: REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+    maxAge: SESSION_TTL,
   });
-
-  res.json({ success: true, access_token: accessToken, user: { id: user.id, username: user.username, role: user.role } });
+  res.json({ success: true });
 }
 
-// Login (step 1: password → access token, or step 2: password + TOTP)
-export async function login(req: Request, res: Response) {
-  const { username, password, totp_code } = req.body;
-  const user = findUser(username);
+// --- Login ---
 
-  if (!user) {
-    console.log(`[Auth] Login failed: user "${username}" not found (users: ${readState().users.map(u => u.username).join(', ')})`);
-    res.status(401).json({ error: 'Invalid credentials' });
+export function login(req: Request, res: Response) {
+  const password = getPassword();
+  if (!password) {
+    res.status(400).json({ error: 'Пароль не задан. Сначала выполните настройку.' });
     return;
   }
 
-  const valid = await bcrypt.compare(password, user.password_hash);
-  if (!valid) {
-    console.log(`[Auth] Login failed: wrong password for "${username}"`);
-    res.status(401).json({ error: 'Invalid credentials' });
+  // BL-014: Zod validation
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const issues = (parsed.error as unknown as { issues: Array<{ path: (string | number)[]; message: string }> }).issues;
+    return res.status(400).json({
+      error: 'Validation error',
+      details: issues.map(e => ({ path: e.path.join('.'), message: e.message })),
+    });
+  }
+  const { password: input } = parsed.data;
+
+  if (input !== password) {
+    recordAuthFailure(req);
+    res.status(401).json({ error: 'Неверный пароль' });
     return;
   }
 
-  // If TOTP enabled, require code
-  if (user.totp_enabled && user.totp_secret) {
-    if (!totp_code) {
-      res.status(401).json({ error: 'TOTP code required', totp_required: true });
-      return;
-    }
-    if (!verifyTOTP(user.totp_secret, totp_code)) {
-      res.status(401).json({ error: 'Invalid TOTP code' });
-      return;
-    }
-  }
-
-  // Update last login
-  const state = readState();
-  const dbUser = state.users.find(u => u.id === user.id);
-  if (dbUser) dbUser.last_login = new Date().toISOString();
-  writeState(state, 'auth', createLogEntry('auth', 'login', 'user', user.id, {}));
-
-  const accessToken = generateAccessToken(user);
-  const refreshToken = generateRefreshToken();
-  storeRefreshToken(user.id, refreshToken);
-
-  res.cookie('refresh_token', refreshToken, {
+  clearAuthFailures(req);
+  const token = createSession();
+  res.cookie(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
-    path: '/api/auth/refresh',
-    maxAge: REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+    maxAge: SESSION_TTL,
   });
-
-  res.json({ success: true, access_token: accessToken, user: { id: user.id, username: user.username, role: user.role } });
+  res.json({ success: true });
 }
 
-// Refresh token rotation
-export function refresh(req: Request, res: Response) {
-  const token = req.cookies?.refresh_token;
-  if (!token) {
-    res.status(401).json({ error: 'No refresh token' });
-    return;
-  }
+// --- Logout ---
 
-  const stored = findRefreshToken(token);
-  if (!stored || stored.revoked) {
-    // Possible theft — revoke all user tokens
-    if (stored) {
-      const state = readState();
-      state.refresh_tokens
-        .filter(t => t.user_id === stored.user_id && !t.revoked)
-        .forEach(t => { t.revoked = true; });
-      writeState(state, 'auth', createLogEntry('auth', 'revoke_all', 'refresh_token', stored.user_id, { reason: 'suspected_theft' }));
-    }
-    res.status(401).json({ error: 'Invalid refresh token' });
-    return;
-  }
-
-  if (new Date(stored.expires_at) < new Date()) {
-    res.status(401).json({ error: 'Refresh token expired' });
-    return;
-  }
-
-  const user = findUserById(stored.user_id);
-  if (!user) {
-    res.status(401).json({ error: 'User not found' });
-    return;
-  }
-
-  // Rotate: revoke old, issue new
-  const newRefreshToken = generateRefreshToken();
-  revokeToken(token, newRefreshToken);
-  storeRefreshToken(user.id, newRefreshToken);
-
-  const accessToken = generateAccessToken(user);
-
-  res.cookie('refresh_token', newRefreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
-    path: '/api/auth/refresh',
-    maxAge: REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
-  });
-
-  res.json({ success: true, access_token: accessToken });
-}
-
-// Logout
 export function logout(req: Request, res: Response) {
-  const token = req.cookies?.refresh_token;
-  if (token) revokeToken(token);
-  res.clearCookie('refresh_token', { path: '/api/auth/refresh' });
+  const token = req.cookies?.[SESSION_COOKIE];
+  if (token) sessions.delete(token);
+  res.clearCookie(SESSION_COOKIE);
   res.json({ success: true });
 }
 
-// Auth status
+// --- Auth status ---
+
 export function authStatus(req: Request, res: Response) {
-  const demo = isDemo();
-  const state = readState();
-  const hasUsers = state.users.length > 0;
-
-  // Check if valid access token present
-  const authHeader = req.headers.authorization;
-  let authenticated = false;
-  let user: { id: string; username: string; role: UserRole } | null = null;
-
-  if (authHeader?.startsWith('Bearer ')) {
-    try {
-      const payload = verifyAccessToken(authHeader.slice(7));
-      authenticated = true;
-      user = { id: payload.sub, username: payload.username, role: payload.role };
-    } catch {
-      // expired/invalid
-    }
-  }
-
+  const isDemo = existsSync(join(process.cwd(), '.demo'));
+  const password = getPassword();
+  const token = req.cookies?.[SESSION_COOKIE];
+  const needsAuth = !!password && !isDemo;
+  const isAuth = token && isValidSession(token);
   res.json({
-    authenticated: demo ? true : authenticated,
-    needsAuth: hasUsers && !demo,
-    needsSetup: !hasUsers && !demo,
-    demo,
-    user: demo ? { id: 'demo-user', username: 'demo', role: 'admin' as const } : user,
+    authenticated: isDemo ? true : !!isAuth,
+    needsAuth,
+    needsSetup: !password && !isDemo,
+    demo: isDemo,
   });
 }
 
-// --- TOTP Setup ---
+// --- Change password ---
 
-export function totpSetup(req: Request, res: Response) {
-  const auth = (req as Request & { auth?: AuthPayload }).auth;
-  if (!auth) { res.status(401).json({ error: 'Not authenticated' }); return; }
-  const user = findUserById(auth.sub);
-  if (!user) { res.status(404).json({ error: 'User not found' }); return; }
-
-  const { secret, uri } = createTOTP(user.username);
-  const state = readState();
-  const dbUser = state.users.find(u => u.id === user.id);
-  if (dbUser) {
-    dbUser.totp_secret = secret;
-    writeState(state, 'auth', createLogEntry('auth', 'totp_setup', 'user', user.id, {}));
+export async function changePassword(req: Request, res: Response) {
+  const password = getPassword();
+  if (!password) {
+    res.status(400).json({ error: 'Пароль не задан. Сначала выполните настройку.' });
+    return;
   }
-  res.json({ secret, uri });
+
+  // BL-014: Zod validation
+  const parsed = changePasswordSchema.safeParse(req.body);
+  if (!parsed.success) {
+    const issues = (parsed.error as unknown as { issues: Array<{ path: (string | number)[]; message: string }> }).issues;
+    return res.status(400).json({
+      error: 'Validation error',
+      details: issues.map(e => ({ path: e.path.join('.'), message: e.message })),
+    });
+  }
+  const { current_password, new_password } = parsed.data;
+
+  // Проверка текущего пароля
+  if (current_password !== password) {
+    res.status(401).json({ error: 'Неверный текущий пароль' });
+    return;
+  }
+
+  // Хешируем новый пароль
+  const password_hash = await bcrypt.hash(new_password, 12);
+
+  // Сохраняем в myrmex.json
+  try {
+    const state = await readState();
+    const adminUser = state.users?.[0];
+
+    if (adminUser) {
+      adminUser.password_hash = password_hash;
+      adminUser.last_login = new Date().toISOString();
+    } else {
+      // Создаём пользователя если нет
+      state.users = [{
+        id: crypto.randomUUID(),
+        username: 'admin',
+        password_hash,
+        role: 'admin',
+        created_at: new Date().toISOString(),
+        last_login: new Date().toISOString(),
+      }];
+    }
+
+    await writeState(
+      { users: state.users },
+      'auth-change-password',
+      createLogEntry('auth', 'update', 'user', state.users[0]?.id || 'admin', {
+        action: 'password_changed',
+      })
+    );
+
+    // Обновляем .env (обратная совместимость)
+    process.env.MYRMEX_PASSWORD = new_password;
+    const { writeFileSync, readFileSync } = require('fs');
+    let env = '';
+    if (existsSync(ENV_FILE)) {
+      env = readFileSync(ENV_FILE, 'utf-8');
+      env = env.replace(/^MYRMEX_PASSWORD=.*$/m, '').trim();
+    }
+    env += `${env ? '\n' : ''}MYRMEX_PASSWORD=${new_password}\n`;
+    writeFileSync(ENV_FILE, env, 'utf-8');
+
+    res.json({ success: true, message: 'Пароль успешно изменён' });
+  } catch (err) {
+    console.error('changePassword error:', err);
+    res.status(500).json({ error: 'Ошибка сервера при смене пароля' });
+  }
 }
 
-export async function totpVerify(req: Request, res: Response) {
-  const auth = (req as Request & { auth?: AuthPayload }).auth;
-  if (!auth) { res.status(401).json({ error: 'Not authenticated' }); return; }
-  const { code } = req.body;
-  const user = findUserById(auth.sub);
-  if (!user || !user.totp_secret) { res.status(400).json({ error: 'TOTP not set up' }); return; }
-  if (!verifyTOTP(user.totp_secret, code)) { res.status(400).json({ error: 'Invalid TOTP code' }); return; }
+// --- BL-019: TWA Authentication ---
 
-  const state = readState();
-  const dbUser = state.users.find(u => u.id === user.id);
-  if (dbUser) {
-    dbUser.totp_enabled = true;
-    writeState(state, 'auth', createLogEntry('auth', 'totp_enable', 'user', user.id, {}));
+/**
+ * Верификация Telegram Web App initData.
+ * 1. Парсит query string
+ * 2. Проверяет replay attack (query_id уникальность)
+ * 3. Вычисляет HMAC-SHA256 от data_check_string
+ * 4. Сравнивает hash через timingSafeEqual
+ */
+export function twaAuth(initData: string): { user: { id: number; first_name: string; username?: string } } | null {
+  try {
+    const params = new URLSearchParams(initData);
+    const hash = params.get('hash');
+    const queryId = params.get('query_id');
+    const userStr = params.get('user');
+
+    if (!hash || !queryId || !userStr) return null;
+
+    // Replay protection
+    if (isReplayAttack(queryId)) {
+      console.warn('[TWA] Replay attack detected:', queryId);
+      return null;
+    }
+
+    // Формируем data_check_string (все поля кроме hash, отсортированные)
+    params.delete('hash');
+    const sortedParams = Array.from(params.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const dataCheckString = sortedParams.map(([k, v]) => `${k}=${v}`).join('\n');
+
+    // Вычисляем секрет: HMAC-SHA256 от "WebAppData" и BOT_TOKEN
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    if (!botToken) {
+      console.error('[TWA] TELEGRAM_BOT_TOKEN not set');
+      return null;
+    }
+
+    const secretKey = crypto.createHmac('sha256', 'WebAppData').update(botToken).digest();
+    const computedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+
+    // BL-019: Timing-safe comparison
+    const computedBuf = Buffer.from(computedHash, 'hex');
+    const providedBuf = Buffer.from(hash, 'hex');
+    if (computedBuf.length !== providedBuf.length) return null;
+    if (!timingSafeEqual(computedBuf, providedBuf)) return null;
+
+    // Помечаем query_id как использованный
+    markQueryIdUsed(queryId);
+
+    return JSON.parse(userStr);
+  } catch (err) {
+    console.error('[TWA] Auth error:', err);
+    return null;
   }
-  res.json({ success: true, message: '2FA enabled' });
 }
 
-export function totpDisable(req: Request, res: Response) {
-  const auth = (req as Request & { auth?: AuthPayload }).auth;
-  if (!auth) { res.status(401).json({ error: 'Not authenticated' }); return; }
-  const state = readState();
-  const dbUser = state.users.find(u => u.id === auth.sub);
-  if (dbUser) {
-    dbUser.totp_enabled = false;
-    dbUser.totp_secret = null;
-    writeState(state, 'auth', createLogEntry('auth', 'totp_disable', 'user', dbUser.id, {}));
+// POST /api/auth/twa — TWA login endpoint
+export function twaLogin(req: Request, res: Response) {
+  const { initData } = req.body;
+  if (!initData || typeof initData !== 'string') {
+    return res.status(400).json({ error: 'initData is required' });
   }
-  res.json({ success: true });
+
+  const authResult = twaAuth(initData);
+  if (!authResult) {
+    return res.status(401).json({ error: 'TWA auth failed' });
+  }
+
+  const token = createSession();
+  res.cookie(SESSION_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: SESSION_TTL,
+  });
+
+  res.json({ success: true, user: { id: authResult.user.id, first_name: authResult.user.first_name, username: authResult.user.username } });
 }
