@@ -53,7 +53,7 @@ export function ForceGraph({ nodes, edges, width = 800, height = 500, onNodeClic
   const [dragging, setDragging] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [pan] = useState({ x: 0, y: 0 });
   const animRef = useRef<number>(0);
   const dragOffset = useRef({ x: 0, y: 0 });
 

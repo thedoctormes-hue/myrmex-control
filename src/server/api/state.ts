@@ -8,7 +8,7 @@ router.get('/', async (_req: Request, res: Response) => {
   try {
     const state = await readState();
     res.json(state);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read myrmex state' });
   }
 });

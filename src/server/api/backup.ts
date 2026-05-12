@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { execSync } from 'child_process';
-import { readdirSync, statSync, readFileSync, existsSync } from 'fs';
+import { readdirSync, statSync, existsSync } from 'fs';
 import { join } from 'path';
 
 const BACKUP_DIR = '/root/LabDoctorM/backups';

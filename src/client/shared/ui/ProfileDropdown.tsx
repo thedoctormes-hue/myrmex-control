@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { User, Settings, LogOut, Moon, Sun, Globe, Keyboard, HelpCircle, KeyRound, Eye, EyeOff, X, Check, AlertTriangle } from 'lucide-react';
+import { User, Settings, LogOut, Moon, Sun, Globe, Keyboard, KeyRound, Eye, EyeOff, X, Check, AlertTriangle } from 'lucide-react';
 import { t, toggleLang, getLang } from '../lib/i18n';
 import { changePassword } from '../lib/api';
 

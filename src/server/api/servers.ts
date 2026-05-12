@@ -10,7 +10,7 @@ router.get('/', async (_req: Request, res: Response) => {
   try {
     const state = await readState();
     res.json(state.servers);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read servers' });
   }
 });
@@ -21,7 +21,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     const server = state.servers.find(s => s.id === req.params.id);
     if (!server) return res.status(404).json({ error: 'Server not found' });
     res.json(server);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read server' });
   }
 });
@@ -48,7 +48,7 @@ router.post('/', validate(serverCreateSchema), async (req: Request, res: Respons
     ));
 
     res.status(201).json(server);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create server' });
   }
 });
@@ -72,7 +72,7 @@ router.put('/:id', validate(serverUpdateSchema), async (req: Request, res: Respo
     ));
 
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update server' });
   }
 });
@@ -89,7 +89,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete server' });
   }
 });
@@ -110,7 +110,7 @@ router.post('/:id/check', async (req: Request, res: Response) => {
     ));
 
     res.json(server);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to check server' });
   }
 });

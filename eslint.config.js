@@ -43,6 +43,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'server-dist/**', '*.config.*'],
+    ignores: ['dist/**', 'src/dist/**', 'demo/**', 'node_modules/**', 'coverage/**', 'server-dist/**', '*.config.*', 'registerSW.js', 'sw.js', 'workbox-*.js'],
   },
 ];

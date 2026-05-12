@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bot, Server, FolderKanban, BarChart3, Shield, Zap, ChevronRight, ChevronLeft, Check } from 'lucide-react';
+import { Zap, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 
 // ============================================================
 // Onboarding — приветственный тур для новых пользователей

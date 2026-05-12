@@ -5,12 +5,11 @@
 
 import { Request, Response, NextFunction } from 'express';
 import crypto, { timingSafeEqual } from 'crypto';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import bcrypt from 'bcryptjs';
 import { readState, writeState, createLogEntry } from './myrmex.js';
 import { recordAuthFailure, clearAuthFailures } from './middleware.js';
-import { validate } from './validation/validate.js';
 import { loginSchema, setupSchema, changePasswordSchema } from './validation/schemas.js';
 
 const SESSION_COOKIE = 'myrmex_session';
@@ -140,7 +139,6 @@ export function setup(req: Request, res: Response) {
 
   // Сохраняем в .env
   process.env.MYRMEX_PASSWORD = newPassword;
-  const { writeFileSync, readFileSync } = require('fs');
   let env = '';
   if (existsSync(ENV_FILE)) {
     env = readFileSync(ENV_FILE, 'utf-8');
@@ -181,12 +179,9 @@ export function login(req: Request, res: Response) {
   const { password: input } = parsed.data;
 
   // Сравнение: bcrypt hash или plain text
-  let valid = false;
-  if (password.startsWith('$2')) {
-    valid = bcrypt.compareSync(input, password);
-  } else {
-    valid = input === password;
-  }
+  const valid = password.startsWith('$2')
+    ? bcrypt.compareSync(input, password)
+    : input === password;
 
   if (!valid) {
     recordAuthFailure(req);
@@ -288,7 +283,6 @@ export async function changePassword(req: Request, res: Response) {
 
     // Обновляем .env (обратная совместимость)
     process.env.MYRMEX_PASSWORD = new_password;
-    const { writeFileSync, readFileSync } = require('fs');
     let env = '';
     if (existsSync(ENV_FILE)) {
       env = readFileSync(ENV_FILE, 'utf-8');

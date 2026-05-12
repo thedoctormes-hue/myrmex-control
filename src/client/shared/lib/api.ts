@@ -8,7 +8,6 @@ const BASE = '/api';
 
 // Token storage
 let accessToken: string | null = localStorage.getItem('access_token');
-let refreshing = false;
 let refreshPromise: Promise<string | null> | null = null;
 
 export function getToken(): string | null {
@@ -24,7 +23,6 @@ export function setToken(token: string | null) {
 // Try to refresh token
 async function tryRefresh(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
-  refreshing = true;
   refreshPromise = (async () => {
     try {
       const res = await fetch(`${BASE}/auth/refresh`, { method: 'POST', credentials: 'include' });
@@ -38,7 +36,6 @@ async function tryRefresh(): Promise<string | null> {
     } catch {
       return null;
     } finally {
-      refreshing = false;
       refreshPromise = null;
     }
   })();

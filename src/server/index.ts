@@ -46,7 +46,7 @@ function getAppVersion(): string {
       const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
       return pkg.version || '0.0.0';
     }
-  } catch {}
+  } catch { /* ignore */ }
   return '0.0.0';
 }
 

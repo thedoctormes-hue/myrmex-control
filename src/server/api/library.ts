@@ -14,7 +14,7 @@ router.get('/', async (req: Request, res: Response) => {
       items = items.filter(s => s.type === req.query.type);
     }
     res.json(items);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read library' });
   }
 });
@@ -25,7 +25,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     const item = state.library.find(s => s.id === req.params.id);
     if (!item) return res.status(404).json({ error: 'Skill not found' });
     res.json(item);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read skill' });
   }
 });
@@ -53,7 +53,7 @@ router.post('/', validate(libraryCreateSchema), async (req: Request, res: Respon
     ));
 
     res.status(201).json(skill);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create skill' });
   }
 });
@@ -78,7 +78,7 @@ router.put('/:id', validate(libraryUpdateSchema), async (req: Request, res: Resp
     ));
 
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update skill' });
   }
 });
@@ -95,7 +95,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete skill' });
   }
 });

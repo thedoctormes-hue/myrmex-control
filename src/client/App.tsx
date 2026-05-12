@@ -3,8 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { useMyrmex } from './hooks/useMyrmex';
 import { useTheme } from './hooks/useTheme';
 import { authStatus, logout as logoutApi, setUnauthorizedHandler } from './lib/api';
-import { Sidebar } from './components/layout/Sidebar';
-import { BottomBar } from './components/layout/BottomBar';
+import { Sidebar } from './shared/ui/Sidebar';
+import { BottomBar } from './shared/ui/BottomBar';
 import { Dashboard } from './pages/Dashboard';
 import { Projects } from './pages/Projects';
 import { Board } from './pages/Board';
@@ -13,6 +13,12 @@ import { Files } from './pages/Files';
 import { Graph } from './pages/Graph';
 import { Login } from './pages/Login';
 import { Setup } from './pages/Setup';
+import { Onboarding } from './pages/Onboarding';
+import { Agents } from './pages/Agents';
+import { Servers } from './pages/Servers';
+import { Analytics } from './pages/Analytics';
+import { AuditLog } from './pages/AuditLog';
+import { Settings } from './pages/Settings';
 
 export default function App() {
   const { state, loading, error, refresh } = useMyrmex();
@@ -116,9 +122,16 @@ export default function App() {
           <Route path="/" element={<Dashboard state={state} onRefresh={refresh} />} />
           <Route path="/projects" element={<Projects state={state} onRefresh={refresh} />} />
           <Route path="/project/:id" element={<Board state={state} onRefresh={refresh} />} />
+          <Route path="/board/:id" element={<Board state={state} onRefresh={refresh} />} />
           <Route path="/library" element={<Library state={state} onRefresh={refresh} />} />
           <Route path="/files" element={<Files />} />
           <Route path="/graph" element={<Graph state={state} />} />
+          <Route path="/agents" element={<Agents state={state} onRefresh={refresh} />} />
+          <Route path="/servers" element={<Servers state={state} onRefresh={refresh} />} />
+          <Route path="/analytics" element={<Analytics state={state} />} />
+          <Route path="/audit" element={<AuditLog state={state} />} />
+          <Route path="/settings" element={<Settings state={state} onRefresh={refresh} />} />
+          <Route path="/onboarding" element={<Onboarding onComplete={refresh} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

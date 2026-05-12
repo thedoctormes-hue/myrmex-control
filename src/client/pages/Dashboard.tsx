@@ -67,11 +67,12 @@ export function Dashboard({ state, onRefresh }: Props) {
 }
 
 function StatCard({ label, value, sub, icon, color }: {
-  label: string; value: string | number; sub?: string; icon: string; color: string;
+  label: string; value: string | number; sub?: string; icon?: string; color: string;
 }) {
   return (
     <div className="bg-card border border-border rounded-lg p-4 hover:border-primary/30 transition-colors">
       <div className="flex items-center gap-2 text-muted-foreground-foreground text-sm mb-1">
+        {icon && <span>{icon}</span>}
         <span className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
         <span>{label}</span>
       </div>

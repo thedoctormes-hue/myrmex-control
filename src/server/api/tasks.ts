@@ -23,7 +23,7 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     res.json(tasks);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read tasks' });
   }
 });
@@ -37,7 +37,7 @@ router.get('/:id', async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Task not found' });
     }
     res.json(task);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to read task' });
   }
 });
@@ -70,7 +70,7 @@ router.post('/', validate(taskCreateSchema), async (req: Request, res: Response)
     ));
 
     res.status(201).json(task);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to create task' });
   }
 });
@@ -104,7 +104,7 @@ router.put('/:id', validate(taskUpdateSchema), async (req: Request, res: Respons
     ));
 
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to update task' });
   }
 });
@@ -124,7 +124,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     ));
 
     res.json({ success: true, id: deleted.id });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to delete task' });
   }
 });
@@ -150,7 +150,7 @@ router.post('/:id/move', validate(taskMoveSchema), async (req: Request, res: Res
     ));
 
     res.json(task);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: 'Failed to move task' });
   }
 });
