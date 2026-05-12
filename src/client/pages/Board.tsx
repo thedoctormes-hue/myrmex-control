@@ -260,3 +260,5 @@ function TaskCard({
     </div>
   );
 }
+
+export default Board;

@@ -92,3 +92,5 @@ export function Setup({ onSetup }: Props) {
     </div>
   );
 }
+
+export default Setup;

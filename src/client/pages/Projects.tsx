@@ -152,3 +152,5 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: s
     </div>
   );
 }
+
+export default Projects;

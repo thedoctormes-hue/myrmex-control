@@ -81,3 +81,5 @@ function StatCard({ label, value, sub, icon, color }: {
     </div>
   );
 }
+
+export default Dashboard;
