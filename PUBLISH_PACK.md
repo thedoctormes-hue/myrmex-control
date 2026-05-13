@@ -1,3 +1,10 @@
+---
+description: "Myrmex Control — Пак для публикации"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # Myrmex Control — Пак для публикации
 
 > **Дата:** 2026-05-11

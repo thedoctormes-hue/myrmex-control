@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState, Project } from '@shared/types';
-import { createProject, deleteProject } from '../lib/api';
+import { createProject, deleteProject } from '../shared/lib/api';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { confirmDialog } from '../shared/ui/ConfirmDialog';
 
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export function Projects({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -22,11 +24,11 @@ export function Projects({ state, onRefresh }: Props) {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Название проекта обязательно');
+      setError(t('projects.nameRequired'));
       return;
     }
     if (name.trim().length < 2) {
-      setError('Название — минимум 2 символа');
+      setError(t('projects.nameMinLength'));
       return;
     }
     try {
@@ -38,20 +40,20 @@ export function Projects({ state, onRefresh }: Props) {
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания проекта');
+      setError(err instanceof Error ? err.message : t('projects.createError'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const ok = await confirmDialog({ title: 'Удалить проект?', message: 'Это действие нельзя отменить.', variant: 'danger' });
+    const ok = await confirmDialog({ title: t('projects.deleteTitle'), message: t('projects.deleteConfirm'), variant: 'danger' });
     if (!ok) return;
     try {
       await deleteProject(id);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : t('projects.deleteError'));
     }
   };
 
@@ -59,14 +61,14 @@ export function Projects({ state, onRefresh }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Проекты</h1>
-          <p className="text-sm text-muted-foreground-foreground">{projects.length} проектов</p>
+          <h1 className="text-2xl font-bold">{t('projects.title')}</h1>
+          <p className="text-sm text-muted-foreground-foreground">{t('projects.count', { n: projects.length })}</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
-          {showForm ? '✕' : '+ Новый проект'}
+          {showForm ? '✕' : t('projects.newProject')}
         </button>
       </div>
 
@@ -78,7 +80,7 @@ export function Projects({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Название проекта *"
+              placeholder={t('projects.nameLabel')}
               className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -90,7 +92,7 @@ export function Projects({ state, onRefresh }: Props) {
             <input
               value={description}
               onChange={e => setDescription(e.target.value)}
-              placeholder="Описание (опционально)"
+              placeholder={t('projects.descriptionLabel')}
               className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               maxLength={500}
             />
@@ -100,7 +102,7 @@ export function Projects({ state, onRefresh }: Props) {
             disabled={saving || !name.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Создание...' : 'Создать'}
+            {saving ? t('projects.creating') : t('projects.create')}
           </button>
         </form>
       )}
@@ -114,7 +116,7 @@ export function Projects({ state, onRefresh }: Props) {
       {projects.length === 0 && !showForm && (
         <div className="text-center py-12 text-muted-foreground-foreground">
           <div className="text-4xl mb-2">📁</div>
-          <p>Нет проектов. Создайте первый!</p>
+          <p>{t('projects.noProjects')}</p>
         </div>
       )}
     </div>
@@ -122,6 +124,8 @@ export function Projects({ state, onRefresh }: Props) {
 }
 
 function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: string) => void }) {
+  const [lang] = useLang();
+
   return (
     <div className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-colors">
       <div className="flex items-start justify-between">
@@ -137,7 +141,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: s
         <button
           onClick={() => onDelete(project.id)}
           className="text-muted-foreground-foreground hover:text-destructive text-sm ml-2 flex-shrink-0"
-          aria-label="Удалить проект"
+          aria-label={t('common.delete')}
         >
           ✕
         </button>
@@ -146,7 +150,7 @@ function ProjectCard({ project, onDelete }: { project: Project; onDelete: (id: s
         <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
         <span className="text-xs text-muted-foreground-foreground">{project.status}</span>
         <span className="text-xs text-muted-foreground-foreground ml-auto">
-          {new Date(project.created_at).toLocaleDateString('ru')}
+          {new Date(project.created_at).toLocaleDateString(lang === 'ru' ? 'ru' : 'en')}
         </span>
       </div>
     </div>

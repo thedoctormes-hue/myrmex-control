@@ -1,0 +1,24 @@
+[
+  {
+    "id": "IMP-MP451GOZ",
+    "title": "Add keyboard shortcuts reference panel",
+    "description": "Auto-generated from analysis: Add keyboard shortcuts reference panel",
+    "category": "ux",
+    "risk": "low",
+    "status": "proposed",
+    "source": "metrics",
+    "impact_score": 3,
+    "created_at": "2026-05-13T14:11:39.587Z"
+  },
+  {
+    "id": "IMP-MP451GOZ",
+    "title": "Consider caching for /api/state endpoint",
+    "description": "Auto-generated from analysis: Consider caching for /api/state endpoint",
+    "category": "performance",
+    "risk": "low",
+    "status": "proposed",
+    "source": "metrics",
+    "impact_score": 5,
+    "created_at": "2026-05-13T14:11:39.587Z"
+  }
+]

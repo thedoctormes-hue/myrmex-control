@@ -1,7 +1,9 @@
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState } from '@shared/types';
 import { ServerWidget } from '../components/dashboard/ServerWidget';
 import { BalanceWidget } from '../components/dashboard/BalanceWidget';
 import { SignalsFeed } from '../components/dashboard/SignalsFeed';
+import { HealthScore } from '../features/dashboard/HealthScore';
 
 interface Props {
   state: MyrmexState | null;
@@ -9,6 +11,8 @@ interface Props {
 }
 
 export function Dashboard({ state, onRefresh }: Props) {
+  const [lang] = useLang();
+
   if (!state) return null;
 
   const activeTasks = state.tasks.filter(t => t.status !== 'done' && t.status !== 'cancelled');
@@ -20,26 +24,29 @@ export function Dashboard({ state, onRefresh }: Props) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Дашборд</h1>
+          <h1 className="text-2xl font-bold">{t('dash.title')}</h1>
           <p className="text-sm text-muted-foreground-foreground">
-            Обзор муравейника · Обновлено {new Date(state._meta.last_updated).toLocaleString('ru')}
+            {t('dash.overview')} · {t('dash.updatedAt', { time: new Date(state._meta.last_updated).toLocaleString(lang === 'ru' ? 'ru' : 'en') })}
           </p>
         </div>
         <button
           onClick={onRefresh}
           className="px-3 py-1.5 text-xs bg-secondary text-secondary-foreground rounded-md hover:bg-accent transition"
         >
-          🔄 Обновить
+          🔄 {t('dash.refresh')}
         </button>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Проекты" value={activeProjects.length} icon="📁" color="#6366f1" />
-        <StatCard label="Задачи" value={activeTasks.length} sub={`${doneTasks.length} выполнено`} icon="✅" color="#22c55e" />
-        <StatCard label="Агенты" value={state.agents.length} icon="🤖" color="#f59e0b" />
-        <StatCard label="Серверы" value={`${onlineServers}/${state.servers.length}`} icon="🖥️" color="#3b82f6" />
+        <StatCard label={t('dash.projectsLabel')} value={activeProjects.length} icon="📁" color="#6366f1" />
+        <StatCard label={t('dash.tasksLabel')} value={activeTasks.length} sub={t('dash.doneTasks', { n: doneTasks.length })} icon="✅" color="#22c55e" />
+        <StatCard label={t('dash.agentsLabel')} value={state.agents.length} icon="🤖" color="#f59e0b" />
+        <StatCard label={t('dash.serversLabel')} value={`${onlineServers}/${state.servers.length}`} icon="🖥️" color="#3b82f6" />
       </div>
+
+      {/* BL-029: Health Score */}
+      <HealthScore />
 
       {/* Widgets */}
       <div className="grid md:grid-cols-2 gap-4">
@@ -52,13 +59,13 @@ export function Dashboard({ state, onRefresh }: Props) {
       {activeProjects.length === 0 && activeTasks.length === 0 && (
         <div className="bg-card border border-border rounded-lg p-6 text-center">
           <div className="text-4xl mb-3">🐜</div>
-          <h2 className="text-lg font-semibold mb-1">Муравейник пуст</h2>
-          <p className="text-sm text-muted-foreground-foreground mb-4">Создайте первый проект и добавьте задачи</p>
+          <h2 className="text-lg font-semibold mb-1">{t('dash.emptyTitle')}</h2>
+          <p className="text-sm text-muted-foreground-foreground mb-4">{t('dash.emptyDesc')}</p>
           <a
             href="/projects"
             className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
           >
-            + Создать проект
+            {t('dash.createProject')}
           </a>
         </div>
       )}

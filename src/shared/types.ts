@@ -11,6 +11,15 @@ export type AgentStatus = 'idle' | 'working' | 'error' | 'offline';
 export type ServerStatus = 'online' | 'offline' | 'degraded';
 export type SkillType = 'skill' | 'mask' | 'hook' | 'template';
 
+// --- BL-040: RBAC ---
+
+export type UserRole = 'admin' | 'manager' | 'developer' | 'viewer' | 'agent';
+
+export interface RolePermissions {
+  role: UserRole;
+  permissions: string[]; // e.g. ['tasks:read', 'tasks:write', 'agents:read']
+}
+
 // --- Meta ---
 
 export interface MyrmexMeta {
@@ -143,7 +152,7 @@ export interface User {
   id: string;
   username: string;
   password_hash: string;
-  role: 'admin' | 'user';
+  role: UserRole;
   created_at: string;
   last_login?: string;
 }
@@ -158,6 +167,118 @@ export interface ChangelogEntry {
   entity_type: string;
   entity_id: string;
   diff: Record<string, unknown>;
+}
+
+// --- BL-034: Deploy ---
+
+export type DeployColor = 'blue' | 'green';
+export type DeployStatus = 'idle' | 'deploying' | 'healthy' | 'unhealthy' | 'rolling_back';
+
+export interface DeployEntry {
+  id: string;
+  color: DeployColor;
+  version: string;
+  status: DeployStatus;
+  started_at: string;
+  finished_at: string | null;
+  health_check_passed: boolean | null;
+  rollback_triggered: boolean;
+  commit_sha?: string;
+  deploy_log: string[];
+}
+
+// --- BL-035: Artifacts ---
+
+export type ArtifactType = 'BL' | 'INC' | 'PAT' | 'RUL' | 'ADR' | 'SKILL' | 'AGENT';
+export type ArtifactStatus = 'draft' | 'review' | 'approved' | 'active' | 'deprecated' | 'archived';
+
+export interface ArtifactFrontmatter {
+  id: string;
+  type: ArtifactType;
+  title: string;
+  status: ArtifactStatus;
+  created: string;
+  updated: string;
+  author: string;
+  tags: string[];
+  links: string[];
+  description?: string;
+  version?: string;
+}
+
+// --- BL-038: Webhooks ---
+
+export type WebhookEvent =
+  | 'task.created' | 'task.completed' | 'task.updated'
+  | 'agent.status_changed' | 'agent.online' | 'agent.offline'
+  | 'deploy.started' | 'deploy.completed' | 'deploy.failed'
+  | 'artifact.created' | 'artifact.updated';
+
+export interface WebhookSubscription {
+  id: string;
+  url: string;
+  events: WebhookEvent[];
+  active: boolean;
+  created_at: string;
+  last_delivery: string | null;
+  failure_count: number;
+}
+
+// --- BL-043: Knowledge Graph ---
+
+export interface GraphNode {
+  id: string;
+  type: 'agent' | 'project' | 'task' | 'artifact' | 'skill' | 'server' | 'user';
+  label: string;
+  status: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  type: string;
+  weight?: number;
+}
+
+// --- BL-046: Sessions ---
+
+export type SessionStatus = 'active' | 'idle' | 'archived';
+
+export interface SessionMessage {
+  id: string;
+  role: 'user' | 'agent' | 'system';
+  content: string;
+  timestamp: string;
+}
+
+export interface Session {
+  id: string;
+  agent_id: string;
+  title: string;
+  status: SessionStatus;
+  created_at: string;
+  updated_at: string;
+  archived_at?: string;
+  tags: string[];
+  bookmarks: string[];
+  summary?: string;
+}
+
+// --- BL-047: SaaS ---
+
+export type PlanTier = 'free' | 'pro' | 'team' | 'enterprise';
+
+export interface PricingTier {
+  id: PlanTier;
+  name: string;
+  description: string;
+  price_monthly: number;
+  price_annual: number;
+  agents_limit: number;
+  projects_limit: number;
+  features: string[];
+  popular: boolean;
 }
 
 // --- Root State ---

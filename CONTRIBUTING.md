@@ -1,3 +1,10 @@
+---
+description: "Contributing to Myrmex Control"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # Contributing to Myrmex Control
 
 Thank you for your interest in contributing to Myrmex Control! This document provides guidelines and instructions for contributing.

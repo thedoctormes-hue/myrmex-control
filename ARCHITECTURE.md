@@ -1,3 +1,10 @@
+---
+description: "ARCHITECTURE.md — Myrmex Control"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # ARCHITECTURE.md — Myrmex Control
 
 > Архитектурный обзор проекта. Последнее обновление: 2026-05-10.

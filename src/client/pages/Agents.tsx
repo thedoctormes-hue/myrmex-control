@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState, Agent, AgentStatus } from '@shared/types';
 import { createAgent, deleteAgent, updateAgent } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
@@ -12,13 +13,14 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<AgentStatus, { label: string; color: string; icon: typeof Bot }> = {
-  idle: { label: 'Ожидание', color: '#6b7280', icon: Pause },
-  working: { label: 'Работает', color: '#22c55e', icon: Play },
-  error: { label: 'Ошибка', color: '#ef4444', icon: Cpu },
-  offline: { label: 'Оффлайн', color: '#374151', icon: Cpu },
+  idle: { label: t('agents.status.idle'), color: '#6b7280', icon: Pause },
+  working: { label: t('agents.status.working'), color: '#22c55e', icon: Play },
+  error: { label: t('agents.status.error'), color: '#ef4444', icon: Cpu },
+  offline: { label: t('agents.status.offline'), color: '#374151', icon: Cpu },
 };
 
 export function Agents({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
@@ -31,36 +33,36 @@ export function Agents({ state, onRefresh }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError('Имя агента обязательно'); return; }
+    if (!name.trim()) { setError(t('agents.nameRequired')); return; }
     try {
       setSaving(true);
       setError(null);
       await createAgent({ name: name.trim(), role: role.trim() || 'worker', model: model.trim() || 'unknown', source: 'ui' });
-      notify('success', `Агент «${name.trim()}» создан`);
+      notify('success', t('agents.created', { name: name.trim() }));
       setName(''); setRole(''); setModel('');
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания агента');
+      setError(err instanceof Error ? err.message : t('agents.createError'));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = async (id: string, agentName: string) => {
     const ok = await confirmDialog({
-      title: 'Удалить агента?',
-      message: `Агент «${name}» будет удалён. Это действие нельзя отменить.`,
-      confirmLabel: 'Удалить',
+      title: t('agents.deleteTitle'),
+      message: t('agents.deleteConfirm', { name: agentName }),
+      confirmLabel: t('agents.deleteLabel'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await deleteAgent(id);
-      notify('info', `Агент «${name}» удалён`);
+      notify('info', t('agents.deleted', { name: agentName }));
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : t('agents.unknownError'));
     }
   };
 
@@ -69,7 +71,7 @@ export function Agents({ state, onRefresh }: Props) {
       await updateAgent(agent.id, { status, source: 'ui' });
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка обновления');
+      setError(err instanceof Error ? err.message : t('agents.updateError'));
     }
   };
 
@@ -79,15 +81,15 @@ export function Agents({ state, onRefresh }: Props) {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bot className="w-6 h-6 text-primary" />
-            Агенты
+            {t('agents.title')}
           </h1>
-          <p className="text-sm text-muted-foreground-foreground">{agents.length} агентов</p>
+          <p className="text-sm text-muted-foreground-foreground">{t('agents.count', { n: agents.length })}</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition flex items-center gap-1.5"
         >
-          {showForm ? <><X className="w-4 h-4" /> Отмена</> : <><Plus className="w-4 h-4" /> Новый агент</>}
+          {showForm ? <><X className="w-4 h-4" /> {t('agents.cancel')}</> : <><Plus className="w-4 h-4" /> {t('agents.newAgent')}</>}
         </button>
       </div>
 
@@ -99,7 +101,7 @@ export function Agents({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Имя агента *"
+              placeholder={t('agents.nameLabel')}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -108,13 +110,13 @@ export function Agents({ state, onRefresh }: Props) {
             <input
               value={role}
               onChange={e => setRole(e.target.value)}
-              placeholder="Роль (worker, reviewer, ...)"
+              placeholder={t('agents.roleLabel')}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <input
               value={model}
               onChange={e => setModel(e.target.value)}
-              placeholder="Модель (gpt-4, claude, ...)"
+              placeholder={t('agents.modelLabel')}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
@@ -123,7 +125,7 @@ export function Agents({ state, onRefresh }: Props) {
             disabled={saving || !name.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Создание...' : 'Создать'}
+            {saving ? t('agents.creating') : t('agents.create')}
           </button>
         </form>
       )}
@@ -137,7 +139,7 @@ export function Agents({ state, onRefresh }: Props) {
       {agents.length === 0 && !showForm && (
         <div className="text-center py-12 text-muted-foreground-foreground">
           <Bot className="w-12 h-12 mx-auto mb-3 opacity-40" />
-          <p>Нет агентов. Создайте первого!</p>
+          <p>{t('agents.noAgents')}</p>
         </div>
       )}
     </div>
@@ -174,7 +176,7 @@ function AgentCard({
         <button
           onClick={() => onDelete(agent.id, agent.name)}
           className="text-muted-foreground-foreground hover:text-destructive transition-colors p-1"
-          aria-label="Удалить"
+          aria-label={t('agents.deleteLabel')}
         >
           <Trash2 className="w-4 h-4" />
         </button>
@@ -197,7 +199,7 @@ function AgentCard({
       </div>
 
       <div className="mt-2 text-[10px] text-muted-foreground-foreground">
-        Виден: {new Date(agent.last_seen).toLocaleString('ru')}
+        {t('agents.lastSeen', { time: new Date(agent.last_seen).toLocaleString(lang === 'ru' ? 'ru' : 'en') })}
       </div>
     </div>
   );

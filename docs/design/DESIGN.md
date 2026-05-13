@@ -1,3 +1,10 @@
+---
+description: "🎨 Myrmex Control — Design System & UX Guide"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # 🎨 Myrmex Control — Design System & UX Guide
 
 > **Версия:** 1.0 | **Дата:** 2026-05-11 | **Автор:** Каскадный брейншторм (20 агентов)

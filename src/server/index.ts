@@ -16,11 +16,28 @@ import { router as projectsRouter } from './api/projects.js';
 import { router as libraryRouter } from './api/library.js';
 import { router as filesRouter } from './api/files.js';
 import { router as serversRouter } from './api/servers.js';
+import { router as agentsRouter } from './api/agents.js';
 import { router as stateRouter } from './api/state.js';
+import { router as settingsRouter } from './api/settings.js';
+import { router as analyticsRouter } from './api/analytics.js';
+import { router as auditRouter } from './api/audit.js';
 import { startWatchdog, stopWatchdog } from './watchdog.js';
 import { rateLimit, errorHandler, cspHeaders, authRateLimit } from './middleware.js';
 import { router as backupRouter } from './api/backup.js';
 import { router as healthRouter } from './api/health.js';
+import { initWebSocket, closeWebSocket } from './ws.js';
+import { router as monitoringRouter } from './api/monitoring.js';
+import { router as costRouter } from './api/cost.js';
+import { router as deployRouter } from './api/deploy.js';
+import { router as artifactsRouter } from './api/artifacts.js';
+import { router as skillsRouter } from './api/skills.js';
+import { router as webhooksRouter } from './api/webhooks.js';
+import { router as fileExchangeRouter } from './api/fileExchange.js';
+import { router as knowledgeRouter } from './api/knowledge.js';
+import { router as sessionsRouter } from './api/sessions.js';
+import { router as evolutionRouter } from './api/evolution.js';
+import { router as saasRouter } from './api/saas.js';
+import { router as demoRouter } from './api/demo.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -46,7 +63,7 @@ function getAppVersion(): string {
       const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
       return pkg.version || '0.0.0';
     }
-  } catch { /* ignore */ }
+  } catch {}
   return '0.0.0';
 }
 
@@ -89,7 +106,41 @@ app.use('/api/tasks', requireAuth, tasksRouter);
 app.use('/api/projects', requireAuth, projectsRouter);
 app.use('/api/library', requireAuth, libraryRouter);
 app.use('/api/files', requireAuth, filesRouter);
+app.use('/api/exchange', requireAuth, fileExchangeRouter);
 app.use('/api/servers', requireAuth, serversRouter);
+app.use('/api/agents', requireAuth, agentsRouter);
+app.use('/api/settings', requireAuth, settingsRouter);
+app.use('/api/analytics', requireAuth, analyticsRouter);
+app.use('/api/audit', requireAuth, auditRouter);
+app.use('/api/monitoring', requireAuth, monitoringRouter);
+app.use('/api/costs', requireAuth, costRouter);
+
+// BL-034: Deploy
+app.use('/api/deploy', requireAuth, deployRouter);
+
+// BL-035: Artifacts
+app.use('/api/artifacts', requireAuth, artifactsRouter);
+
+// BL-037: Skills
+app.use('/api/skills', skillsRouter);
+
+// BL-038: Webhooks
+app.use('/api/webhooks', requireAuth, webhooksRouter);
+
+// BL-043: Knowledge Graph
+app.use('/api/knowledge', requireAuth, knowledgeRouter);
+
+// BL-046: Sessions
+app.use('/api/sessions', requireAuth, sessionsRouter);
+
+// BL-045: Evolution
+app.use('/api/evolution', requireAuth, evolutionRouter);
+
+// BL-047: SaaS
+app.use('/api/saas', saasRouter);
+
+// BL-042: Demo
+app.use('/api/demo', demoRouter);
 
 // BL-016: Backup API
 app.use('/api/backup', requireAuth, backupRouter);
@@ -111,9 +162,13 @@ const server = app.listen(PORT, () => {
   startWatchdog();
 });
 
+// BL-028: Initialize WebSocket server
+initWebSocket(server);
+
 // Graceful shutdown
 function shutdown() {
   stopWatchdog();
+  closeWebSocket();
   server.close(() => process.exit(0));
 }
 process.on('SIGTERM', shutdown);

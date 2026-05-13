@@ -1,3 +1,10 @@
+---
+description: "🏛 Консилиум: {{тема}}"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # 🏛 Консилиум: {{тема}}
 **Дата:** {{YYYY-MM-DD}}
 **Режим:** EMERGENCY | INCIDENT | STANDARD | MIGRATION

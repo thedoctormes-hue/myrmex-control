@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState, Task, TaskStatus } from '@shared/types';
-import { createTask, moveTask, deleteTask } from '../lib/api';
+import { createTask, moveTask, deleteTask } from '../shared/lib/api';
 import { confirmDialog } from '../shared/ui/ConfirmDialog';
 
 interface Props {
@@ -9,15 +10,16 @@ interface Props {
   onRefresh: () => void;
 }
 
-const COLUMNS: { status: TaskStatus; label: string; color: string }[] = [
-  { status: 'backlog', label: 'Бэклог', color: '#6b7280' },
-  { status: 'todo', label: 'К выполнению', color: '#3b82f6' },
-  { status: 'in_progress', label: 'В работе', color: '#f59e0b' },
-  { status: 'review', label: 'На проверке', color: '#8b5cf6' },
-  { status: 'done', label: 'Готово', color: '#22c55e' },
+const COLUMNS: { status: TaskStatus; labelKey: string; color: string }[] = [
+  { status: 'backlog', labelKey: 'board.column.backlog', color: '#6b7280' },
+  { status: 'todo', labelKey: 'board.column.todo', color: '#3b82f6' },
+  { status: 'in_progress', labelKey: 'board.column.in_progress', color: '#f59e0b' },
+  { status: 'review', labelKey: 'board.column.review', color: '#8b5cf6' },
+  { status: 'done', labelKey: 'board.column.done', color: '#22c55e' },
 ];
 
 export function Board({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const { id } = useParams<{ id: string }>();
   const project = state?.projects.find(p => p.id === id);
   const tasks = state?.tasks.filter(t => t.project_id === id) || [];
@@ -42,7 +44,7 @@ export function Board({ state, onRefresh }: Props) {
   };
 
   const handleDelete = async (taskId: string) => {
-    const ok = await confirmDialog({ title: 'Удалить задачу?', message: 'Это действие нельзя отменить.', variant: 'danger' });
+    const ok = await confirmDialog({ title: t('board.deleteTaskTitle'), message: t('board.deleteTaskConfirm'), variant: 'danger' });
     if (!ok) return;
     await deleteTask(taskId);
     onRefresh();
@@ -64,7 +66,7 @@ export function Board({ state, onRefresh }: Props) {
       <div className="flex items-center justify-center h-64 text-muted-foreground-foreground">
         <div className="text-center">
           <div className="text-4xl mb-2">📭</div>
-          <p>Проект не найден</p>
+          <p>{t('board.projectNotFound')}</p>
         </div>
       </div>
     );
@@ -78,13 +80,13 @@ export function Board({ state, onRefresh }: Props) {
             <span>{project.icon}</span>
             <span>{project.name}</span>
           </h1>
-          <p className="text-sm text-muted-foreground-foreground">{tasks.length} задач</p>
+          <p className="text-sm text-muted-foreground-foreground">{t('board.tasksCount', { n: tasks.length })}</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
-          {showForm ? '✕' : '+ Задача'}
+          {showForm ? '✕' : t('board.newTask')}
         </button>
       </div>
 
@@ -93,13 +95,13 @@ export function Board({ state, onRefresh }: Props) {
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="Название задачи"
+            placeholder={t('board.taskTitlePlaceholder')}
             className="flex-1 px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             autoFocus
             required
           />
           <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm">
-            Создать
+            {t('board.create')}
           </button>
         </form>
       )}
@@ -108,7 +110,9 @@ export function Board({ state, onRefresh }: Props) {
         {COLUMNS.map(col => (
           <KanbanColumn
             key={col.status}
-            {...col}
+            status={col.status}
+            label={t(col.labelKey)}
+            color={col.color}
             tasks={tasks.filter(t => t.status === col.status)}
             isDragOver={dragOverCol === col.status}
             dragTaskId={dragTaskId}
@@ -189,7 +193,7 @@ function KanbanColumn({
         ))}
         {tasks.length === 0 && !isDragOver && (
           <div className="text-center py-4 text-xs text-muted-foreground-foreground border border-dashed border-border rounded">
-            Перетащите задачу сюда
+            {t('board.dragHint')}
           </div>
         )}
       </div>
@@ -210,11 +214,11 @@ function TaskCard({
   onDragStart: (e: React.DragEvent, id: string) => void;
   onDragEnd: () => void;
 }) {
-  const priorityConfig: Record<string, { color: string; label: string }> = {
-    low: { color: '#6b7280', label: 'Низкий' },
-    medium: { color: '#3b82f6', label: 'Средний' },
-    high: { color: '#f59e0b', label: 'Высокий' },
-    critical: { color: '#ef4444', label: 'Критический' },
+  const priorityConfig: Record<string, { color: string; labelKey: string }> = {
+    low: { color: '#6b7280', labelKey: 'board.priority.low' },
+    medium: { color: '#3b82f6', labelKey: 'board.priority.medium' },
+    high: { color: '#f59e0b', labelKey: 'board.priority.high' },
+    critical: { color: '#ef4444', labelKey: 'board.priority.critical' },
   };
   const prio = priorityConfig[task.priority] || priorityConfig.medium;
 
@@ -232,7 +236,7 @@ function TaskCard({
         <button
           onClick={e => { e.stopPropagation(); onDelete(task.id); }}
           className="text-muted-foreground-foreground hover:text-destructive text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-          aria-label="Удалить"
+          aria-label={t('common.delete')}
         >
           ✕
         </button>
@@ -246,15 +250,15 @@ function TaskCard({
           style={{ backgroundColor: prio.color + '20', color: prio.color }}
         >
           <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: prio.color }} />
-          {prio.label}
+          {t(prio.labelKey)}
         </span>
-        {task.tags.slice(0, 3).map(tag => (
+        {task?.tags?.slice(0, 3).map(tag => (
           <span key={tag} className="text-[10px] text-muted-foreground-foreground bg-secondary px-1.5 py-0.5 rounded">
             {tag}
           </span>
         ))}
-        {task.tags.length > 3 && (
-          <span className="text-[10px] text-muted-foreground-foreground">+{task.tags.length - 3}</span>
+        {task?.tags?.length > 3 && (
+          <span className="text-[10px] text-muted-foreground-foreground">+{task?.tags?.length - 3}</span>
         )}
       </div>
     </div>

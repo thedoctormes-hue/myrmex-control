@@ -11,6 +11,7 @@ import bcrypt from 'bcryptjs';
 import { readState, writeState, createLogEntry } from './myrmex.js';
 import { recordAuthFailure, clearAuthFailures } from './middleware.js';
 import { loginSchema, setupSchema, changePasswordSchema } from './validation/schemas.js';
+import type { UserRole } from '@shared/types.js';
 
 const SESSION_COOKIE = 'myrmex_session';
 const SESSION_TTL = 24 * 60 * 60 * 1000; // 24 часа
@@ -267,7 +268,7 @@ export async function changePassword(req: Request, res: Response) {
         id: crypto.randomUUID(),
         username: 'admin',
         password_hash,
-        role: 'admin',
+        role: 'admin' as UserRole,
         created_at: new Date().toISOString(),
         last_login: new Date().toISOString(),
       }];

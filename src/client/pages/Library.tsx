@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState, Skill } from '@shared/types';
-import { createSkill, deleteSkill } from '../lib/api';
+import { createSkill, deleteSkill } from '../shared/lib/api';
 import { ErrorBanner } from '../components/ui/ErrorBanner';
 import { confirmDialog } from '../shared/ui/ConfirmDialog';
 
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export function Library({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [type, setType] = useState<Skill['type']>('skill');
@@ -25,8 +27,8 @@ export function Library({ state, onRefresh }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError('Название обязательно'); return; }
-    if (!content.trim()) { setError('Содержимое обязательно'); return; }
+    if (!name.trim()) { setError(t('lib.name') + ' *'); return; }
+    if (!content.trim()) { setError(t('lib.content') + ' *'); return; }
     try {
       setSaving(true);
       setError(null);
@@ -35,46 +37,53 @@ export function Library({ state, onRefresh }: Props) {
         type,
         content: content.trim(),
         description: description.trim(),
-        tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+        tags: tags.split(',').map(tp => tp.trim()).filter(Boolean),
         source: 'ui',
       });
       setName(''); setContent(''); setDescription(''); setTags('');
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания');
+      setError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    const ok = await confirmDialog({ title: 'Удалить?', message: 'Это действие нельзя отменить.', variant: 'danger' });
+    const ok = await confirmDialog({ title: t('common.delete'), message: t('common.delete') + '?', variant: 'danger' });
     if (!ok) return;
     try {
       await deleteSkill(id);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : t('common.error'));
     }
   };
 
   const typeLabels: Record<string, string> = {
-    all: 'Все', skill: 'Скиллы', mask: 'Маски', hook: 'Хуки', template: 'Шаблоны',
+    all: t('common.all'), skill: t('lib.type.skill'), mask: 'Маски', hook: t('lib.type.hook'), template: 'Шаблоны',
   };
+
+  const typeOptions: { value: string; label: string }[] = [
+    { value: 'skill', label: t('lib.type.skill') },
+    { value: 'mask', label: 'Маска' },
+    { value: 'hook', label: t('lib.type.hook') },
+    { value: 'template', label: 'Шаблон' },
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Библиотека</h1>
-          <p className="text-sm text-muted-foreground-foreground">{allSkills.length} элементов</p>
+          <h1 className="text-2xl font-bold">{t('lib.title')}</h1>
+          <p className="text-sm text-muted-foreground-foreground">{allSkills.length} {t('common.all').toLowerCase()}</p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition"
         >
-          {showForm ? '✕' : '+ Добавить'}
+          {showForm ? '✕' : t('lib.add')}
         </button>
       </div>
 
@@ -102,7 +111,7 @@ export function Library({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Название *"
+              placeholder={t('lib.name')}
               className="flex-1 px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -113,22 +122,21 @@ export function Library({ state, onRefresh }: Props) {
               onChange={e => setType(e.target.value as Skill['type'])}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm"
             >
-              <option value="skill">Скилл</option>
-              <option value="mask">Маска</option>
-              <option value="hook">Хук</option>
-              <option value="template">Шаблон</option>
+              {typeOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           </div>
           <input
             value={description}
             onChange={e => setDescription(e.target.value)}
-            placeholder="Описание (опционально)"
+            placeholder={t('lib.description')}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder="Содержимое *"
+            placeholder={t('lib.content')}
             rows={6}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring"
             required
@@ -136,7 +144,7 @@ export function Library({ state, onRefresh }: Props) {
           <input
             value={tags}
             onChange={e => setTags(e.target.value)}
-            placeholder="Теги (через запятую)"
+            placeholder={t('lib.tags')}
             className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
           <button
@@ -144,7 +152,7 @@ export function Library({ state, onRefresh }: Props) {
             disabled={saving || !name.trim() || !content.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50"
           >
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? t('common.save') + '...' : t('common.save')}
           </button>
         </form>
       )}
@@ -171,9 +179,9 @@ export function Library({ state, onRefresh }: Props) {
                 {skill.content}
               </pre>
             )}
-            {skill.tags.length > 0 && (
+            {skill?.tags?.length > 0 && (
               <div className="flex gap-1 mt-2 flex-wrap">
-                {skill.tags.map(tag => (
+                {skill?.tags?.map(tag => (
                   <span key={tag} className="text-[10px] bg-secondary px-1.5 py-0.5 rounded">{tag}</span>
                 ))}
               </div>
@@ -185,7 +193,7 @@ export function Library({ state, onRefresh }: Props) {
       {skills.length === 0 && (
         <div className="text-center py-12 text-muted-foreground-foreground">
           <div className="text-4xl mb-2">📚</div>
-          <p>Библиотека пуста</p>
+          <p>{t('lib.empty')}</p>
         </div>
       )}
     </div>

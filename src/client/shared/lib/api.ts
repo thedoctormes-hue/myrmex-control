@@ -54,6 +54,7 @@ async function request<T>(url: string, options?: RequestInit, retry = true): Pro
 
   const res = await fetch(`${BASE}${url}`, {
     ...options,
+    credentials: 'include',
     headers: { ...headers, ...(options?.headers as Record<string, string> || {}) },
   });
 

@@ -1,3 +1,10 @@
+---
+description: "Visual Audit: myrmex-control vs myrmex-demo"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # Visual Audit: myrmex-control vs myrmex-demo
 
 ## 1. Цветовые схемы

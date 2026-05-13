@@ -1,0 +1,262 @@
+{
+  "version": "1.0.0",
+  "skills": [
+    {
+      "id": "skill-testing",
+      "name": "add-pytest",
+      "version": "1.0.0",
+      "description": "Добавляет pytest тесты к Python коду",
+      "author": "system",
+      "category": "testing",
+      "triggers": [
+        "тест",
+        "pytest",
+        "test",
+        "покрытие"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.540Z",
+      "updated": "2026-05-13T10:58:53.540Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-security",
+      "name": "security-audit",
+      "version": "1.0.0",
+      "description": "Полный аудит безопасности кода",
+      "author": "system",
+      "category": "security",
+      "triggers": [
+        "безопасность",
+        "уязвимость",
+        "security",
+        "audit"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:read"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.540Z",
+      "updated": "2026-05-13T10:58:53.540Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-deploy",
+      "name": "auto-deploy-check",
+      "version": "1.0.0",
+      "description": "Проверка готовности к деплою",
+      "author": "system",
+      "category": "deployment",
+      "triggers": [
+        "деплой",
+        "deploy",
+        "production",
+        "rollback"
+      ],
+      "dependencies": [
+        "skill-ci-cd"
+      ],
+      "permissions": [
+        "files:read",
+        "deploy:execute"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.540Z",
+      "updated": "2026-05-13T10:58:53.540Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-ci-cd",
+      "name": "ci-cd-and-automation",
+      "version": "1.0.0",
+      "description": "Настройка CI/CD pipeline",
+      "author": "system",
+      "category": "automation",
+      "triggers": [
+        "ci",
+        "cd",
+        "pipeline",
+        "github actions",
+        "automation"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-lint",
+      "name": "add-linter",
+      "version": "1.0.0",
+      "description": "Настройка линтера (ruff/eslint)",
+      "author": "system",
+      "category": "automation",
+      "triggers": [
+        "линтер",
+        "ruff",
+        "eslint",
+        "style",
+        "lint"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-docs",
+      "name": "docs-writer",
+      "version": "1.0.0",
+      "description": "Генерация документации для проектов",
+      "author": "system",
+      "category": "content",
+      "triggers": [
+        "документация",
+        "readme",
+        "docs",
+        "api docs"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-frontend",
+      "name": "frontend-ui-engineering",
+      "version": "1.0.0",
+      "description": "Создание production-quality UI",
+      "author": "system",
+      "category": "content",
+      "triggers": [
+        "ui",
+        "react",
+        "frontend",
+        "компонент",
+        "интерфейс"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-evo",
+      "name": "evolve-activator",
+      "version": "1.0.0",
+      "description": "Оркестратор эволюции лаборатории",
+      "author": "system",
+      "category": "automation",
+      "triggers": [
+        "эволюция",
+        "evolve",
+        "self-improve",
+        "улучшение"
+      ],
+      "dependencies": [
+        "skill-monitoring"
+      ],
+      "permissions": [
+        "files:write",
+        "system:evolve"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-monitoring",
+      "name": "metrics-storyteller",
+      "version": "1.0.0",
+      "description": "Сбор и анализ метрик",
+      "author": "system",
+      "category": "analytics",
+      "triggers": [
+        "метрики",
+        "metrics",
+        "health",
+        "kpi",
+        "dashboard"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "analytics:read"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    },
+    {
+      "id": "skill-api",
+      "name": "api-and-interface-design",
+      "version": "1.0.0",
+      "description": "Проектирование API и интерфейсов",
+      "author": "system",
+      "category": "content",
+      "triggers": [
+        "api",
+        "rest",
+        "graphql",
+        "endpoint",
+        "интерфейс"
+      ],
+      "dependencies": [],
+      "permissions": [
+        "files:write"
+      ],
+      "status": "active",
+      "created": "2026-05-13T10:58:53.541Z",
+      "updated": "2026-05-13T10:58:53.541Z",
+      "usage_count": 0,
+      "success_rate": 0
+    }
+  ],
+  "dependency_graph": {
+    "skill-testing": [],
+    "skill-security": [],
+    "skill-deploy": [
+      "skill-ci-cd"
+    ],
+    "skill-ci-cd": [],
+    "skill-lint": [],
+    "skill-docs": [],
+    "skill-frontend": [],
+    "skill-evo": [
+      "skill-monitoring"
+    ],
+    "skill-monitoring": [],
+    "skill-api": []
+  }
+}

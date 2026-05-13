@@ -29,41 +29,43 @@ interface HealthScore {
   timestamp: string;
 }
 
-router.get('/', async (_req: Request, res: Response) => {
+async function computeHealthScore(): Promise<HealthScore> {
   const state = await readState();
 
-  // Servers score
   const totalServers = state.servers.length;
   const onlineServers = state.servers.filter(s => s.status === 'online').length;
   const serversScore = totalServers === 0 ? 100 : Math.round((onlineServers / totalServers) * 100);
 
-  // Tasks score
   const totalTasks = state.tasks.length;
   const doneTasks = state.tasks.filter(t => t.status === 'done').length;
   const inProgressTasks = state.tasks.filter(t => t.status === 'in_progress' || t.status === 'review').length;
   const tasksScore = totalTasks === 0 ? 100 : Math.round(((doneTasks + inProgressTasks * 0.5) / totalTasks) * 100);
 
-  // Agents score
   const totalAgents = state.agents.length;
   const activeAgents = state.agents.filter(a => a.status === 'working' || a.status === 'idle').length;
   const agentsScore = totalAgents === 0 ? 100 : Math.round((activeAgents / totalAgents) * 100);
 
-  // Overall (weighted: servers 40%, tasks 35%, agents 25%)
   const overall = Math.round(
     serversScore * 0.4 +
     tasksScore * 0.35 +
     agentsScore * 0.25
   );
 
-  const result: HealthScore = {
+  return {
     overall,
     servers: { online: onlineServers, total: totalServers, score: serversScore },
     tasks: { total: totalTasks, done: doneTasks, inProgress: inProgressTasks, score: tasksScore },
     agents: { active: activeAgents, total: totalAgents, score: agentsScore },
     timestamp: new Date().toISOString(),
   };
+}
 
-  res.json(result);
+router.get('/', async (_req: Request, res: Response) => {
+  res.json(await computeHealthScore());
+});
+
+router.get('/score', async (_req: Request, res: Response) => {
+  res.json(await computeHealthScore());
 });
 
 // --- BL-024: System metrics endpoint ---

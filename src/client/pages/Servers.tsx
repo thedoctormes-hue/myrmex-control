@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import type { MyrmexState, Server, ServerStatus } from '@shared/types';
 import { createServer, deleteServer, updateServer } from '../shared/lib/api';
 import { ErrorBanner } from '../shared/ui/ErrorBanner';
@@ -12,12 +13,13 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<ServerStatus, { label: string; color: string }> = {
-  online: { label: 'Онлайн', color: '#22c55e' },
-  offline: { label: 'Оффлайн', color: '#6b7280' },
-  degraded: { label: 'Деградация', color: '#f59e0b' },
+  online: { label: t('servers.status.online'), color: '#22c55e' },
+  offline: { label: t('servers.status.offline'), color: '#6b7280' },
+  degraded: { label: t('servers.status.degraded'), color: '#f59e0b' },
 };
 
 export function Servers({ state, onRefresh }: Props) {
+  const [lang] = useLang();
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
   const [host, setHost] = useState('');
@@ -29,8 +31,8 @@ export function Servers({ state, onRefresh }: Props) {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) { setError('Имя сервера обязательно'); return; }
-    if (!host.trim()) { setError('Хост обязателен'); return; }
+    if (!name.trim()) { setError(t('servers.nameRequired')); return; }
+    if (!host.trim()) { setError(t('servers.hostRequired')); return; }
     try {
       setSaving(true);
       setError(null);
@@ -40,31 +42,31 @@ export function Servers({ state, onRefresh }: Props) {
         port: parseInt(port) || 22,
         source: 'ui',
       });
-      notify('success', `Сервер «${name.trim()}» добавлен`);
+      notify('success', t('servers.added', { name: name.trim() }));
       setName(''); setHost(''); setPort('22');
       setShowForm(false);
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка создания сервера');
+      setError(err instanceof Error ? err.message : t('servers.createError'));
     } finally {
       setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = async (id: string, serverName: string) => {
     const ok = await confirmDialog({
-      title: 'Удалить сервер?',
-      message: `Сервер «${name}» будет удалён из списка.`,
-      confirmLabel: 'Удалить',
+      title: t('servers.deleteTitle'),
+      message: t('servers.deleteConfirm', { name: serverName }),
+      confirmLabel: t('common.delete'),
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await deleteServer(id);
-      notify('info', `Сервер «${name}» удалён`);
+      notify('info', t('servers.deleted', { name: serverName }));
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка удаления');
+      setError(err instanceof Error ? err.message : t('common.error'));
     }
   };
 
@@ -73,7 +75,7 @@ export function Servers({ state, onRefresh }: Props) {
       await updateServer(id, { source: 'ui' });
       onRefresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка проверки');
+      setError(err instanceof Error ? err.message : t('servers.checkError'));
     }
   };
 
@@ -83,17 +85,17 @@ export function Servers({ state, onRefresh }: Props) {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <ServerIcon className="w-6 h-6 text-primary" />
-            Серверы
+            {t('servers.title')}
           </h1>
           <p className="text-sm text-muted-foreground-foreground">
-            {servers.length} серверов · {servers.filter(s => s.status === 'online').length} онлайн
+            {t('servers.count', { n: servers.length, online: servers.filter(s => s.status === 'online').length })}
           </p>
         </div>
         <button
           onClick={() => { setShowForm(!showForm); setError(null); }}
           className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition flex items-center gap-1.5"
         >
-          {showForm ? <><X className="w-4 h-4" /> Отмена</> : <><Plus className="w-4 h-4" /> Добавить</>}
+          {showForm ? <><X className="w-4 h-4" /> {t('common.cancel')}</> : <><Plus className="w-4 h-4" /> {t('servers.add')}</>}
         </button>
       </div>
 
@@ -105,7 +107,7 @@ export function Servers({ state, onRefresh }: Props) {
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Имя сервера *"
+              placeholder={t('servers.nameLabel')}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -113,14 +115,14 @@ export function Servers({ state, onRefresh }: Props) {
             <input
               value={host}
               onChange={e => setHost(e.target.value)}
-              placeholder="Хост (IP или домен) *"
+              placeholder={t('servers.hostLabel')}
               className="px-3 py-2 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               required
             />
             <input
               value={port}
               onChange={e => setPort(e.target.value)}
-              placeholder="Порт"
+              placeholder={t('servers.portLabel')}
               type="number"
               min="1"
               max="65535"
@@ -132,7 +134,7 @@ export function Servers({ state, onRefresh }: Props) {
             disabled={saving || !name.trim() || !host.trim()}
             className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Создание...' : 'Добавить'}
+            {saving ? t('servers.creating') : t('servers.add')}
           </button>
         </form>
       )}
@@ -146,7 +148,7 @@ export function Servers({ state, onRefresh }: Props) {
       {servers.length === 0 && !showForm && (
         <div className="text-center py-12 text-muted-foreground-foreground">
           <ServerIcon className="w-12 h-12 mx-auto mb-3 opacity-40" />
-          <p>Нет серверов. Добавьте первый!</p>
+          <p>{t('servers.noServers')}</p>
         </div>
       )}
     </div>
@@ -162,6 +164,7 @@ function ServerCard({
   onDelete: (id: string) => void;
   onCheck: (id: string) => void;
 }) {
+  const [lang] = useLang();
   const config = STATUS_CONFIG[server.status] || STATUS_CONFIG.offline;
 
   return (
@@ -180,15 +183,15 @@ function ServerCard({
           <button
             onClick={() => onCheck(server.id)}
             className="text-muted-foreground-foreground hover:text-primary transition-colors p-1"
-            aria-label="Проверить"
-            title="Проверить статус"
+            aria-label={t('servers.check')}
+            title={t('servers.check')}
           >
             <RefreshCw className="w-4 h-4" />
           </button>
           <button
             onClick={() => onDelete(server.id, server.name)}
             className="text-muted-foreground-foreground hover:text-destructive transition-colors p-1"
-            aria-label="Удалить"
+            aria-label={t('common.delete')}
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -211,7 +214,7 @@ function ServerCard({
       </div>
 
       <div className="mt-2 text-[10px] text-muted-foreground-foreground">
-        Проверен: {new Date(server.last_check).toLocaleString('ru')}
+        {t('servers.lastCheck', { time: new Date(server.last_check).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US') })}
       </div>
     </div>
   );

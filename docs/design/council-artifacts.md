@@ -1,3 +1,10 @@
+---
+description: "Консилиум: Артефакты и связи в Myrmex Control"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # Консилиум: Артефакты и связи в Myrmex Control
 
 **Дата:** 2026-05-11

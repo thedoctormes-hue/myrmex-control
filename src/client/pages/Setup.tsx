@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { setup } from '../lib/api';
+import { t, useLang } from '../shared/lib/i18n';
+import { setup } from '../shared/lib/api';
 
 interface Props {
   onSetup: () => void;
 }
 
 export function Setup({ onSetup }: Props) {
+  const [lang] = useLang();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -13,15 +15,15 @@ export function Setup({ onSetup }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password.length < 4) { setError('Минимум 4 символа'); return; }
-    if (password !== confirm) { setError('Пароли не совпадают'); return; }
+    if (password.length < 4) { setError(t('setup.minChars')); return; }
+    if (password !== confirm) { setError(t('setup.passwordsMismatch')); return; }
     try {
       setLoading(true);
       setError(null);
       await setup(password);
       onSetup();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка установки');
+      setError(err instanceof Error ? err.message : t('setup.error'));
     } finally {
       setLoading(false);
     }
@@ -33,24 +35,24 @@ export function Setup({ onSetup }: Props) {
         <div className="text-center mb-8">
           <div className="text-5xl mb-3">🐜</div>
           <h1 className="text-2xl font-bold">Myrmex Control</h1>
-          <p className="text-sm text-muted-foreground-foreground mt-1">Первичная настройка</p>
+          <p className="text-sm text-muted-foreground-foreground mt-1">{t('setup.title')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg p-6 space-y-4">
           <p className="text-sm text-muted-foreground-foreground">
-            Придумайте пароль для доступа к центру управления. Он будет сохранён и потребуется при каждом входе.
+            {t('setup.subtitle')}
           </p>
 
           <div>
             <label htmlFor="password" className="block text-sm font-medium mb-1.5">
-              Пароль
+              {t('setup.passwordLabel')}
             </label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Минимум 4 символа"
+              placeholder={t('setup.passwordPlaceholder')}
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               autoFocus
               required
@@ -60,14 +62,14 @@ export function Setup({ onSetup }: Props) {
 
           <div>
             <label htmlFor="confirm" className="block text-sm font-medium mb-1.5">
-              Подтверждение
+              {t('setup.confirmLabel')}
             </label>
             <input
               id="confirm"
               type="password"
               value={confirm}
               onChange={e => setConfirm(e.target.value)}
-              placeholder="Повторите пароль"
+              placeholder={t('setup.confirmPlaceholder')}
               className="w-full px-3 py-2.5 bg-background border border-border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               required
               minLength={4}
@@ -85,7 +87,7 @@ export function Setup({ onSetup }: Props) {
             disabled={loading || !password || !confirm}
             className="w-full px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition"
           >
-            {loading ? 'Установка...' : 'Установить пароль'}
+            {loading ? t('setup.installing') : t('setup.installPassword')}
           </button>
         </form>
       </div>

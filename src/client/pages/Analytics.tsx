@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import { getAnalytics } from '../shared/lib/api';
 import { BarChart3, TrendingUp, Clock, Zap } from 'lucide-react';
 
@@ -47,7 +48,7 @@ function BarChart({ data, label }: { data: Record<string, number>; label: string
           </div>
         ))}
         {Object.keys(data).length === 0 && (
-          <div className="text-muted-foreground-foreground text-sm text-center py-4">No data</div>
+          <div className="text-muted-foreground-foreground text-sm text-center py-4">{t('analytics.noData')}</div>
         )}
       </div>
     </div>
@@ -55,6 +56,7 @@ function BarChart({ data, label }: { data: Record<string, number>; label: string
 }
 
 export function Analytics() {
+  const [lang] = useLang();
   const [data, setData] = useState<ReturnType<typeof getAnalytics> extends Promise<infer T> ? T : null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -66,55 +68,55 @@ export function Analytics() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-64 text-muted-foreground-foreground animate-pulse">Loading analytics...</div>;
+    return <div className="flex items-center justify-center h-64 text-muted-foreground-foreground animate-pulse">{t('analytics.loading')}</div>;
   }
 
   if (!data) {
-    return <div className="text-center text-muted-foreground-foreground py-8">Failed to load analytics</div>;
+    return <div className="text-center text-muted-foreground-foreground py-8">{t('analytics.loadError')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <BarChart3 size={20} className="text-accent" />
-        <h1 className="text-xl font-bold">Analytics</h1>
+        <h1 className="text-xl font-bold">{t('analytics.title')}</h1>
       </div>
 
       {/* Activity */}
       <div>
-        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">Activity</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">{t('analytics.activity')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={Zap} label="Last 24h" value={data.activity.last24h} sub="changes" />
-          <StatCard icon={TrendingUp} label="Last 7 days" value={data.activity.last7d} sub="changes" />
-          <StatCard icon={Clock} label="Last 30 days" value={data.activity.last30d} sub="changes" />
-          <StatCard icon={BarChart3} label="Projects" value={data.projects.total}
-            sub={`${data.projects.active} active`} />
+          <StatCard icon={Zap} label={t('analytics.last24h')} value={data.activity.last24h} sub={t('analytics.changes')} />
+          <StatCard icon={TrendingUp} label={t('analytics.last7d')} value={data.activity.last7d} sub={t('analytics.changes')} />
+          <StatCard icon={Clock} label={t('analytics.last30d')} value={data.activity.last30d} sub={t('analytics.changes')} />
+          <StatCard icon={BarChart3} label={t('nav.projects')} value={data.projects.total}
+            sub={t('analytics.activeProjects', { n: data.projects.active })} />
         </div>
       </div>
 
       {/* Task metrics */}
       <div>
-        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">Tasks</h2>
+        <h2 className="text-sm font-semibold text-muted-foreground-foreground mb-3 uppercase tracking-wide">{t('dash.tasks')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard icon={BarChart3} label="Total" value={data.tasks.byStatus ? Object.values(data.tasks.byStatus).reduce((a, b) => a + b, 0) : 0} />
-          <StatCard icon={TrendingUp} label="Completed (7d)" value={data.tasks.completedLast7Days} />
-          <StatCard icon={Clock} label="Created (7d)" value={data.tasks.createdLast7Days} />
-          <StatCard icon={Zap} label="Avg completion" value={data.tasks.avgCompletionHours !== null ? `${data.tasks.avgCompletionHours}h` : 'N/A'} />
+          <StatCard icon={BarChart3} label={t('analytics.totalTasks')} value={data.tasks.byStatus ? Object.values(data.tasks.byStatus).reduce((a, b) => a + b, 0) : 0} />
+          <StatCard icon={TrendingUp} label={t('analytics.completed7d')} value={data.tasks.completedLast7Days} />
+          <StatCard icon={Clock} label={t('analytics.created7d')} value={data.tasks.createdLast7Days} />
+          <StatCard icon={Zap} label={t('analytics.avgCompletion')} value={data.tasks.avgCompletionHours !== null ? `${data.tasks.avgCompletionHours}h` : t('analytics.na')} />
         </div>
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <BarChart data={data.tasks.byStatus} label="Tasks by Status" />
-        <BarChart data={data.tasks.byPriority} label="Tasks by Priority" />
-        <BarChart data={data.servers.byStatus} label="Servers by Status" />
-        <BarChart data={data.agents.byStatus} label="Agents by Status" />
+        <BarChart data={data.tasks.byStatus} label={t('analytics.tasksByStatus')} />
+        <BarChart data={data.tasks.byPriority} label={t('analytics.tasksByPriority')} />
+        <BarChart data={data.servers.byStatus} label={t('analytics.serversByStatus')} />
+        <BarChart data={data.agents.byStatus} label={t('analytics.agentsByStatus')} />
       </div>
 
       {/* Project breakdown */}
       {data.tasks.byProject.length > 0 && (
         <div className="bg-card rounded-xl p-4 border border-border">
-          <h3 className="text-sm font-semibold mb-3">Tasks by Project</h3>
+          <h3 className="text-sm font-semibold mb-3">{t('analytics.tasksByProject')}</h3>
           <div className="space-y-2">
             {data.tasks.byProject.map(p => (
               <div key={p.name} className="flex items-center gap-2">

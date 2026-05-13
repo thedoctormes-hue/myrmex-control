@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import { Zap, ChevronRight, ChevronLeft, Check } from 'lucide-react';
 
 // ============================================================
@@ -12,62 +13,63 @@ interface Props {
 const STEPS = [
   {
     icon: '🐜',
-    title: 'Добро пожаловать в Myrmex Control',
-    description: 'Пульт управления колонией AI-агентов. Управляйте проектами, агентами, серверами и задачами из одного места.',
-    details: [
-      '23 проекта лаборатории',
-      '6 активных агентов-ботов',
-      '3 сервера в разных локациях',
-      'Канбан-доски для управления задачами',
+    titleKey: 'onboarding.step1.title',
+    descKey: 'onboarding.step1.description',
+    detailKeys: [
+      'onboarding.step1.detail1',
+      'onboarding.step1.detail2',
+      'onboarding.step1.detail3',
+      'onboarding.step1.detail4',
     ],
   },
   {
     icon: '📁',
-    title: 'Проекты и задачи',
-    description: 'Каждый проект лаборатории — на одной странице. Задачи распределяются по канбан-доскам.',
-    details: [
-      'Проекты: боты, API, инфраструктура',
-      '3 канбан-доски: ЗАВЛАБ, МУРАВЕЙ, КОТ',
-      'Drag & drop задач между колонками',
-      'WIP-лимиты и приоритеты',
+    titleKey: 'onboarding.step2.title',
+    descKey: 'onboarding.step2.description',
+    detailKeys: [
+      'onboarding.step2.detail1',
+      'onboarding.step2.detail2',
+      'onboarding.step2.detail3',
+      'onboarding.step2.detail4',
     ],
   },
   {
     icon: '🤖',
-    title: 'Агенты и серверы',
-    description: 'Telegram-боты и сервисы — ваши цифровые агенты. Мониторинг статуса в реальном времени.',
-    details: [
-      '6 активных агентов-ботов',
-      '3 сервера: Warsaw, Florida, RF',
-      'Статус: online / offline / degraded',
-      'Управление из единого интерфейса',
+    titleKey: 'onboarding.step3.title',
+    descKey: 'onboarding.step3.description',
+    detailKeys: [
+      'onboarding.step3.detail1',
+      'onboarding.step3.detail2',
+      'onboarding.step3.detail3',
+      'onboarding.step3.detail4',
     ],
   },
   {
     icon: '📊',
-    title: 'Аналитика и карта',
-    description: 'Визуализация связей лаборатории, аналитика задач, журнал аудита.',
-    details: [
-      'Интерактивный граф связей (Jason)',
-      'Аналитика: throughput, cycle time',
-      'Журнал аудита всех действий',
-      'Экспорт данных в JSON/CSV',
+    titleKey: 'onboarding.step4.title',
+    descKey: 'onboarding.step4.description',
+    detailKeys: [
+      'onboarding.step4.detail1',
+      'onboarding.step4.detail2',
+      'onboarding.step4.detail3',
+      'onboarding.step4.detail4',
     ],
   },
   {
     icon: '⌨️',
-    title: 'Быстрые действия',
-    description: 'Работайте быстрее с горячими клавишами и командной палитрой.',
-    details: [
-      '⌘K — командная палитра',
-      '↑↓ — навигация по спискам',
-      'ESC — закрыть модальные окна',
-      'S — быстрый поиск',
+    titleKey: 'onboarding.step5.title',
+    descKey: 'onboarding.step5.description',
+    detailKeys: [
+      'onboarding.step5.detail1',
+      'onboarding.step5.detail2',
+      'onboarding.step5.detail3',
+      'onboarding.step5.detail4',
     ],
   },
 ];
 
 export function Onboarding({ onComplete }: Props) {
+  const [lang] = useLang();
   const [step, setStep] = useState(0);
   const current = STEPS[step];
   const isLast = step === STEPS.length - 1;
@@ -90,14 +92,14 @@ export function Onboarding({ onComplete }: Props) {
         {/* Content */}
         <div className="p-8 text-center">
           <div className="text-5xl mb-4">{current.icon}</div>
-          <h2 className="text-xl font-bold mb-2">{current.title}</h2>
-          <p className="text-sm text-muted-foreground-foreground mb-6">{current.description}</p>
+          <h2 className="text-xl font-bold mb-2">{t(current.titleKey)}</h2>
+          <p className="text-sm text-muted-foreground-foreground mb-6">{t(current.descKey)}</p>
 
           <div className="space-y-2 text-left">
-            {current.details.map((detail, i) => (
+            {current.detailKeys.map((detailKey, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
                 <Check className="w-4 h-4 text-success flex-shrink-0" />
-                <span>{detail}</span>
+                <span>{t(detailKey)}</span>
               </div>
             ))}
           </div>
@@ -111,11 +113,11 @@ export function Onboarding({ onComplete }: Props) {
             className="flex items-center gap-1 text-sm text-muted-foreground-foreground hover:text-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Назад
+            {t('onboarding.back')}
           </button>
 
           <span className="text-xs text-muted-foreground-foreground">
-            {step + 1} / {STEPS.length}
+            {t('onboarding.stepIndicator', { current: step + 1, total: STEPS.length })}
           </span>
 
           {isLast ? (
@@ -123,7 +125,7 @@ export function Onboarding({ onComplete }: Props) {
               onClick={onComplete}
               className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:opacity-90 transition flex items-center gap-1"
             >
-              Начать работу
+              {t('onboarding.start')}
               <Zap className="w-3.5 h-3.5" />
             </button>
           ) : (
@@ -131,7 +133,7 @@ export function Onboarding({ onComplete }: Props) {
               onClick={() => setStep(s => Math.min(STEPS.length - 1, s + 1))}
               className="flex items-center gap-1 text-sm text-primary hover:text-primary/80 transition-colors"
             >
-              Далее
+              {t('onboarding.next')}
               <ChevronRight className="w-4 h-4" />
             </button>
           )}
@@ -143,7 +145,7 @@ export function Onboarding({ onComplete }: Props) {
             onClick={onComplete}
             className="text-xs text-muted-foreground-foreground hover:text-foreground transition-colors"
           >
-            Пропустить тур
+            {t('onboarding.skip')}
           </button>
         </div>
       </div>

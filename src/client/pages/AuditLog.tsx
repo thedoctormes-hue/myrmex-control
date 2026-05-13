@@ -3,6 +3,7 @@
 // ============================================================
 
 import { useState, useEffect } from 'react';
+import { t, useLang } from '../shared/lib/i18n';
 import { getAuditLog, getAuditEntityTypes, getAuditSources, type AuditLogEntry } from '../shared/lib/api';
 import { FileText, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 
@@ -14,8 +15,9 @@ const ACTION_COLORS: Record<string, string> = {
 };
 
 function EntryRow({ entry }: { entry: AuditLogEntry }) {
+  const [lang] = useLang();
   const [expanded, setExpanded] = useState(false);
-  const time = new Date(entry.timestamp).toLocaleString('ru-RU');
+  const time = new Date(entry.timestamp).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US');
 
   return (
     <div className="border-b border-border py-2 px-3 hover:bg-card/50 cursor-pointer"
@@ -40,6 +42,7 @@ function EntryRow({ entry }: { entry: AuditLogEntry }) {
 }
 
 export function AuditLog() {
+  const [lang] = useLang();
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -78,8 +81,8 @@ export function AuditLog() {
     <div className="space-y-4">
       <div className="flex items-center gap-2">
         <FileText size={20} className="text-accent" />
-        <h1 className="text-xl font-bold">Audit Log</h1>
-        <span className="text-muted-foreground text-sm ml-2">{total} entries</span>
+        <h1 className="text-xl font-bold">{t('audit.title')}</h1>
+        <span className="text-muted-foreground text-sm ml-2">{t('audit.entriesCount', { total })}</span>
       </div>
 
       {/* Filters */}
@@ -88,19 +91,19 @@ export function AuditLog() {
         <select className="bg-secondary border border-border rounded px-2 py-1 text-sm"
           value={filters.entity_type}
           onChange={e => { setFilters(f => ({ ...f, entity_type: e.target.value })); setPage(0); }}>
-          <option value="">All types</option>
-          {entityTypes.map(t => <option key={t} value={t}>{t}</option>)}
+          <option value="">{t('audit.allTypes')}</option>
+          {entityTypes.map(tp => <option key={tp} value={tp}>{tp}</option>)}
         </select>
         <select className="bg-secondary border border-border rounded px-2 py-1 text-sm"
           value={filters.source}
           onChange={e => { setFilters(f => ({ ...f, source: e.target.value })); setPage(0); }}>
-          <option value="">All sources</option>
+          <option value="">{t('audit.allSources')}</option>
           {sources.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
         <select className="bg-secondary border border-border rounded px-2 py-1 text-sm"
           value={filters.action}
           onChange={e => { setFilters(f => ({ ...f, action: e.target.value })); setPage(0); }}>
-          <option value="">All actions</option>
+          <option value="">{t('audit.allActions')}</option>
           <option value="create">create</option>
           <option value="update">update</option>
           <option value="delete">delete</option>
@@ -111,9 +114,9 @@ export function AuditLog() {
       {/* Entries */}
       <div className="bg-card rounded-xl border border-border overflow-hidden">
         {loading ? (
-          <div className="p-8 text-center text-muted-foreground animate-pulse">Loading...</div>
+          <div className="p-8 text-center text-muted-foreground animate-pulse">{t('common.loading')}</div>
         ) : entries.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground">No entries found</div>
+          <div className="p-8 text-center text-muted-foreground">{t('audit.noEntries')}</div>
         ) : (
           entries.map(e => <EntryRow key={e.id} entry={e} />)
         )}
@@ -123,10 +126,10 @@ export function AuditLog() {
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
-            className="px-3 py-1 bg-secondary rounded text-sm disabled:opacity-50">← Prev</button>
-          <span className="text-sm text-muted-foreground">Page {page + 1} of {totalPages}</span>
+            className="px-3 py-1 bg-secondary rounded text-sm disabled:opacity-50">{t('audit.prev')}</button>
+          <span className="text-sm text-muted-foreground">{t('audit.page', { current: page + 1, total: totalPages })}</span>
           <button disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}
-            className="px-3 py-1 bg-secondary rounded text-sm disabled:opacity-50">Next →</button>
+            className="px-3 py-1 bg-secondary rounded text-sm disabled:opacity-50">{t('audit.next')}</button>
         </div>
       )}
     </div>

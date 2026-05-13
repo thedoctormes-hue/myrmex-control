@@ -1,3 +1,10 @@
+---
+description: "Security Policy"
+type: guide
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # Security Policy
 
 ## Supported Versions

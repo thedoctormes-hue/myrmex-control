@@ -30,6 +30,12 @@ const Analytics = lazy(() => import('../pages/Analytics'));
 const Agents = lazy(() => import('../pages/Agents'));
 const Servers = lazy(() => import('../pages/Servers'));
 const Settings = lazy(() => import('../pages/Settings'));
+const Chat = lazy(() => import('../pages/Chat'));
+const Artifacts = lazy(() => import('../pages/Artifacts'));
+const Knowledge = lazy(() => import('../pages/Knowledge'));
+const Sessions = lazy(() => import('../pages/Sessions'));
+const Evolution = lazy(() => import('../pages/Evolution'));
+const Pricing = lazy(() => import('../pages/Pricing'));
 
 // Force-reload if Service Worker serves stale version
 async function checkVersion() {
@@ -272,6 +278,12 @@ export default function App() {
                 <Route path="/audit" element={<AuditLog />} />
                 <Route path="/analytics" element={<Analytics />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/chat" element={<Chat state={state} />} />
+                <Route path="/artifacts" element={<Artifacts />} />
+                <Route path="/knowledge" element={<Knowledge />} />
+                <Route path="/sessions" element={<Sessions />} />
+                <Route path="/evolution" element={<Evolution />} />
+                <Route path="/pricing" element={<Pricing />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </ErrorBoundary>

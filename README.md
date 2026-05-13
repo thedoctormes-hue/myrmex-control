@@ -1,3 +1,10 @@
+---
+description: "🐜 Myrmex Control"
+type: readme
+last_reviewed: 2026-05-12
+last_code_change: 2026-05-12
+status: active
+---
 # 🐜 Myrmex Control
 
 <p align="center">
